@@ -2,35 +2,62 @@ cmake_minimum_required(VERSION 3.16)
 project(robohub-board-ds18b20-temperature-module C)
 
 # ---------------------------------------------------------------------------
-# Locate what the board joins
+# Locating a sibling module
 # ---------------------------------------------------------------------------
 # The board's support package touches the driver and, through it, the common
-# module that declares the interfaces. Built as a dependency the generated
-# project adds both itself; this is for a standalone build of the module.
-if(NOT ROBOHUB_COMMON_DIR)
-  if(EXISTS "/home/miraur/projects/robohub-common")
-    set(ROBOHUB_COMMON_DIR "/home/miraur/projects/robohub-common")
-  elseif(DEFINED ENV{ROBOHUB_COMMON_DIR})
-    set(ROBOHUB_COMMON_DIR "$ENV{ROBOHUB_COMMON_DIR}")
-  else()
-    message(FATAL_ERROR "robohub-common not found. Set ROBOHUB_COMMON_DIR or place it beside this checkout.")
-  endif()
+# module that declares the interfaces. A path is never hard-coded: a variable a
+# parent build already set (rho writes one for every dependency) wins, then the
+# environment, then a sibling checkout somewhere above, and finally a fetch.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/deps.cmake")
 endif()
 
-# The driver is a sibling inside this repository, two levels up and back down
-# into drivers/<category>/<device>.
-if(NOT ROBOHUB_DS18B20_DIR)
-  get_filename_component(ROBOHUB_DS18B20_DIR
-      "${CMAKE_CURRENT_SOURCE_DIR}/../../drivers/temperature/ds18b20" ABSOLUTE)
+# robohub_locate_module(<name> <out-var>): find a sibling module and set the
+# variable to its directory. `<name>` is the module's name, so the variable is
+# its upper-case form with `_DIR` appended.
+function(robohub_locate_module module out_var)
+  string(TOUPPER "${module}" upper)
+  string(REPLACE "-" "_" upper "${upper}")
+  if(${out_var})
+    return()
+  endif()
+  if(DEFINED ENV{${upper}_DIR})
+    set(${out_var} "$ENV{${upper}_DIR}" PARENT_SCOPE)
+    return()
+  endif()
+  # A sibling checkout, searched upward: a module may sit nested — a board and a
+  # driver inside one collection — with the sibling several levels above it.
+  set(dir "${CMAKE_CURRENT_SOURCE_DIR}")
+  foreach(level RANGE 6)
+    get_filename_component(parent "${dir}/.." ABSOLUTE)
+    if(EXISTS "${parent}/${module}/CMakeLists.txt")
+      set(${out_var} "${parent}/${module}" PARENT_SCOPE)
+      return()
+    endif()
+    set(dir "${parent}")
+  endforeach()
+  include(FetchContent)
+  message(STATUS "[${PROJECT_NAME}] fetching ${module}")
+  FetchContent_Declare(${module}
+    GIT_REPOSITORY "https://github.com/RoboHubPlatform/${module}.git"
+    GIT_TAG main GIT_SHALLOW TRUE GIT_PROGRESS TRUE)
+  FetchContent_MakeAvailable(${module})
+  set(${out_var} "${${module}_SOURCE_DIR}" PARENT_SCOPE)
+endfunction()
+
+robohub_locate_module(robohub-common ROBOHUB_COMMON_DIR)
+robohub_locate_module(robohub-driver-ds18b20 ROBOHUB_DRIVER_DS18B20_DIR)
+if(NOT ROBOHUB_COMMON_DIR OR NOT ROBOHUB_DRIVER_DS18B20_DIR)
+  message(FATAL_ERROR "robohub-common or robohub-driver-ds18b20 not found and could not be fetched")
 endif()
-message(STATUS "[robohub-board-ds18b20-temperature-module] driver at ${ROBOHUB_DS18B20_DIR}")
+message(STATUS "[${PROJECT_NAME}] driver at ${ROBOHUB_DRIVER_DS18B20_DIR}")
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
   if(NOT TARGET robohub-common)
     add_subdirectory("${ROBOHUB_COMMON_DIR}" robohub-common)
   endif()
   if(NOT TARGET robohub-driver-ds18b20)
-    add_subdirectory("${ROBOHUB_DS18B20_DIR}" robohub-driver-ds18b20)
+    add_subdirectory("${ROBOHUB_DRIVER_DS18B20_DIR}" robohub-driver-ds18b20)
   endif()
 endif()
 

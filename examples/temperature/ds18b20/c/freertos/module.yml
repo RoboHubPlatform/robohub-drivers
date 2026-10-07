@@ -1,9 +1,10 @@
 #
-# ds18b20/c — reads the DS18B20 temperature module and prints it, in C.
+# ds18b20/c/freertos — the DS18B20 example on the runtime, over FreeRTOS.
 #
-# A Pico 2W application that reads the sensor every 1.5 seconds and writes the
-# temperature to the console. It is written against the driver's own API, so it
-# shows the device struct, the configuration and the temperature interface.
+# The same application as c/bare-metal, linked against robohub-freertos instead
+# of its bare-metal OSAL. Nothing in the program changes: the runtime asks the
+# OSAL whether an RTOS is present, and here it is, so each periodic task becomes
+# a FreeRTOS task and the event bus locks for real.
 #
 # Built for the board with: rho build -target pico2w .
 #
@@ -12,12 +13,12 @@
 #
 
 module:
-  name: ds18b20-temperature-c
+  name: ds18b20-temperature-c-freertos
   type: module
   version: 0.1.0
   description: >
-    Reads the DS18B20 breakout on a Pico 2W and prints the temperature over the
-    console every 1.5 s, in C, against the driver's own API.
+    Reads the DS18B20 breakout on a Pico 2W on the RoboHub runtime, with
+    FreeRTOS beneath it: the sensor task and the app loop are FreeRTOS tasks.
 
   maintainer: "Aurel Miron"
   license: "MIT"
@@ -45,6 +46,16 @@ depends:
   - name: robohub-driver-ds18b20
     type: c
     path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-core
+    type: c
+    path: /home/miraur/projects/robohub-core
+    git: https://github.com/RoboHubPlatform/robohub-core
+    branch: main
+  - name: robohub-freertos
+    type: c
+    path: /home/miraur/projects/robohub-freertos
+    git: https://github.com/RoboHubPlatform/robohub-freertos
+    branch: main
 
 c_connection:
   library: "robohub-pico"
@@ -72,11 +83,15 @@ c_connection:
     - /home/miraur/projects/robohub-pico/include/robohub/platform
     - /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20/inc
     - /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module/bsp
+    - /home/miraur/projects/robohub-core/include
+    - /home/miraur/projects/robohub-core/include/robohub/core
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"
       libraries:
         - robohub-driver-ds18b20
+        - robohub-core
+        - robohub-freertos
 
 config:
   dialect: linux
