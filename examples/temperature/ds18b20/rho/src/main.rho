@@ -1,0 +1,60 @@
+// ds18b20 — read the DS18B20 temperature module and print it, in Rho.
+//
+// The same program as examples/temperature/ds18b20/c, written in Rho. The names
+// below are the foreign functions rho-cimport generates from the board module's
+// BSP, reached through the `ffi` module.
+//
+// @project RoboHub Platform
+// @license MIT
+
+module main
+
+import ffi
+
+// The sentinel the board returns when a reading could not be taken: -1000.000
+// degrees Celsius, which the DS18B20 itself cannot report.
+const TEMPERATURE_ERROR: i32 = -1000000
+
+fn main() void {
+    if robohub_platform_init() != 0 {
+        return
+    }
+
+    print("\n")
+    print("DS18B20 temperature, in Rho\n")
+    print("----------------------------\n")
+
+    if robohub_ds18b20_module_open() != 0 {
+        print("no DS18B20 module: is the platform's onewire HAL up?\n")
+        return
+    }
+
+    while true {
+        let raw: i32 = robohub_ds18b20_module_milli_celsius()
+
+        if raw == TEMPERATURE_ERROR {
+            print("read failed\n")
+        } else {
+            let negative: bool = raw < 0
+            let magnitude: i32 = raw
+            if negative { magnitude = 0 - raw }
+
+            let whole: i32 = magnitude / 1000
+            let fraction: i32 = magnitude % 1000
+
+            if negative {
+                print("T = -")
+            } else {
+                print("T = ")
+            }
+            print(string.from_i32(whole))
+            print(".")
+            if fraction < 100 { print("0") }
+            if fraction < 10 { print("0") }
+            print(string.from_i32(fraction))
+            print(" C\n")
+        }
+
+        robohub_ds18b20_module_sleep_ms(1500)
+    }
+}

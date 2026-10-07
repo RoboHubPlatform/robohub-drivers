@@ -1,0 +1,98 @@
+#
+# ds18b20/c — reads the DS18B20 temperature module and prints it, in C.
+#
+# A Pico 2W application that reads the sensor every 1.5 seconds and writes the
+# temperature to the console. It is written against the driver's own API, so it
+# shows the device struct, the configuration and the temperature interface.
+#
+# Built for the board with: rho build -target pico2w .
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: ds18b20-temperature-c
+  type: module
+  version: 0.1.0
+  description: >
+    Reads the DS18B20 breakout on a Pico 2W and prints the temperature over the
+    console every 1.5 s, in C, against the driver's own API.
+
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-07"
+
+main: src/main.c
+
+build:
+  language: c
+  sources:
+    - src/main.c
+  output_dir: output
+  presets:
+    - pico2w
+
+depends:
+  - name: robohub-pico
+    type: c
+    path: /home/miraur/projects/robohub-pico
+    git: https://github.com/RoboHubPlatform/robohub-pico
+    branch: main
+  - name: ds18b20-temperature-module
+    type: c
+    path: /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module
+  - name: robohub-driver-ds18b20
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+
+c_connection:
+  library: "robohub-pico"
+  # The headers are what make the upload record the preset's board sources: a
+  # project with a C connection has its foreign interface generated, and that
+  # step is also where the board's own sources are written down. Without them
+  # the board support package is never compiled and nothing is registered.
+  headers:
+    - platform.h
+    - console.h
+    - gpio.h
+    - timer.h
+    - onewire.h
+    - error.h
+    - types.h
+    - registry.h
+    - bsp.h
+    - ds18b20.h
+  include_dirs:
+    - /home/miraur/projects/robohub-common/include
+    - /home/miraur/projects/robohub-common/include/robohub/hal
+    - /home/miraur/projects/robohub-common/include/robohub/drivers
+    - /home/miraur/projects/robohub-pico/include
+    - /home/miraur/projects/robohub-pico/include/robohub/hal
+    - /home/miraur/projects/robohub-pico/include/robohub/platform
+    - /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20/inc
+    - /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module/bsp
+  variants:
+    pico2w:
+      target: "robohub-board-ds18b20-temperature-module"
+      libraries:
+        - robohub-driver-ds18b20
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+  values_file: project.conf
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - example
+    - temperature
+    - ds18b20
+    - pico
+  stability: experimental
+  visibility: public

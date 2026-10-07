@@ -1,0 +1,86 @@
+#
+# ds18b20-temperature-module — DS18B20 temperature sensor breakout support.
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: ds18b20-temperature-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    Support package for the DS18B20 temperature sensor breakout: which driver it
+    carries, the signals its connector exposes, and the defaults its data line
+    is reached with.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-07"
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-ds18b20
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/bsp.h
+  cmake:
+    target: "rho::robohub-board-ds18b20-temperature-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-ds18b20
+      - rho::robohub-common
+
+board:
+  designation: DS18B20_MODULE
+  device: DS18B20
+  category: temperature
+  driver: robohub-driver-ds18b20
+  connector:
+    - name: VCC
+      signal: power
+    - name: GND
+      signal: ground
+    - name: DQ
+      signal: onewire
+  peripherals:
+    onewire:
+      - name: onewire0
+        signal: DQ
+  defaults:
+    resolution_bits: 12
+    alarm_high_c: 30
+    alarm_low_c: 0
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - temperature
+    - ds18b20
+  stability: experimental
+  visibility: public

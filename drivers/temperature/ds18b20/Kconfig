@@ -1,0 +1,13 @@
+menu "RoboHub DS18B20 driver"
+
+config RH_DRV_DS18B20
+    bool "DS18B20 1-Wire temperature sensor"
+    select RH_HAL_ONEWIRE
+    select RH_HAL_TIMER
+    default n
+    help
+      The Maxim DS18B20 temperature sensor, reached through a 1-Wire bus and a
+      timer the selected platform implements. An application that sets this
+      gets the driver compiled in; one that does not pays for none of it.
+
+endmenu
