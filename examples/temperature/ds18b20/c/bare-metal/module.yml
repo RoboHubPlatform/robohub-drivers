@@ -1,9 +1,9 @@
 #
-# ds18b20/c — reads the DS18B20 temperature module and prints it, in C.
+# ds18b20/c/bare-metal — the DS18B20 example on the runtime, without an RTOS.
 #
-# A Pico 2W application that reads the sensor every 1.5 seconds and writes the
-# temperature to the console. It is written against the driver's own API, so it
-# shows the device struct, the configuration and the temperature interface.
+# A Pico 2W application whose sensor publishes a reading and whose telemetry
+# subscribes to it, run by robohub-core over its bare-metal OSAL: one
+# cooperative loop, no threads.
 #
 # Built for the board with: rho build -target pico2w .
 #
@@ -12,12 +12,12 @@
 #
 
 module:
-  name: ds18b20-temperature-c
+  name: ds18b20-temperature-c-bare-metal
   type: module
   version: 0.1.0
   description: >
-    Reads the DS18B20 breakout on a Pico 2W and prints the temperature over the
-    console every 1.5 s, in C, against the driver's own API.
+    Reads the DS18B20 breakout on a Pico 2W on the RoboHub runtime and prints
+    the temperature over the console, with no RTOS beneath it.
 
   maintainer: "Aurel Miron"
   license: "MIT"
@@ -45,6 +45,11 @@ depends:
   - name: robohub-driver-ds18b20
     type: c
     path: ${RHO_WORKSPACE}/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-core
+    type: c
+    path: ${RHO_WORKSPACE}/robohub-core
+    git: https://github.com/RoboHubPlatform/robohub-core
+    branch: main
 
 c_connection:
   library: "robohub-pico"
@@ -72,11 +77,14 @@ c_connection:
     - ${RHO_WORKSPACE}/robohub-pico/include/robohub/platform
     - ${RHO_WORKSPACE}/robohub-drivers/drivers/temperature/ds18b20/inc
     - ${RHO_WORKSPACE}/robohub-drivers/boards/ds18b20-temperature-module/bsp
+    - ${RHO_WORKSPACE}/robohub-core/include
+    - ${RHO_WORKSPACE}/robohub-core/include/robohub/core
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"
       libraries:
         - robohub-driver-ds18b20
+        - robohub-core
 
 config:
   dialect: linux

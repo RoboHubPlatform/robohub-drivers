@@ -11,23 +11,33 @@ side.
 examples/
     temperature/
         ds18b20/
-            c/          the DS18B20 program, in C
-            rho/        the DS18B20 program, in Rho
+            c/
+                bare-metal/   the DS18B20 program, in C, on the runtime alone
+                freertos/     the same program, with FreeRTOS beneath the runtime
+            rho/              the DS18B20 program, in Rho
 ```
 
 Each application reads the sensor every 1.5 seconds and writes the temperature
-to the console, and each is built for a board the same way:
+to the console. The C program is built on `robohub-core`: a sensor application
+publishes a reading and a telemetry application subscribes to it, and neither
+names the other. The two C variants differ by one dependency — `freertos/`
+links `robohub-freertos`, so the same runtime runs its tasks as FreeRTOS tasks;
+`bare-metal/` links nothing and runs one cooperative loop.
+
+Build one for a board the same way:
 
 ```sh
-cd examples/temperature/ds18b20/c
+cd examples/temperature/ds18b20/c/bare-metal
 rho build -target pico2w .
-rho flash ...
+rho flash -target pico2w . build/output/c.elf
 ```
 
 The applications depend on a platform (`robohub-pico`, for the Pico 2W) and on
 the eval module board under `boards/`, which brings in the driver. The platform
-supplies the bus and the timer; the driver supplies the protocol; the program
-supplies the loop.
+supplies the bus and the timer; the driver supplies the protocol; the runtime
+supplies the loop and the event bus; the program supplies the two applications.
 
-Both have been run on a Pico 2W with the DS18B20 module on GP28 (physical pin 34)
-and print a reading every 1.5 seconds. The wiring is in the module's README.
+The bare-metal variant has been run on a Pico 2W with the DS18B20 module on GP28
+(physical pin 34) and prints a reading every 1.5 seconds. The wiring is in the
+module's README. The FreeRTOS variant additionally needs the FreeRTOS kernel
+fetched into `robohub-freertos/vendor/` and a `FreeRTOSConfig.h` for the board.

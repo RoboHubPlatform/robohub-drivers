@@ -32,8 +32,12 @@ config:
     - Kconfig
 
 exports:
+  # The name a consumer includes is the module's place in the ecosystem, not the
+  # file's place in this directory. The header stays flat in inc/ds18b20.h; the
+  # namespaced path is generated into the build tree and put on the path through
+  # the CMake target below, and installed under this name.
   headers:
-    - ds18b20.h
+    - robohub/drivers/temperature/ds18b20.h
   cmake:
     target: "rho::robohub-driver-ds18b20"
     include_dirs:
