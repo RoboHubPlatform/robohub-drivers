@@ -1,0 +1,12 @@
+menu "RoboHub DS18B20 module"
+
+config RH_BOARD_DS18B20_MODULE
+    bool "DS18B20 temperature sensor breakout"
+    select RH_DRV_DS18B20
+    default n
+    help
+      The DS18B20 temperature sensor breakout. Selecting it brings in the
+      driver and the 1-Wire bus and timer the breakout needs; an application
+      that does not fit the module pays for none of it.
+
+endmenu
