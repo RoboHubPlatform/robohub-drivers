@@ -36,6 +36,7 @@
 #include "robohub/core/scheduler.h"
 #include "robohub/transport.h"
 #include "robohub/telemetry.h"
+#include "protocol.h"
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
 #include "robohub/net.h"
 #endif
@@ -66,14 +67,24 @@
 #endif
 #endif
 
-/* The event the sensor layer owns. A rho schema would name it and give the
- * payload its layout; here it is written out, because the point is the way it
- * travels. */
-#define EVENT_TEMP_READING RH_EVENT_ID(RH_EVENT_DOMAIN_SENSOR, 1)
+/* The event the reading travels as, and its layout, both from the schema. The
+ * gateway is generated from the same schemas/telemetry.rho, so the two ends
+ * write one layout; the event sits in the sensor domain and the schema names
+ * it MESSAGE_ID_TELEMETRY (0x0201), which is where a sensor event would fall
+ * anyway.
+ *
+ * The payload is the schema's `Telemetry` — a version byte, timestamp_ms,
+ * temperature_c and status — serialized here rather than the bare float this
+ * example once published. A gateway that decoded the bare float could not be
+ * sure what it was; the schema's message it can. */
+#define EVENT_TEMP_READING MESSAGE_ID_TELEMETRY
 
-typedef struct {
-    rh_f32 celsius;
-} temperature_reading;
+/* This board's identity on the bus, so a gateway can attribute the reading. */
+#if defined(CONFIG_RH_NODE_ID)
+#define RH_NODE_ID ((rh_u16)CONFIG_RH_NODE_ID)
+#else
+#define RH_NODE_ID ((rh_u16)1u)
+#endif
 
 static void emit(const char* text)
 {
@@ -111,11 +122,21 @@ static RoboHubError read_and_publish(robohub_core_task_id id, void* user)
 
     rh_f32 celsius = 0.0f;
     RoboHubError err = robohub_ds18b20_get_celsius(&sensor, &celsius);
-    if (ROBOHUB_FAILED(err)) {
-        return err;
+
+    /* A failed read is still published, carrying FAULT: a gateway that sees the
+     * status knows the difference between a stale reading and a dead sensor,
+     * which a missing frame could not tell it. */
+    Telemetry message = {
+        .node_id = RH_NODE_ID,
+        .timestamp_ms = to_ms_since_boot(get_absolute_time()),
+        .temperature_c = (ROBOHUB_SUCCEEDED(err)) ? celsius : 0.0f,
+        .status = (ROBOHUB_SUCCEEDED(err)) ? NODE_STATUS_OK : NODE_STATUS_FAULT,
+    };
+    rh_u8 payload[TELEMETRY_WIRE_SIZE];
+    if (Telemetry_serialize(&message, payload, sizeof(payload)) == 0u) {
+        return ROBOHUB_ERR_PROTOCOL;
     }
-    temperature_reading reading = { .celsius = celsius };
-    return robohub_core_event_publish(EVENT_TEMP_READING, &reading, (rh_size)sizeof(reading));
+    return robohub_core_event_publish(EVENT_TEMP_READING, payload, (rh_size)TELEMETRY_WIRE_SIZE);
 }
 
 static RoboHubError sensor_init(void)
@@ -143,15 +164,65 @@ static RoboHubError sensor_init(void)
     return err;
 }
 
+static robohub_core_task_id sample_task = RH_CORE_TASK_INVALID;
+static rh_u16 sample_period_ms = REPORT_PERIOD_MS;
+
 static RoboHubError sensor_start(void)
 {
-    return robohub_core_task_add("temp", read_and_publish, 0, REPORT_PERIOD_MS, 0);
+    return robohub_core_task_add("temp", read_and_publish, 0, sample_period_ms, &sample_task);
+}
+
+/* A configuration command from the gateway: 0x0301 in, 0x0302 out, the caller's
+ * tx_id carried back so it can match its answer to its request. The period is
+ * clamped to one a DS18B20 conversion can meet; the acknowledgement reports
+ * what was actually set, not what was asked for. */
+static RoboHubError on_set_sampling_rate(robohub_event_id id, const void* payload, rh_size size, void* user)
+{
+    (void)id;
+    (void)user;
+
+    SetSamplingRateRequest request;
+    if (!SetSamplingRateRequest_deserialize((const uint8_t*)payload, (size_t)size, &request)) {
+        return ROBOHUB_ERR_PROTOCOL;
+    }
+    rh_u32 interval = request.interval_ms;
+    if (interval < 100u) {
+        interval = 100u;
+    }
+    if (ROBOHUB_SUCCEEDED(robohub_core_task_set_period(sample_task, interval))) {
+        sample_period_ms = (rh_u16)interval;
+    }
+
+    SetSamplingRateResponse response = { .actual_interval_ms = sample_period_ms };
+    rh_u8 bytes[SET_SAMPLING_RATE_RESPONSE_WIRE_SIZE];
+    if (SetSamplingRateResponse_serialize(&response, bytes, sizeof(bytes)) == 0u) {
+        return ROBOHUB_ERR_PROTOCOL;
+    }
+    return robohub_core_event_publish_with_tx(MESSAGE_ID_SET_SAMPLING_RATE_RESPONSE,
+                                              robohub_core_event_current_tx(),
+                                              bytes, (rh_size)SET_SAMPLING_RATE_RESPONSE_WIRE_SIZE);
+}
+
+/* Called every pass. Reads whatever the link has delivered and feeds the
+ * transport one byte at a time, so a command from the gateway becomes an event
+ * exactly as a frame from a node does. */
+static void pump_link(rh_u32 now_ms)
+{
+    (void)now_ms;
+    for (int i = 0; i < 64; i++) {
+        int byte = getchar_timeout_us(0);
+        if (byte == PICO_ERROR_TIMEOUT) {
+            break;
+        }
+        robohub_transport_feed_byte(&usb_link, (rh_u8)byte);
+    }
 }
 
 static const robohub_core_app sensor_app = {
     .name = "sensor",
     .init = sensor_init,
     .start = sensor_start,
+    .step = pump_link,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -254,6 +325,10 @@ int main(void)
     /* Subscribe after the runtime is up: bringing it up initialises the event
      * bus, which starts with no subscriptions and would drop this one. */
     (void)robohub_telemetry_enable_event(EVENT_TEMP_READING, 1u);
+    /* The acknowledgement goes back out the same link, with the caller's tx. */
+    (void)robohub_telemetry_enable_event(MESSAGE_ID_SET_SAMPLING_RATE_RESPONSE, 1u);
+    /* And a command from the gateway arrives on it. */
+    (void)robohub_core_event_subscribe(MESSAGE_ID_SET_SAMPLING_RATE_REQUEST, on_set_sampling_rate, 0);
 
     (void)robohub_core_run();
     for (;;) {

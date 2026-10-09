@@ -35,3 +35,10 @@ config RH_TELEMETRY
 config RH_NET
     bool "Network"
     default y
+
+# The board's identity on the bus. A gateway attributes a reading to this
+# number, so two boards on one link must not share it.
+config RH_NODE_ID
+    int "Node id"
+    range 1 65535
+    default 1
