@@ -1,0 +1,44 @@
+# ds18b20 temperature example configuration
+
+config RH_HAL_GPIO
+    bool "GPIO"
+    default y
+
+config RH_HAL_UART
+    bool "UART"
+    default y
+
+config RH_HAL_TIMER
+    bool "Timer"
+    default y
+
+config RH_HAL_ONEWIRE
+    bool "OneWire"
+    default y
+
+config RH_BOARD_PICO_2W
+    bool "Pico 2W"
+    default y
+
+config RH_BOARD_DS18B20_MODULE
+    bool "DS18B20 temperature module"
+    default y
+
+config RH_TRANSPORT
+    bool "Transport"
+    default y
+
+config RH_TELEMETRY
+    bool "Telemetry"
+    default y
+
+config RH_NET
+    bool "Network"
+    default y
+
+# The board's identity on the bus. A gateway attributes a reading to this
+# number, so two boards on one link must not share it.
+config RH_NODE_ID
+    int "Node id"
+    range 1 65535
+    default 1

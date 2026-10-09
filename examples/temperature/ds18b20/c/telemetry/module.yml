@@ -9,6 +9,12 @@
 # the event, robohub-telemetry routes it, robohub-transport frames it and
 # robohub-drivers produced it.
 #
+# The payload is the schema's: schemas/telemetry.rho generates src/protocol/,
+# and the same schema generates robohub-gateway's Rho on the host. The event is
+# the schema's MESSAGE_ID_TELEMETRY, and a 0x0301 sampling-rate command is
+# answered with 0x0302 and the caller's tx id, so the host gateway's REST call
+# and its PlotJuggler stream both read this board.
+#
 # Built for the board with: rho build -target pico2w .
 #
 # @project RoboHub Platform
@@ -33,6 +39,9 @@ build:
   language: c
   sources:
     - src/main.c
+    # The payloads, generated from schemas/telemetry.rho. The same schema
+    # generates the gateway's Rho, so both ends write one layout.
+    - src/protocol/protocol.c
   output_dir: output
   presets:
     - pico2w
@@ -80,6 +89,7 @@ c_connection:
     - bsp.h
     - ds18b20.h
   include_dirs:
+    - /home/miraur/projects/robohub-drivers/examples/temperature/ds18b20/c/telemetry/src/protocol
     - /home/miraur/projects/robohub-common/include
     - /home/miraur/projects/robohub-common/include/robohub/hal
     - /home/miraur/projects/robohub-common/include/robohub/drivers

@@ -1,0 +1,143 @@
+#
+# gateway/c/repeater — a Pico that measures, and hears other boards.
+#
+# The same stack as the telemetry node, with a downstream link added: the local
+# DS18B20 and every frame that arrives on uart1 publish Telemetry on the one
+# event bus, and robohub-telemetry bridges that bus to the upstream USB CDC. The
+# gateway is therefore not a second program but the same node with one more
+# link, and it forwards a board by hearing it — the reading already names its
+# node.
+#
+# Built for the board with: rho build -target pico2w .
+#
+# The sensor application publishes a reading and knows nothing else. Telemetry
+# has subscribed to that event and writes each frame to a transport whose bytes
+# go out the USB CDC console, so a host reads COBS frames, not text.
+#
+# This is the integration the other examples only imply: robohub-core carries
+# the event, robohub-telemetry routes it, robohub-transport frames it and
+# robohub-drivers produced it.
+#
+# The payload is the schema's: schemas/telemetry.rho generates src/protocol/,
+# and the same schema generates robohub-gateway's Rho on the host. The event is
+# the schema's MESSAGE_ID_TELEMETRY, and a 0x0301 sampling-rate command is
+# answered with 0x0302 and the caller's tx id, so the host gateway's REST call
+# and its PlotJuggler stream both read this board.
+#
+# Built for the board with: rho build -target pico2w .
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: robohub-gateway-repeater
+  type: module
+  version: 0.1.0
+  description: >
+    A measuring gateway: reads its own DS18B20, receives frames from boards on
+    uart1, and streams all of them over USB CDC through robohub-core,
+    robohub-telemetry and robohub-transport.
+
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-08"
+
+main: src/main.c
+
+build:
+  language: c
+  sources:
+    - src/main.c
+    # The payloads, generated from schemas/telemetry.rho. The same schema
+    # generates the gateway's Rho, so both ends write one layout.
+    - src/protocol/protocol.c
+  output_dir: output
+  presets:
+    - pico2w
+
+depends:
+  - name: robohub-pico
+    type: c
+    path: /home/miraur/projects/robohub-pico
+    git: https://github.com/RoboHubPlatform/robohub-pico
+    branch: main
+  - name: ds18b20-temperature-module
+    type: c
+    path: /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module
+  - name: robohub-driver-ds18b20
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-core
+    type: c
+    path: /home/miraur/projects/robohub-core
+    git: https://github.com/RoboHubPlatform/robohub-core
+    branch: main
+  - name: robohub-transport
+    type: c
+    path: /home/miraur/projects/robohub-transport
+    git: https://github.com/RoboHubPlatform/robohub-transport
+    branch: main
+  - name: robohub-telemetry
+    type: c
+    path: /home/miraur/projects/robohub-telemetry
+    git: https://github.com/RoboHubPlatform/robohub-telemetry
+    branch: main
+
+c_connection:
+  library: "robohub-pico"
+  # The headers are what make the upload record the preset's board sources.
+  headers:
+    - platform.h
+    - console.h
+    - gpio.h
+    - timer.h
+    - onewire.h
+    - error.h
+    - types.h
+    - registry.h
+    - bsp.h
+    - ds18b20.h
+  include_dirs:
+    - /home/miraur/projects/robohub-drivers/examples/gateway/c/repeater/src/protocol
+    - /home/miraur/projects/robohub-common/include
+    - /home/miraur/projects/robohub-common/include/robohub/hal
+    - /home/miraur/projects/robohub-common/include/robohub/drivers
+    - /home/miraur/projects/robohub-pico/include
+    - /home/miraur/projects/robohub-pico/include/robohub/hal
+    - /home/miraur/projects/robohub-pico/include/robohub/platform
+    - /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20/inc
+    - /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module/bsp
+    - /home/miraur/projects/robohub-core/include
+    - /home/miraur/projects/robohub-core/include/robohub/core
+    - /home/miraur/projects/robohub-transport/include
+    - /home/miraur/projects/robohub-telemetry/include
+  variants:
+    pico2w:
+      target: "robohub-board-ds18b20-temperature-module"
+      libraries:
+        - robohub-driver-ds18b20
+        - robohub-core
+        - robohub-transport
+        - robohub-telemetry
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+  values_file: project.conf
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - example
+    - temperature
+    - ds18b20
+    - pico
+    - telemetry
+    - transport
+  stability: experimental
+  visibility: public
