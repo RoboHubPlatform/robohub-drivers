@@ -1,0 +1,35 @@
+#
+# @file module.yml
+# @brief robohub-drivers — the drivers, and how one is started.
+#
+# The repository is a collection rather than one library, so this manifest
+# describes the collection and what a person may start from it. `rho init` in
+# this directory reads `generate:` and writes a driver and the example that uses
+# it, instead of a Rho application, because that is what this repository is for.
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: robohub-drivers
+  type: collection
+  version: 0.1.0
+  description: >
+    Device drivers for the RoboHub Platform, and the examples that use them.
+
+# What `rho init` can write here. Inline for a repository this small; a larger
+# one points at a generate.yml it keeps beside its sources.
+generate:
+  - name: driver
+    description: A new device driver, and the example that uses it
+    variables:
+      - name: category
+        description: The category the driver belongs to, such as temperature
+      - name: name
+        description: The device, such as ds18b20
+    outputs:
+      - path: drivers/{{category}}/{{name}}
+        template: templates/driver
+      - path: examples/{{category}}/{{name}}/c
+        template: templates/example
