@@ -80,3 +80,21 @@ there is no allocation and nothing to free.
 The DS18B20 driver, its eval module, and both applications build and run. On a
 Pico 2W with the module on GP28 (physical pin 34), the C and Rho programs each
 print a reading every 1.5 seconds; the wiring is in the module's README.
+
+## Starting a driver
+
+A driver, and the example that uses it, are started from this repository rather
+than copied from one:
+
+```sh
+rho init --project . --category temperature --name sht31 \
+         --description "Sensirion SHT31 temperature and humidity sensor" \
+         driver drivers/temperature/sht31
+```
+
+The root `module.yml` is what makes that work: it is a `collection`, and its
+`generate:` section names the generator, the variables it asks for, and the two
+directories it writes — the driver under `drivers/<category>/<name>` and its
+example under `examples/<category>/<name>/c`. The templates are in `templates/`,
+and `{{name}}` and `{{category}}` are substituted in the file names and their
+contents. Run `rho init --project .` with no arguments to see what is on offer.

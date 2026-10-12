@@ -1,0 +1,30 @@
+module:
+  name: robohub-driver-{{name}}
+  type: driver
+  version: 0.1.0
+  description: >
+    {{description}}
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/{{name}}.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - robohub/drivers/{{category}}/{{name}}.h

@@ -1,0 +1,10 @@
+menu "RoboHub {{name}} driver"
+
+config RH_DRV_{{name}}
+    bool "{{description}}"
+    default n
+    help
+      An application that sets this gets the driver compiled in; one that does
+      not pays for none of it.
+
+endmenu

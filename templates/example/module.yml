@@ -1,0 +1,31 @@
+#
+# {{name}}/c — reads the {{name}} driver and prints it.
+#
+# Built for the board with: rho build -target pico2w .
+#
+module:
+  name: {{name}}-temperature-c
+  type: module
+  version: 0.1.0
+  description: >
+    {{description}}
+
+main: src/main.c
+
+build:
+  language: c
+  output_dir: output
+  sources:
+    - src/main.c
+  presets:
+    - pico2w
+
+depends:
+  - name: robohub-pico
+    type: c
+    path: /home/miraur/projects/robohub-pico
+    git: https://github.com/RoboHubPlatform/robohub-pico
+    branch: main
+  - name: robohub-driver-{{name}}
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/{{category}}/{{name}}

@@ -1,0 +1,3 @@
+config RH_DRV_{{name}}
+    bool "{{description}}"
+    default y
