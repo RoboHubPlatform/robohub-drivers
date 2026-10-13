@@ -5,6 +5,12 @@ module:
   description: >
     {{description}}
 
+# The driver interfaces this part presents. Declare every one the driver
+# implements — a part that measures more than one thing lists each, so a search
+# for any of them finds it. The names are the vocabulary the collection's own
+# manifest declares.
+functions: [{{functions}}]
+
 build:
   language: c
   standard: c11

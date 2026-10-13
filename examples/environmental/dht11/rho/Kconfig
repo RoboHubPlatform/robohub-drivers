@@ -1,0 +1,25 @@
+# dht11 environmental example configuration
+
+config RH_HAL_GPIO
+    bool "GPIO"
+    default y
+
+config RH_HAL_UART
+    bool "UART"
+    default y
+
+config RH_HAL_TIMER
+    bool "Timer"
+    default y
+
+config RH_HAL_DHT
+    bool "DHT single-wire"
+    default y
+
+config RH_BOARD_PICO_2W
+    bool "Pico 2W"
+    default y
+
+config RH_BOARD_DHT11_MODULE
+    bool "DHT11 sensor module"
+    default y

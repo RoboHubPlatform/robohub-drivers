@@ -4,7 +4,7 @@
 # Built for the board with: rho build -target pico2w .
 #
 module:
-  name: {{name}}-temperature-c
+  name: {{name}}-c
   type: module
   version: 0.1.0
   description: >

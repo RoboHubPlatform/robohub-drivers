@@ -1,0 +1,25 @@
+# bmp180 environmental example configuration
+
+config RH_HAL_GPIO
+    bool "GPIO"
+    default y
+
+config RH_HAL_UART
+    bool "UART"
+    default y
+
+config RH_HAL_TIMER
+    bool "Timer"
+    default y
+
+config RH_HAL_I2C
+    bool "I2C"
+    default y
+
+config RH_BOARD_PICO_2W
+    bool "Pico 2W"
+    default y
+
+config RH_BOARD_BMP180_MODULE
+    bool "BMP180 sensor module"
+    default y

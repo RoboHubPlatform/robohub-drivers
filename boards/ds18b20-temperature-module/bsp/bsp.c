@@ -1,10 +1,15 @@
 /*
  * bsp.c — Support package for the DS18B20 temperature sensor module.
  *
- * The whole of it is the join: the registry holds the platform's bus and timer,
- * the driver holds the device, and this looks the first two up by the names the
- * caller gives and hands them to the third. It owns nothing and keeps nothing,
+ * This is the registry-specific layer of the driver stack: the bus comes from
+ * the platform's registry, the driver holds only the device's protocol, and this
+ * joins them. It looks the platform's 1-Wire bus and timer up by the names the
+ * caller gives and hands them to the driver. It owns nothing and keeps nothing,
  * so there is no state here to get wrong.
+ *
+ * A 1-Wire part is reached through `RoboHubOneWire` directly rather than through
+ * the common register bus, because 1-Wire is not register-shaped. The layering is
+ * the same either way.
  *
  * @project RoboHub Platform
  * @license MIT

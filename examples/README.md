@@ -15,6 +15,13 @@ examples/
                 bare-metal/   the DS18B20 program, in C, on the runtime alone
                 freertos/     the same program, with FreeRTOS beneath the runtime
             rho/              the DS18B20 program, in Rho
+    environmental/
+        bmp180/
+            c/                the BMP180 program, in C
+            rho/              the BMP180 program, in Rho
+        dht11/
+            c/                the DHT11 program, in C
+            rho/              the DHT11 program, in Rho
 ```
 
 Each application reads the sensor every 1.5 seconds and writes the temperature
@@ -41,6 +48,21 @@ The bare-metal variant has been run on a Pico 2W with the DS18B20 module on GP28
 (physical pin 34) and prints a reading every 1.5 seconds. The wiring is in the
 module's README. The FreeRTOS variant additionally needs the FreeRTOS kernel
 fetched into `robohub-freertos/vendor/` and a `FreeRTOSConfig.h` for the board.
+
+## Environmental
+
+`examples/environmental/bmp180` shows a part that presents more than one driver
+interface. The BMP180 measures temperature and pressure and computes altitude
+from the pressure, so the same program prints all three. It is reached through
+the common register bus, which the board's BSP resolves from the platform's I2C
+bus, so the program names neither I2C nor a chip. It is the counterpart of the
+DS18B20 example for a register device rather than a 1-Wire one.
+
+`examples/environmental/dht11` shows a part on a wire that is neither a register
+bus nor 1-Wire: the DHT11 reports temperature and relative humidity in one frame
+on a single timed line. The pulse timing belongs to the platform's `RoboHubDHT`
+implementation and the frame decoding to the driver, so the program names
+neither a pin nor a microsecond.
 
 ## Gateways
 

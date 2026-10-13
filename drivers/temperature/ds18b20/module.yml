@@ -11,6 +11,11 @@ module:
   license: "MIT"
   created: "2026-10-07"
 
+# The driver interfaces this part presents. A DS18B20 is a temperature sensor
+# and nothing else, so a search for a temperature sensor finds it.
+functions:
+  - temperature
+
 build:
   language: c
   standard: c11
