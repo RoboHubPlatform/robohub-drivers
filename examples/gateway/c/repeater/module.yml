@@ -49,7 +49,7 @@ build:
   language: c
   sources:
     - src/main.c
-    # The payloads, generated from schemas/telemetry.rho. The same schema
+    # The payloads, generated from schemas/link.rho. The same schema
     # generates the gateway's Rho, so both ends write one layout.
     - src/protocol/protocol.c
   output_dir: output

@@ -38,6 +38,14 @@ config RH_NET
 
 # The board's identity on the bus. A gateway attributes a reading to this
 # number, so two boards on one link must not share it.
+# The area this board's readings are numbered in. A gateway owns the area its
+# devices are in, and a board with the same node id in another area is another
+# device.
+config RH_AREA_ID
+    int "Area id"
+    range 1 65535
+    default 1
+
 config RH_NODE_ID
     int "Node id"
     range 1 65535
