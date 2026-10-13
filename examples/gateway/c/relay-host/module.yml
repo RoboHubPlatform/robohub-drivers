@@ -1,0 +1,109 @@
+#
+# gateway/c/relay-host — a relay that is a hop, on a host.
+#
+# The board relay (`examples/gateway/c/relay`) built for robohub-linux: it hears
+# boards on a downstream tty, gateways them to the USB... no — to the gateway
+# above it over TCP, and routes a command or a diagnostic addressed to a board
+# behind it down and the answer back up. It is the whole middle of a RoboHub
+# tree without a board, so the tree can be run and tested on one machine.
+#
+#     rho build -target native .
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: robohub-gateway-relay-host
+  type: module
+  version: 0.1.0
+  description: >
+    A relay on a host: hears boards on a downstream tty, dials the gateway above
+    it, forwards their readings up, and routes a command or a diagnostic for a
+    board behind it down and the answer back up. Runs on robohub-linux.
+
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-13"
+
+main: src/main.c
+
+build:
+  language: c
+  standard: c11
+  sources:
+    - src/main.c
+    - src/uplink.c
+    - src/protocol/protocol.c
+  output_dir: output
+  presets:
+    - native
+
+depends:
+  - name: robohub-linux
+    type: c
+    path: /home/miraur/projects/robohub-linux
+    git: https://github.com/RoboHubPlatform/robohub-linux
+    branch: main
+  - name: robohub-core
+    type: c
+    path: /home/miraur/projects/robohub-core
+    git: https://github.com/RoboHubPlatform/robohub-core
+    branch: main
+  - name: robohub-transport
+    type: c
+    path: /home/miraur/projects/robohub-transport
+    git: https://github.com/RoboHubPlatform/robohub-transport
+    branch: main
+  - name: robohub-telemetry
+    type: c
+    path: /home/miraur/projects/robohub-telemetry
+    git: https://github.com/RoboHubPlatform/robohub-telemetry
+    branch: main
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+c_connection:
+  library: "robohub-linux"
+  headers:
+    - platform.h
+    - robohub/net.h
+  include_dirs:
+    - /home/miraur/projects/robohub-drivers/examples/gateway/c/relay-host/src/protocol
+    - /home/miraur/projects/robohub-linux/include
+    - /home/miraur/projects/robohub-common/include
+    - /home/miraur/projects/robohub-common/include/robohub/hal
+    - /home/miraur/projects/robohub-core/include
+    - /home/miraur/projects/robohub-core/include/robohub/core
+    - /home/miraur/projects/robohub-transport/include
+    - /home/miraur/projects/robohub-telemetry/include
+  variants:
+    native:
+      libraries:
+        - robohub-core
+        - robohub-transport
+        - robohub-telemetry
+        - robohub-common
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+  values_file: project.conf
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - example
+    - gateway
+    - relay
+    - linux
+    - host
+  stability: experimental
+  visibility: public

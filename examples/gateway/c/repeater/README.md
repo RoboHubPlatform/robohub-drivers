@@ -32,7 +32,7 @@ a gateway at once.
 
 A downstream board runs the node firmware with its own `CONFIG_RH_NODE_ID`
 (`examples/temperature/ds18b20/c/telemetry`), set to a value distinct from this
-Pico's. It speaks the same `Telemetry` schema and the same `robohub-transport`
+Pico's. It speaks the same `link` schema and the same `robohub-transport`
 framing; the only difference is that its link is a UART rather than USB CDC.
 
 ## Upstream and the host
@@ -49,5 +49,6 @@ framing; the only difference is that its link is a UART rather than USB CDC.
 - One downstream link today, on `uart1` (GP4/GP5). A second UART or an RS-485
   transceiver is another `robohub-transport` fed the same way; RS-485 needs the
   direction pin and the `rs485` HAL, whose Pico implementation is still a stub.
-- A sampling-rate command (`0x0301`) is answered for this Pico. Commands for a
-  board behind it are not yet routed by node id.
+- A control (`CONTROL_REQUEST`, `0x0301`) is answered for this Pico: a command
+  carries an opcode and one argument, and sampling rate is opcode 1. A command
+  addressed to a board behind it is not yet routed down by device id.

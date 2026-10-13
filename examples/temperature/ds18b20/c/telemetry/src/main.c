@@ -33,6 +33,7 @@
 #include "robohub/core/app.h"
 #include "robohub/core/event.h"
 #include "robohub/core/events.h"
+#include "robohub/core/diagnostics.h"
 #include "robohub/core/scheduler.h"
 #include "robohub/transport.h"
 #include "robohub/telemetry.h"
@@ -68,23 +69,32 @@
 #endif
 
 /* The event the reading travels as, and its layout, both from the schema. The
- * gateway is generated from the same schemas/telemetry.rho, so the two ends
- * write one layout; the event sits in the sensor domain and the schema names
- * it MESSAGE_ID_TELEMETRY (0x0201), which is where a sensor event would fall
- * anyway.
+ * gateway is generated from the same schemas/link.rho, so the two ends write one
+ * layout; the schema names the reading MESSAGE_ID_TELEMETRY (0x0201).
  *
- * The payload is the schema's `Telemetry` — a version byte, timestamp_ms,
- * temperature_c and status — serialized here rather than the bare float this
- * example once published. A gateway that decoded the bare float could not be
- * sure what it was; the schema's message it can. */
+ * The payload is the schema's `Telemetry` — a version byte, the device (an area
+ * and a node), timestamp_ms, temperature_c and status — serialized here rather
+ * than the bare float this example once published. A gateway that decoded the
+ * bare float could not be sure what it was; the schema's message it can. */
 #define EVENT_TEMP_READING MESSAGE_ID_TELEMETRY
 
-/* This board's identity on the bus, so a gateway can attribute the reading. */
+/* This board's identity on the bus: the area it is in and its node id within it.
+ * A gateway numbers several areas, so the pair — not the node id alone — is what
+ * names a device. */
+#if defined(CONFIG_RH_AREA_ID)
+#define RH_AREA_ID ((rh_u16)CONFIG_RH_AREA_ID)
+#else
+#define RH_AREA_ID ((rh_u16)1u)
+#endif
 #if defined(CONFIG_RH_NODE_ID)
 #define RH_NODE_ID ((rh_u16)CONFIG_RH_NODE_ID)
 #else
 #define RH_NODE_ID ((rh_u16)1u)
 #endif
+
+/* Sampling rate is control opcode 1; the control family is general, so a second
+ * command is another opcode rather than another message. */
+#define CONTROL_SAMPLING_RATE 1u
 
 static void emit(const char* text)
 {
@@ -127,7 +137,7 @@ static RoboHubError read_and_publish(robohub_core_task_id id, void* user)
      * status knows the difference between a stale reading and a dead sensor,
      * which a missing frame could not tell it. */
     Telemetry message = {
-        .node_id = RH_NODE_ID,
+        .device = { .area_id = RH_AREA_ID, .node_id = RH_NODE_ID },
         .timestamp_ms = to_ms_since_boot(get_absolute_time()),
         .temperature_c = (ROBOHUB_SUCCEEDED(err)) ? celsius : 0.0f,
         .status = (ROBOHUB_SUCCEEDED(err)) ? NODE_STATUS_OK : NODE_STATUS_FAULT,
@@ -172,35 +182,92 @@ static RoboHubError sensor_start(void)
     return robohub_core_task_add("temp", read_and_publish, 0, sample_period_ms, &sample_task);
 }
 
-/* A configuration command from the gateway: 0x0301 in, 0x0302 out, the caller's
- * tx_id carried back so it can match its answer to its request. The period is
- * clamped to one a DS18B20 conversion can meet; the acknowledgement reports
- * what was actually set, not what was asked for. */
-static RoboHubError on_set_sampling_rate(robohub_event_id id, const void* payload, rh_size size, void* user)
+/* A control from the gateway: `CONTROL_REQUEST` in, `CONTROL_RESPONSE` out, the
+ * caller's tx_id carried back so it can match the answer to its request. The
+ * request names the device it is for and carries one argument; sampling rate is
+ * opcode 1, and the period is clamped to one a DS18B20 conversion can meet. The
+ * acknowledgement repeats the device and the opcode and reports what was
+ * actually set, not what was asked for. */
+static RoboHubError on_control(robohub_event_id id, const void* payload, rh_size size, void* user)
 {
     (void)id;
     (void)user;
 
-    SetSamplingRateRequest request;
-    if (!SetSamplingRateRequest_deserialize((const uint8_t*)payload, (size_t)size, &request)) {
+    ControlRequest request;
+    if (!ControlRequest_deserialize((const uint8_t*)payload, (size_t)size, &request)) {
         return ROBOHUB_ERR_PROTOCOL;
-    }
-    rh_u32 interval = request.interval_ms;
-    if (interval < 100u) {
-        interval = 100u;
-    }
-    if (ROBOHUB_SUCCEEDED(robohub_core_task_set_period(sample_task, interval))) {
-        sample_period_ms = (rh_u16)interval;
     }
 
-    SetSamplingRateResponse response = { .actual_interval_ms = sample_period_ms };
-    rh_u8 bytes[SET_SAMPLING_RATE_RESPONSE_WIRE_SIZE];
-    if (SetSamplingRateResponse_serialize(&response, bytes, sizeof(bytes)) == 0u) {
+    ControlResponse response = {
+        .device = request.device,
+        .opcode = request.opcode,
+        .result = 0u,
+        .argument = request.argument,
+    };
+
+    if (request.opcode != CONTROL_SAMPLING_RATE) {
+        response.result = 2u; /* no such command */
+    } else {
+        rh_u32 interval = request.argument;
+        if (interval < 100u) {
+            interval = 100u;
+        }
+        if (ROBOHUB_FAILED(robohub_core_task_set_period(sample_task, interval))) {
+            response.result = 1u;
+        } else {
+            sample_period_ms = (rh_u16)interval;
+            response.argument = sample_period_ms;
+        }
+    }
+
+    rh_u8 bytes[CONTROL_RESPONSE_WIRE_SIZE];
+    if (ControlResponse_serialize(&response, bytes, sizeof(bytes)) == 0u) {
         return ROBOHUB_ERR_PROTOCOL;
     }
-    return robohub_core_event_publish_with_tx(MESSAGE_ID_SET_SAMPLING_RATE_RESPONSE,
+    return robohub_core_event_publish_with_tx(MESSAGE_ID_CONTROL_RESPONSE,
                                               robohub_core_event_current_tx(),
-                                              bytes, (rh_size)SET_SAMPLING_RATE_RESPONSE_WIRE_SIZE);
+                                              bytes, (rh_size)CONTROL_RESPONSE_WIRE_SIZE);
+}
+
+/* A diagnostic request: run the smoke the mask asks for and answer with the
+ * runtime's counters and the result. A gateway reads this to tell a board that
+ * stopped from a board whose OneWire bus was never up. */
+static RoboHubError on_diag(robohub_event_id id, const void* payload, rh_size size, void* user)
+{
+    (void)id;
+    (void)user;
+
+    DiagRequest request;
+    if (!DiagRequest_deserialize((const uint8_t*)payload, (size_t)size, &request)) {
+        return ROBOHUB_ERR_PROTOCOL;
+    }
+
+    robohub_core_diagnostics counters;
+    robohub_core_diagnostics_get(&counters);
+
+    rh_u32 probe_ok = 0u;
+    rh_u32 probe_fault = 0u;
+    (void)robohub_core_smoke(system_timer, request.mask, &probe_ok, &probe_fault);
+
+    DiagResponse response = {
+        .device = request.device,
+        .uptime_ms = counters.uptime_ms,
+        .events_published = counters.events_published,
+        .handler_errors = counters.handler_errors,
+        .tasks_run = counters.tasks_run,
+        .task_errors = counters.task_errors,
+        .last_error = (rh_u16)counters.last_error,
+        .probe_ok = probe_ok,
+        .probe_fault = probe_fault,
+    };
+
+    rh_u8 bytes[DIAG_RESPONSE_WIRE_SIZE];
+    if (DiagResponse_serialize(&response, bytes, sizeof(bytes)) == 0u) {
+        return ROBOHUB_ERR_PROTOCOL;
+    }
+    return robohub_core_event_publish_with_tx(MESSAGE_ID_DIAG_RESPONSE,
+                                              robohub_core_event_current_tx(),
+                                              bytes, (rh_size)DIAG_RESPONSE_WIRE_SIZE);
 }
 
 /* Called every pass. Reads whatever the link has delivered and feeds the
@@ -326,9 +393,11 @@ int main(void)
      * bus, which starts with no subscriptions and would drop this one. */
     (void)robohub_telemetry_enable_event(EVENT_TEMP_READING, 1u);
     /* The acknowledgement goes back out the same link, with the caller's tx. */
-    (void)robohub_telemetry_enable_event(MESSAGE_ID_SET_SAMPLING_RATE_RESPONSE, 1u);
+    (void)robohub_telemetry_enable_event(MESSAGE_ID_CONTROL_RESPONSE, 1u);
+    (void)robohub_telemetry_enable_event(MESSAGE_ID_DIAG_RESPONSE, 1u);
     /* And a command from the gateway arrives on it. */
-    (void)robohub_core_event_subscribe(MESSAGE_ID_SET_SAMPLING_RATE_REQUEST, on_set_sampling_rate, 0);
+    (void)robohub_core_event_subscribe(MESSAGE_ID_CONTROL_REQUEST, on_control, 0);
+    (void)robohub_core_event_subscribe(MESSAGE_ID_DIAG_REQUEST, on_diag, 0);
 
     (void)robohub_core_run();
     for (;;) {

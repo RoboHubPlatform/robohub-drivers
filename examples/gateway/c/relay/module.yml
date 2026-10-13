@@ -1,0 +1,115 @@
+#
+# gateway/c/relay — a Pico that gateways without measuring.
+#
+# The edge's stack minus the sensor: frames that arrive on uart1 publish
+# Telemetry on the event bus, and robohub-telemetry bridges that bus to the
+# upstream USB CDC. With nothing of its own to send, a relay is a pure hop: the
+# boards behind it are its readings, and its parent reads them through it.
+#
+# Built for the board with: rho build -target pico2w .
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: robohub-gateway-relay
+  type: module
+  version: 0.1.0
+  description: >
+    A gateway that only gateways: receives frames from boards on uart1 and
+    streams all of them over USB CDC through robohub-core, robohub-telemetry and
+    robohub-transport. It measures nothing of its own.
+
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-13"
+
+main: src/main.c
+
+build:
+  language: c
+  sources:
+    - src/main.c
+    - src/uplink.c
+    # The payloads, generated from schemas/gateway.rho. The same schemas generate
+    # the gateway's Rho, so both ends write one layout; a relay speaks both
+    # levels, so it generates both.
+    - src/protocol/protocol.c
+  output_dir: output
+  presets:
+    - pico2w
+
+depends:
+  - name: robohub-pico
+    type: c
+    path: /home/miraur/projects/robohub-pico
+    git: https://github.com/RoboHubPlatform/robohub-pico
+    branch: main
+  - name: robohub-core
+    type: c
+    path: /home/miraur/projects/robohub-core
+    git: https://github.com/RoboHubPlatform/robohub-core
+    branch: main
+  - name: robohub-transport
+    type: c
+    path: /home/miraur/projects/robohub-transport
+    git: https://github.com/RoboHubPlatform/robohub-transport
+    branch: main
+  - name: robohub-telemetry
+    type: c
+    path: /home/miraur/projects/robohub-telemetry
+    git: https://github.com/RoboHubPlatform/robohub-telemetry
+    branch: main
+
+c_connection:
+  library: "robohub-pico"
+  # The headers are what make the upload record the preset's board sources.
+  headers:
+    - platform.h
+    - console.h
+    - gpio.h
+    - timer.h
+    - uart.h
+    - error.h
+    - types.h
+    - registry.h
+  include_dirs:
+    - /home/miraur/projects/robohub-drivers/examples/gateway/c/relay/src/protocol
+    - /home/miraur/projects/robohub-common/include
+    - /home/miraur/projects/robohub-common/include/robohub/hal
+    - /home/miraur/projects/robohub-common/include/robohub/drivers
+    - /home/miraur/projects/robohub-pico/include
+    - /home/miraur/projects/robohub-pico/include/robohub/hal
+    - /home/miraur/projects/robohub-pico/include/robohub/platform
+    - /home/miraur/projects/robohub-core/include
+    - /home/miraur/projects/robohub-core/include/robohub/core
+    - /home/miraur/projects/robohub-transport/include
+    - /home/miraur/projects/robohub-telemetry/include
+  variants:
+    pico2w:
+      libraries:
+        - robohub-core
+        - robohub-transport
+        - robohub-telemetry
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+  values_file: project.conf
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - example
+    - gateway
+    - relay
+    - pico
+    - telemetry
+    - transport
+  stability: experimental
+  visibility: public

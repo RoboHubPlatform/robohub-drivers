@@ -1,0 +1,27 @@
+# gateway/c/relay-host configuration
+
+config RH_HAL_UART
+    bool "UART"
+    default y
+
+config RH_HAL_TIMER
+    bool "Timer"
+    default y
+
+config RH_TRANSPORT
+    bool "Transport"
+    default y
+
+config RH_TELEMETRY
+    bool "Telemetry"
+    default y
+
+config RH_NET
+    bool "Network"
+    default y
+
+# The area this relay speaks for: the area the boards behind it are numbered in.
+config RH_AREA_ID
+    int "Area id"
+    range 1 65535
+    default 9
