@@ -1,0 +1,76 @@
+module:
+  name: robohub-driver-bmp180
+  type: driver
+  version: 0.1.0
+  description: >
+    Platform-agnostic Bosch BMP180 temperature, pressure and altitude sensor.
+    Implements the RoboHubTemperature, RoboHubPressure and RoboHubAltitude
+    driver interfaces from robohub-common and reaches the part through the
+    common register bus (RoboHubBus), so the same object file runs whether the
+    part is wired to I2C or to SPI and on any board that implements the bus.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-13"
+
+# The driver interfaces this part presents. A sensor that measures more than one
+# thing lists every function it answers, so a search for any one of them finds
+# it: the BMP180 is a temperature sensor, a barometer and an altimeter at once.
+functions:
+  - temperature
+  - pressure
+  - altitude
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/bmp180.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  # The name a consumer includes is the module's place in the ecosystem, not the
+  # file's place in this directory. The header stays flat in inc/bmp180.h; the
+  # namespaced path is generated into the build tree and put on the path through
+  # the CMake target below, and installed under this name.
+  headers:
+    - robohub/drivers/environmental/bmp180.h
+  cmake:
+    target: "rho::robohub-driver-bmp180"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+      # The altitude formula is a power, so the part of the C library that has it
+      # is linked. A build that never reads altitude still links it; it is one
+      # library and the alternative is a driver with two link shapes.
+      - m
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - driver
+    - temperature
+    - pressure
+    - altitude
+    - environmental
+    - i2c
+    - spi
+    - bmp180
+  stability: experimental
+  visibility: public

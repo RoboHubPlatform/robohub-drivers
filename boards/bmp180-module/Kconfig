@@ -1,0 +1,12 @@
+menu "RoboHub BMP180 module"
+
+config RH_BOARD_BMP180_MODULE
+    bool "BMP180 temperature, pressure and altitude sensor breakout"
+    select RH_DRV_BMP180
+    default n
+    help
+      The Bosch BMP180 sensor breakout. Selecting it brings in the driver and
+      the bus and timer the breakout needs; an application that does not fit the
+      module pays for none of it.
+
+endmenu

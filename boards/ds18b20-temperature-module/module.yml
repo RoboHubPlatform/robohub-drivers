@@ -17,6 +17,11 @@ module:
   license: "MIT"
   created: "2026-10-07"
 
+# The driver interfaces the part presents, mirrored from the driver's own
+# manifest so the module can be found by function as well as by name.
+functions:
+  - temperature
+
 build:
   language: c
   standard: c11
@@ -56,6 +61,8 @@ board:
   device: DS18B20
   category: temperature
   driver: robohub-driver-ds18b20
+  functions:
+    - temperature
   connector:
     - name: VCC
       signal: power

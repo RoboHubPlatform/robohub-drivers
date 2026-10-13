@@ -1,0 +1,67 @@
+module:
+  name: robohub-driver-dht11
+  type: driver
+  version: 0.1.0
+  description: >
+    Platform-agnostic Aosong DHT11 temperature and humidity sensor. Implements
+    the RoboHubTemperature and RoboHubHumidity driver interfaces from
+    robohub-common and reaches the part through the RoboHubDHT single-wire HAL,
+    so it is not written for any one board.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-13"
+
+# The driver interfaces this part presents. The DHT11 measures temperature and
+# relative humidity in one frame, so a search for either finds it.
+functions:
+  - temperature
+  - humidity
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/dht11.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  # The name a consumer includes is the module's place in the ecosystem, not the
+  # file's place in this directory. The header stays flat in inc/dht11.h; the
+  # namespaced path is generated into the build tree and put on the path through
+  # the CMake target below, and installed under this name.
+  headers:
+    - robohub/drivers/environmental/dht11.h
+  cmake:
+    target: "rho::robohub-driver-dht11"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - driver
+    - temperature
+    - humidity
+    - environmental
+    - single-wire
+    - dht11
+  stability: experimental
+  visibility: public

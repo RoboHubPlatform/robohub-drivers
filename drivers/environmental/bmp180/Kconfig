@@ -1,0 +1,15 @@
+menu "RoboHub BMP180 driver"
+
+config RH_DRV_BMP180
+    bool "BMP180 temperature, pressure and altitude sensor"
+    select RH_HAL_I2C
+    select RH_HAL_SPI
+    select RH_HAL_TIMER
+    default n
+    help
+      The Bosch BMP180 temperature, pressure and altitude sensor, reached
+      through the common register bus and a timer the selected platform
+      implements. An application that sets this gets the driver compiled in; one
+      that does not pays for none of it.
+
+endmenu

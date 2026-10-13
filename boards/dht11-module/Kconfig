@@ -1,0 +1,12 @@
+menu "RoboHub DHT11 module"
+
+config RH_BOARD_DHT11_MODULE
+    bool "DHT11 temperature and humidity sensor breakout"
+    select RH_DRV_DHT11
+    default n
+    help
+      The DHT11 temperature and humidity sensor breakout. Selecting it brings in
+      the driver and the single-wire line and timer the breakout needs; an
+      application that does not fit the module pays for none of it.
+
+endmenu

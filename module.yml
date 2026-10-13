@@ -18,6 +18,17 @@ module:
   description: >
     Device drivers for the RoboHub Platform, and the examples that use them.
 
+# The functions a driver here may present, one per driver interface
+# robohub-common declares. A driver lists the ones it answers in its own
+# manifest, so a sensor that measures more than one thing — a BMP180 is a
+# thermometer, a barometer and an altimeter at once — is found by any of them.
+# This is the vocabulary; a driver's own `functions:` is its claim.
+functions:
+  - temperature
+  - pressure
+  - altitude
+  - humidity
+
 # What `rho init` can write here. Inline for a repository this small; a larger
 # one points at a generate.yml it keeps beside its sources.
 generate:
@@ -28,6 +39,8 @@ generate:
         description: The category the driver belongs to, such as temperature
       - name: name
         description: The device, such as ds18b20
+      - name: functions
+        description: Comma-separated driver interfaces it presents, such as temperature,pressure
     outputs:
       - path: drivers/{{category}}/{{name}}
         template: templates/driver

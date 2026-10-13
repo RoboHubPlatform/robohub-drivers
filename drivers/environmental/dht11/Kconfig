@@ -1,0 +1,14 @@
+menu "RoboHub DHT11 driver"
+
+config RH_DRV_DHT11
+    bool "DHT11 temperature and humidity sensor"
+    select RH_HAL_DHT
+    select RH_HAL_TIMER
+    default n
+    help
+      The Aosong DHT11 temperature and humidity sensor, reached through the
+      single-wire HAL and a timer the selected platform implements. An
+      application that sets this gets the driver compiled in; one that does not
+      pays for none of it.
+
+endmenu

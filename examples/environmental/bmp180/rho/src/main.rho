@@ -1,0 +1,86 @@
+// bmp180 — read the BMP180 temperature, pressure and altitude module, in Rho.
+//
+// The same program as examples/environmental/bmp180/c, written in Rho. The names
+// below are the foreign functions rho-cimport generates from the board module's
+// BSP, reached through the `ffi` module.
+//
+// @project RoboHub Platform
+// @license MIT
+
+module main
+
+import ffi
+
+// The sentinel the board returns when a reading could not be taken.
+const VALUE_ERROR: i32 = -1000000
+
+// Print a fixed-point value — thousandths for thousandths of a degree, hundredths
+// for centimetres — by hand, so the program needs no float formatting.
+fn print_fixed(value: i32, scale: i32) void {
+    let negative: bool = value < 0
+    let magnitude: i32 = value
+    if negative {
+        magnitude = 0 - value
+    }
+    let whole: i32 = magnitude / scale
+    let fraction: i32 = magnitude % scale
+
+    if negative {
+        print("-")
+    }
+    print(string.from_i32(whole))
+    print(".")
+
+    if scale == 1000 {
+        if fraction < 100 { print("0") }
+    }
+    if fraction < 10 { print("0") }
+    print(string.from_i32(fraction))
+}
+
+fn main() void {
+    if robohub_platform_init() != 0 {
+        return
+    }
+
+    print("\n")
+    print("BMP180 temperature, pressure and altitude, in Rho\n")
+    print("-------------------------------------------------\n")
+
+    if robohub_bmp180_module_open() != 0 {
+        print("no BMP180 module: is the platform's i2c HAL up?\n")
+        return
+    }
+
+    while true {
+        let t: i32 = robohub_bmp180_module_milli_celsius()
+        let p: i32 = robohub_bmp180_module_pascals()
+        let a: i32 = robohub_bmp180_module_centi_metres()
+
+        if t == VALUE_ERROR {
+            print("T = read failed\n")
+        } else {
+            print("T = ")
+            print_fixed(t, 1000)
+            print(" C\n")
+        }
+
+        if p == VALUE_ERROR {
+            print("P = read failed\n")
+        } else {
+            print("P = ")
+            print(string.from_i32(p))
+            print(" Pa\n")
+        }
+
+        if a == VALUE_ERROR {
+            print("alt = read failed\n")
+        } else {
+            print("alt = ")
+            print_fixed(a, 100)
+            print(" m\n")
+        }
+
+        robohub_bmp180_module_sleep_ms(1500)
+    }
+}

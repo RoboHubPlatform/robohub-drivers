@@ -1,0 +1,94 @@
+#
+# bmp180/c — reads the BMP180 module and prints temperature, pressure and
+# altitude.
+#
+# Built for the board with: rho build -target pico2w .
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: bmp180-environmental-c
+  type: module
+  version: 0.1.0
+  description: >
+    Reads the BMP180 breakout on a Pico 2W and prints the temperature, pressure
+    and altitude over the console every 1.5 s.
+
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-13"
+
+main: src/main.c
+
+build:
+  language: c
+  sources:
+    - src/main.c
+  output_dir: output
+  presets:
+    - pico2w
+
+depends:
+  - name: robohub-pico
+    type: c
+    path: /home/miraur/projects/robohub-pico
+    git: https://github.com/RoboHubPlatform/robohub-pico
+    branch: main
+  - name: bmp180-module
+    type: c
+    path: /home/miraur/projects/robohub-drivers/boards/bmp180-module
+  - name: robohub-driver-bmp180
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/environmental/bmp180
+
+c_connection:
+  library: "robohub-pico"
+  # The headers are what make the upload record the preset's board sources: a
+  # project with a C connection has its foreign interface generated, and that
+  # step is also where the board's own sources are written down. Without them
+  # the board support package is never compiled and nothing is registered.
+  headers:
+    - platform.h
+    - console.h
+    - bsp.h
+    - bmp180.h
+    - bus.h
+    - registry.h
+    - timer.h
+    - error.h
+    - types.h
+  include_dirs:
+    - /home/miraur/projects/robohub-common/include
+    - /home/miraur/projects/robohub-common/include/robohub/hal
+    - /home/miraur/projects/robohub-common/include/robohub/drivers
+    - /home/miraur/projects/robohub-pico/include
+    - /home/miraur/projects/robohub-pico/include/robohub/hal
+    - /home/miraur/projects/robohub-pico/include/robohub/platform
+    - /home/miraur/projects/robohub-drivers/drivers/environmental/bmp180/inc
+    - /home/miraur/projects/robohub-drivers/boards/bmp180-module/bsp
+  variants:
+    pico2w:
+      target: "robohub-board-bmp180-module"
+      libraries:
+        - robohub-driver-bmp180
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+  values_file: project.conf
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - example
+    - environmental
+    - bmp180
+    - pico
+  stability: experimental
+  visibility: public
