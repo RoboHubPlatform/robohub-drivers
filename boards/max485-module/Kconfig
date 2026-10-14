@@ -1,0 +1,16 @@
+menu "RoboHub MAX485 module"
+
+config RH_BOARD_MAX485_MODULE
+    bool "MAX485 RS485 transceiver carrier"
+    select RH_HAL_RS485
+    select RH_HAL_UART
+    select RH_HAL_GPIO
+    select RH_HAL_TIMER
+    default n
+    help
+      A MAX485 RS485 transceiver carrier, bound to a UART and a direction pin.
+      Selecting it makes the RoboHubRS485 interface available on a board that
+      does not carry RS485 natively; the pins and speed are given when the
+      module is brought up.
+
+endmenu
