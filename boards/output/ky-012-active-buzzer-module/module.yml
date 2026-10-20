@@ -1,0 +1,87 @@
+module:
+  name: ky-012-active-buzzer-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-012 active buzzer: it has its own oscillator, so it is driven on and off rather than at a frequency.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - switch
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-gpio-switch
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/gpio-switch
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_012_active_buzzer_module.h
+  cmake:
+    target: "rho::robohub-board-ky-012-active-buzzer-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-gpio-switch
+      - rho::robohub-common
+
+board:
+  designation: KY_012_ACTIVE_BUZZER_MODULE
+  device: ky-012-active-buzzer
+  category: output
+  driver: robohub-driver-gpio-switch
+  functions:
+    - switch
+  connectors:
+    - name: s
+      signal: digital_out
+      position: 1
+    - name: nc
+      signal: not_connected
+      position: 2
+    - name: gnd
+      signal: ground
+      position: 3
+  pins:
+    s:
+      signal: digital_out
+    nc:
+      signal: not_connected
+    gnd:
+      signal: ground
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public

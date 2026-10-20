@@ -1,0 +1,10 @@
+menu "RoboHub robohub-driver-analog-adc"
+
+config RH_DRV_ANALOG_ADC
+    bool "robohub-driver-analog-adc"
+    select RH_HAL_ADC
+    default n
+    help
+      A input part presenting the analog interface.
+
+endmenu

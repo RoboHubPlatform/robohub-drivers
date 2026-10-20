@@ -52,11 +52,26 @@ board:
   driver: robohub-driver-tone-pwm
   functions:
     - tone
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: s
+      signal: pwm_out
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    s:
+      signal: pwm_out
+  peripherals:
+    - name: pwm
+      instance: pwm
 
 package:
   kind: library

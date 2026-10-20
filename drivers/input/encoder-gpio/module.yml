@@ -1,0 +1,54 @@
+module:
+  name: robohub-driver-encoder-gpio
+  type: driver
+  version: 0.1.0
+  description: >
+    A input part for the RoboHub Platform, presenting the encoder interface.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - encoder
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/encoder_gpio.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - robohub/drivers/input/encoder_gpio.h
+  cmake:
+    target: "rho::robohub-driver-encoder-gpio"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - driver
+    - input
+    - encoder rotary knob
+  stability: experimental
+  visibility: public

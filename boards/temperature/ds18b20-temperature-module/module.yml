@@ -63,12 +63,22 @@ board:
   driver: robohub-driver-ds18b20
   functions:
     - temperature
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
-    - name: DQ
+      position: 2
+    - name: dq
+      signal: onewire
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    dq:
       signal: onewire
   peripherals:
     onewire:

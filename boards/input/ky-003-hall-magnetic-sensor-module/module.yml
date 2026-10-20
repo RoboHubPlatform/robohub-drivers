@@ -1,0 +1,88 @@
+module:
+  name: ky-003-hall-magnetic-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-003 hall magnetic sensor: a solid-state switch that is polarity sensitive.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-button-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/button-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_003_hall_magnetic_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-003-hall-magnetic-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-button-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_003_HALL_MAGNETIC_SENSOR_MODULE
+  device: ky-003-hall-magnetic-sensor
+  category: input
+  driver: robohub-driver-button-gpio
+  functions:
+    - button
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: s
+      signal: digital_in
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    s:
+      signal: digital_in
+      active_low: true
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

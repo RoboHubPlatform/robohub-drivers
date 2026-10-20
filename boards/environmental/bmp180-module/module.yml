@@ -67,18 +67,37 @@ board:
     - temperature
     - pressure
     - altitude
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
-    - name: SDA
+      position: 2
+    - name: sda
       signal: i2c_sda
-    - name: SCL
+      position: 3
+    - name: scl
       signal: i2c_scl
-    - name: SDO
+      position: 4
+    - name: sdo
       signal: spi_sdo
-    - name: CSB
+      position: 5
+    - name: csb
+      signal: spi_cs
+      position: 6
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    sda:
+      signal: i2c_sda
+    scl:
+      signal: i2c_scl
+    sdo:
+      signal: spi_sdo
+    csb:
       signal: spi_cs
   peripherals:
     i2c:

@@ -1,0 +1,10 @@
+menu "RoboHub ky-025-reed-switch module"
+
+config RH_BOARD_KY_025_REED_SWITCH_MODULE
+    bool "ky-025-reed-switch eval board"
+    select RH_DRV_ANALOG-ADC
+    default n
+    help
+      A KY-025 reed switch: a digital contact and an analog output of the field strength.
+
+endmenu

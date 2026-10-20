@@ -153,36 +153,51 @@ no arguments to see what is on offer.
 ## Simple parts and eval boards
 
 Not every part has a protocol. A button, a light sensor, a buzzer, an LED and an
-IR transmitter are a pin or a channel each, and their drivers are the interface
-over that pin: `button-gpio` (a discrete contact), `photoresistor-adc` (a light
-level), `tone-pwm` (a frequency), `rgb-pwm` (a colour) and `infrared-pwm` (a
-mark/space sequence on a carrier). Each is reusable for any part of its kind, and
-each is in the category of what it is — `input`, `output`, `light`.
+infrared transmitter are a pin or a channel each, and their drivers are the
+interface over that pin: `button-gpio` (a discrete contact), `photoresistor-adc`
+(a light level), `thermistor-adc` (a temperature), `analog-adc` (a level),
+`tone-pwm` (a frequency), `rgb-pwm` (a colour), `infrared-pwm` (a mark/space
+sequence on a carrier), `infrared-receiver-gpio` (a decoded code),
+`encoder-gpio` (steps and direction), `pulse-adc` (a rate) and `gpio-switch` (an
+output). Each is reusable for any part of its kind, and each is in the category
+of what it is — `input`, `output`, `light`, `temperature`.
 
-The KY eval boards carry one of those parts and wire it:
+The eval boards carry one of those parts and wire it. Every board's manifest
+carries its **pinout** — the connector positions and what each carries, and the
+polarity where it matters — so a person wiring the board reads it off the board
+rather than off a page:
 
-| Module | Driver | Function |
-|--------|--------|----------|
+| Board | Driver | Function |
+|-------|--------|----------|
 | `boards/input/ky-004-key-switch-module` | `button-gpio` | button |
 | `boards/input/ky-020-tilt-switch-module` | `button-gpio` | button |
 | `boards/input/ky-002-vibration-switch-module` | `button-gpio` | button |
 | `boards/input/ky-031-knock-sensor-module` | `button-gpio` | button |
-| `boards/input/ky-017-mercury-switch-module` | `button-gpio` | button |
+| `boards/input/ky-021-mini-magnetic-reed-switch-module` | `button-gpio` | button |
+| `boards/input/ky-003-hall-magnetic-sensor-module` | `button-gpio` | button |
+| `boards/input/ky-010-photo-interrupter-module` | `button-gpio` | button |
+| `boards/input/ky-025-reed-switch-module` | `analog-adc` | analog, button |
+| `boards/input/ky-022-infrared-receiver-module` | `infrared-receiver-gpio` | infrared |
+| `boards/input/ky-040-rotary-encoder-module` | `encoder-gpio` | encoder |
+| `boards/input/ky-039-heartbeat-sensor-module` | `pulse-adc` | pulse |
 | `boards/output/ky-006-passive-buzzer-module` | `tone-pwm` | tone |
 | `boards/output/ky-011-two-color-led-module` | `rgb-pwm` | color |
 | `boards/output/ky-029-dual-color-led-module` | `rgb-pwm` | color |
 | `boards/output/ky-009-rgb-led-module` | `rgb-pwm` | color |
 | `boards/output/ky-016-rgb-full-color-led-module` | `rgb-pwm` | color |
-| `boards/output/ky-005-ir-transmitter-module` | `infrared-pwm` | infrared |
+| `boards/output/ky-012-active-buzzer-module` | `gpio-switch` | switch |
+| `boards/output/ky-034-automatic-flashing-color-led-module` | `gpio-switch` | color |
+| `boards/output/ky-027-magic-light-cup-module` | `gpio-switch` | switch, button |
 | `boards/light/ky-018-photoresistor-module` | `photoresistor-adc` | light |
+| `boards/temperature/ky-013-analog-temperature-sensor-module` | `thermistor-adc` | temperature |
 
-A board's wiring — which pin, which channel, which polarity — is a macro its BSP
-resolves from the registry, so an application fits the board without repeating
-it.
+A board's support package resolves its interface from the registry and hands it
+to the driver, so an application fits the board without repeating which pin or
+channel it is on. The wiring is a macro, so a board overrides it from the build.
 
 ## Tests
 
-The part drivers have a host test over fake GPIO, PWM, ADC and timer halves under
+The part drivers have host tests over fake GPIO, PWM, ADC and timer halves under
 `tests/`, run with:
 
 ```sh

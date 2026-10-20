@@ -1,0 +1,88 @@
+module:
+  name: ky-021-mini-magnetic-reed-switch-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-021 mini magnetic reed switch: a normally open contact that reads low when a magnet is near.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-button-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/button-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_021_mini_magnetic_reed_switch_module.h
+  cmake:
+    target: "rho::robohub-board-ky-021-mini-magnetic-reed-switch-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-button-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_021_MINI_MAGNETIC_REED_SWITCH_MODULE
+  device: ky-021-mini-magnetic-reed-switch
+  category: input
+  driver: robohub-driver-button-gpio
+  functions:
+    - button
+  connectors:
+    - name: s
+      signal: digital_in
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: gnd
+      signal: ground
+      position: 3
+  pins:
+    s:
+      signal: digital_in
+      active_low: true
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

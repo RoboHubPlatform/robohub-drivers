@@ -1,0 +1,98 @@
+module:
+  name: ky-040-rotary-encoder-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-040 rotary encoder: a knob that turns, with a push switch of its own.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - encoder
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-encoder-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/encoder-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_040_rotary_encoder_module.h
+  cmake:
+    target: "rho::robohub-board-ky-040-rotary-encoder-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-encoder-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_040_ROTARY_ENCODER_MODULE
+  device: ky-040-rotary-encoder
+  category: input
+  driver: robohub-driver-encoder-gpio
+  functions:
+    - encoder
+  connectors:
+    - name: gnd
+      signal: ground
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: sw
+      signal: digital_in
+      position: 3
+    - name: dt
+      signal: digital_in
+      position: 4
+    - name: clk
+      signal: digital_in
+      position: 5
+  pins:
+    gnd:
+      signal: ground
+    vcc:
+      signal: power
+    sw:
+      signal: digital_in
+      active_low: true
+    dt:
+      signal: digital_in
+    clk:
+      signal: digital_in
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

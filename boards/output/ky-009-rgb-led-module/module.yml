@@ -52,11 +52,36 @@ board:
   driver: robohub-driver-rgb-pwm
   functions:
     - color
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: r
+      signal: pwm_out
+      position: 3
+    - name: g
+      signal: pwm_out
+      position: 4
+    - name: b
+      signal: pwm_out
+      position: 5
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    r:
+      signal: pwm_out
+    g:
+      signal: pwm_out
+    b:
+      signal: pwm_out
+  peripherals:
+    - name: pwm
+      instance: pwm
 
 package:
   kind: library

@@ -1,5 +1,5 @@
 /*
- * bsp.c — Support package for the button eval board (ky-031-knock-sensor).
+ * bsp.c — Support package for the ky-031-knock-sensor eval board.
  *
  * The join: the registry holds the platform's interface, the driver holds the
  * part, and this looks the interface up by the name the board was given and

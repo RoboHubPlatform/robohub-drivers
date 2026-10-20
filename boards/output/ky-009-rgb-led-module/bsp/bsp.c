@@ -1,5 +1,5 @@
 /*
- * bsp.c — Support package for the rgb eval board (ky-009-rgb-led).
+ * bsp.c — Support package for the ky-009-rgb-led eval board.
  *
  * The join: the registry holds the platform's interface, the driver holds the
  * part, and this looks the interface up by the name the board was given and
@@ -29,5 +29,5 @@ RoboHubError robohub_ky_009_rgb_led_module_init(RoboHubRgbPwm* dev)
         return ROBOHUB_ERR_NOT_FOUND;
     }
     return robohub_rgb_pwm_init(dev, pwm, (rh_u8)RH_KY_009_RGB_LED_RED, (rh_u8)RH_KY_009_RGB_LED_GREEN,
-                                RH_KY_009_RGB_LED_BLUE_CHANNEL);
+                                (rh_u8)RH_KY_009_RGB_LED_BLUE_CHANNEL);
 }

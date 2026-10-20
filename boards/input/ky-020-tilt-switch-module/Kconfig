@@ -2,7 +2,7 @@ menu "RoboHub ky-020-tilt-switch module"
 
 config RH_BOARD_KY_020_TILT_SWITCH_MODULE
     bool "ky-020-tilt-switch eval board"
-    select RH_DRV_BUTTON_GPIO
+    select RH_DRV_BUTTON-GPIO
     default n
     help
       A KY-020 tilt switch: a ball switch on a GPIO.

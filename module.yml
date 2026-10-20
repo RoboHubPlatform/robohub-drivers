@@ -33,6 +33,9 @@ functions:
   - tone
   - color
   - infrared
+  - analog
+  - encoder
+  - pulse
 
 # What `rho init` can write here. Inline for a repository this small; a larger
 # one points at a generate.yml it keeps beside its sources.

@@ -1,0 +1,95 @@
+module:
+  name: ky-027-magic-light-cup-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-027 magic light cup: a mercury tilt switch and an LED on one small board, sold as a pair.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - switch
+  -  button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-gpio-switch
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/gpio-switch
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_027_magic_light_cup_module.h
+  cmake:
+    target: "rho::robohub-board-ky-027-magic-light-cup-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-gpio-switch
+      - rho::robohub-common
+
+board:
+  designation: KY_027_MAGIC_LIGHT_CUP_MODULE
+  device: ky-027-magic-light-cup
+  category: output
+  driver: robohub-driver-gpio-switch
+  functions:
+    - switch
+    -  button
+  connectors:
+    - name: g
+      signal: ground
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: s
+      signal: digital_in
+      position: 3
+    - name: l
+      signal: digital_out
+      position: 4
+  pins:
+    g:
+      signal: ground
+    vcc:
+      signal: power
+    s:
+      signal: digital_in
+      active_low: true
+    l:
+      signal: digital_out
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public

@@ -2,7 +2,7 @@ menu "RoboHub ky-006-passive-buzzer module"
 
 config RH_BOARD_KY_006_PASSIVE_BUZZER_MODULE
     bool "ky-006-passive-buzzer eval board"
-    select RH_DRV_TONE_PWM
+    select RH_DRV_TONE-PWM
     default n
     help
       A KY-006 passive buzzer on a PWM channel.

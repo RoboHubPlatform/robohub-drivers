@@ -1,0 +1,87 @@
+module:
+  name: ky-034-automatic-flashing-color-led-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-034 seven-colour self-flashing LED: the sequence is inside the LED, so it is switched on and off as a whole.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - color
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-gpio-switch
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/gpio-switch
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_034_automatic_flashing_color_led_module.h
+  cmake:
+    target: "rho::robohub-board-ky-034-automatic-flashing-color-led-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-gpio-switch
+      - rho::robohub-common
+
+board:
+  designation: KY_034_AUTOMATIC_FLASHING_COLOR_LED_MODULE
+  device: ky-034-automatic-flashing-color-led
+  category: output
+  driver: robohub-driver-gpio-switch
+  functions:
+    - color
+  connectors:
+    - name: s
+      signal: digital_out
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: gnd2
+      signal: ground
+      position: 3
+  pins:
+    s:
+      signal: digital_out
+    gnd:
+      signal: ground
+    gnd2:
+      signal: ground
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public

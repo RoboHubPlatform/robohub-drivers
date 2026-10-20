@@ -1,0 +1,54 @@
+module:
+  name: robohub-driver-thermistor-adc
+  type: driver
+  version: 0.1.0
+  description: >
+    A temperature part for the RoboHub Platform, presenting the temperature interface.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - temperature
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/thermistor_adc.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - robohub/drivers/temperature/thermistor_adc.h
+  cmake:
+    target: "rho::robohub-driver-thermistor-adc"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+      - m
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - driver
+    - temperature
+    - thermistor temperature ntc adc
+  stability: experimental
+  visibility: public

@@ -1,0 +1,87 @@
+module:
+  name: ky-035-analog-hall-magnetic-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-035 analog hall sensor: the field it sees as a voltage.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - analog
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-analog-adc
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/analog-adc
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_035_analog_hall_magnetic_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-035-analog-hall-magnetic-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-analog-adc
+      - rho::robohub-common
+
+board:
+  designation: KY_035_ANALOG_HALL_MAGNETIC_SENSOR_MODULE
+  device: ky-035-analog-hall-magnetic-sensor
+  category: input
+  driver: robohub-driver-analog-adc
+  functions:
+    - analog
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: ao
+      signal: analog_in
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    ao:
+      signal: analog_in
+  peripherals:
+    - name: adc
+      instance: adc
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

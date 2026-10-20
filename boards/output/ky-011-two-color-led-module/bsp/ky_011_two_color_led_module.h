@@ -1,20 +1,19 @@
 /*
- * bsp.h — Support package for the rgb eval board (ky-011-two-color-led).
+ * bsp.h — Support package for the ky-011-two-color-led eval board.
  *
  * The board's wiring and the defaults it is reached with. It resolves the
- * interface from the registry and hands it to the driver, so an application
- * fits the board without repeating which pin or channel it is on. The wiring is
- * a macro so a board overrides it from the build.
+ * interface from the registry and hands it to the driver, so an application fits
+ * the board without repeating which pin or channel it is on. The wiring is a
+ * macro so a board overrides it from the build.
  *
  * @project RoboHub Platform
  * @license MIT
  */
 
-#ifndef BOARDS_KY_011_TWO_COLOR_LED_BSP_BSP_H
-#define BOARDS_KY_011_TWO_COLOR_LED_BSP_BSP_H
+#ifndef BOARDS_KY_011_TWO_COLOR_LED_MODULE_H
+#define BOARDS_KY_011_TWO_COLOR_LED_MODULE_H
 
 #ifdef __cplusplus
-extern "C" {
 #endif
 
 #pragma once
@@ -22,7 +21,6 @@ extern "C" {
 #include "types.h"
 #include "error.h"
 #include "robohub/drivers/output/rgb_pwm.h"
-#include "robohub/hal/pwm.h"
 
 #define RH_BOARD_KY_011_TWO_COLOR_LED 1
 
@@ -42,4 +40,4 @@ RoboHubError robohub_ky_011_two_color_led_module_init(RoboHubRgbPwm* dev);
 }
 #endif
 
-#endif /* BOARDS_KY_011_TWO_COLOR_LED_BSP_BSP_H */
+#endif /* BOARDS_KY_011_TWO_COLOR_LED_MODULE_H */

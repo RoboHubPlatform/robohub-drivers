@@ -2,6 +2,14 @@
 
 A KY-002 vibration switch on a GPIO.
 
+## Pinout
+
+| Pin | Carries |
+|-----|---------|
+| vcc | power |
+| gnd | ground |
+| s | digital_in |
+
 ## Driver
 
 `robohub-driver-button-gpio` — see `drivers/input/button-gpio`. Selecting `RH_BOARD_KY_002_VIBRATION_SWITCH_MODULE` brings it in.

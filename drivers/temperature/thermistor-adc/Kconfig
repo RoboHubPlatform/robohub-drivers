@@ -1,0 +1,10 @@
+menu "RoboHub robohub-driver-thermistor-adc"
+
+config RH_DRV_THERMISTOR_ADC
+    bool "robohub-driver-thermistor-adc"
+    select RH_HAL_ADC
+    default n
+    help
+      A temperature part presenting the temperature interface.
+
+endmenu
