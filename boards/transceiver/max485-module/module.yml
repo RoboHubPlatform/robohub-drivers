@@ -52,22 +52,47 @@ board:
   designation: MAX485_MODULE
   device: MAX485
   category: transceiver
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
-    - name: DI
+      position: 2
+    - name: di
       signal: uart_tx
-    - name: RO
+      position: 3
+    - name: ro
       signal: uart_rx
-    - name: DE
+      position: 4
+    - name: de
       signal: gpio
-    - name: RE
+      position: 5
+    - name: re
       signal: gpio
-    - name: A
+      position: 6
+    - name: a
       signal: rs485_a
-    - name: B
+      position: 7
+    - name: b
+      signal: rs485_b
+      position: 8
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    di:
+      signal: uart_tx
+    ro:
+      signal: uart_rx
+    de:
+      signal: gpio
+    re:
+      signal: gpio
+    a:
+      signal: rs485_a
+    b:
       signal: rs485_b
   peripherals:
     uart:

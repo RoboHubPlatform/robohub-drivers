@@ -1,0 +1,10 @@
+menu "RoboHub ky-040-rotary-encoder module"
+
+config RH_BOARD_KY_040_ROTARY_ENCODER_MODULE
+    bool "ky-040-rotary-encoder eval board"
+    select RH_DRV_ENCODER-GPIO
+    default n
+    help
+      A KY-040 rotary encoder: a knob that turns, with a push switch of its own.
+
+endmenu

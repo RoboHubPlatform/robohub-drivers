@@ -1,0 +1,10 @@
+menu "RoboHub ky-012-active-buzzer module"
+
+config RH_BOARD_KY_012_ACTIVE_BUZZER_MODULE
+    bool "ky-012-active-buzzer eval board"
+    select RH_DRV_GPIO-SWITCH
+    default n
+    help
+      A KY-012 active buzzer: it has its own oscillator, so it is driven on and off rather than at a frequency.
+
+endmenu

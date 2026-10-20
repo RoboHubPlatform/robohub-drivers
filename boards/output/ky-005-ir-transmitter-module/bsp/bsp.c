@@ -1,5 +1,5 @@
 /*
- * bsp.c — Support package for the ir_tx eval board (ky-005-ir-transmitter).
+ * bsp.c — Support package for the ky-005-ir-transmitter eval board.
  *
  * The join: the registry holds the platform's interface, the driver holds the
  * part, and this looks the interface up by the name the board was given and

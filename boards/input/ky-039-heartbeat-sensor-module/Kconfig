@@ -1,0 +1,10 @@
+menu "RoboHub ky-039-heartbeat-sensor module"
+
+config RH_BOARD_KY_039_HEARTBEAT_SENSOR_MODULE
+    bool "ky-039-heartbeat-sensor eval board"
+    select RH_DRV_PULSE-ADC
+    default n
+    help
+      A KY-039 heartbeat sensor: a phototransistor that follows the pulse of blood.
+
+endmenu

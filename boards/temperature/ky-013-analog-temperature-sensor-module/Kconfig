@@ -1,0 +1,10 @@
+menu "RoboHub ky-013-analog-temperature-sensor module"
+
+config RH_BOARD_KY_013_ANALOG_TEMPERATURE_SENSOR_MODULE
+    bool "ky-013-analog-temperature-sensor eval board"
+    select RH_DRV_THERMISTOR-ADC
+    default n
+    help
+      A KY-013 analog temperature sensor: a thermistor on an ADC channel.
+
+endmenu

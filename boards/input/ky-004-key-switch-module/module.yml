@@ -52,11 +52,27 @@ board:
   driver: robohub-driver-button-gpio
   functions:
     - button
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: s
+      signal: digital_in
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    s:
+      signal: digital_in
+      active_low: true
+  peripherals:
+    - name: gpio
+      instance: gpio
 
 package:
   kind: library

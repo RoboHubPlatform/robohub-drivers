@@ -1,5 +1,5 @@
 /*
- * bsp.c — Support package for the buzzer eval board (ky-006-passive-buzzer).
+ * bsp.c — Support package for the ky-006-passive-buzzer eval board.
  *
  * The join: the registry holds the platform's interface, the driver holds the
  * part, and this looks the interface up by the name the board was given and

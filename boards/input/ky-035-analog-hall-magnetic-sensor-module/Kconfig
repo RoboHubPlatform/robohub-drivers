@@ -1,0 +1,10 @@
+menu "RoboHub ky-035-analog-hall-magnetic-sensor module"
+
+config RH_BOARD_KY_035_ANALOG_HALL_MAGNETIC_SENSOR_MODULE
+    bool "ky-035-analog-hall-magnetic-sensor eval board"
+    select RH_DRV_ANALOG-ADC
+    default n
+    help
+      A KY-035 analog hall sensor: the field it sees as a voltage.
+
+endmenu

@@ -2,7 +2,7 @@ menu "RoboHub ky-009-rgb-led module"
 
 config RH_BOARD_KY_009_RGB_LED_MODULE
     bool "ky-009-rgb-led eval board"
-    select RH_DRV_RGB_PWM
+    select RH_DRV_RGB-PWM
     default n
     help
       A KY-009 RGB full-colour LED on three PWM channels.

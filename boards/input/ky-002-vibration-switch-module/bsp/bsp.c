@@ -1,5 +1,5 @@
 /*
- * bsp.c — Support package for the button eval board (ky-002-vibration-switch).
+ * bsp.c — Support package for the ky-002-vibration-switch eval board.
  *
  * The join: the registry holds the platform's interface, the driver holds the
  * part, and this looks the interface up by the name the board was given and

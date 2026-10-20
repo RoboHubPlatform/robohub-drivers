@@ -1,0 +1,10 @@
+menu "RoboHub ky-003-hall-magnetic-sensor module"
+
+config RH_BOARD_KY_003_HALL_MAGNETIC_SENSOR_MODULE
+    bool "ky-003-hall-magnetic-sensor eval board"
+    select RH_DRV_BUTTON-GPIO
+    default n
+    help
+      A KY-003 hall magnetic sensor: a solid-state switch that is polarity sensitive.
+
+endmenu

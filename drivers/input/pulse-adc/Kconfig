@@ -1,0 +1,11 @@
+menu "RoboHub robohub-driver-pulse-adc"
+
+config RH_DRV_PULSE_ADC
+    bool "robohub-driver-pulse-adc"
+    select RH_HAL_ADC
+    select RH_HAL_TIMER
+    default n
+    help
+      A input part presenting the pulse interface.
+
+endmenu

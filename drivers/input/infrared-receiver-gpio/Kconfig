@@ -1,0 +1,11 @@
+menu "RoboHub robohub-driver-infrared-receiver-gpio"
+
+config RH_DRV_INFRARED_RECEIVER_GPIO
+    bool "robohub-driver-infrared-receiver-gpio"
+    select RH_HAL_GPIO
+    select RH_HAL_TIMER
+    default n
+    help
+      A input part presenting the infrared interface.
+
+endmenu

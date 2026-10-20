@@ -1,0 +1,10 @@
+menu "RoboHub ky-010-photo-interrupter module"
+
+config RH_BOARD_KY_010_PHOTO_INTERRUPTER_MODULE
+    bool "ky-010-photo-interrupter eval board"
+    select RH_DRV_BUTTON-GPIO
+    default n
+    help
+      A KY-010 photo interrupter: a light barrier whose output changes when the beam is broken.
+
+endmenu

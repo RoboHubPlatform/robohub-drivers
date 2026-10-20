@@ -1,0 +1,10 @@
+menu "RoboHub robohub-driver-encoder-gpio"
+
+config RH_DRV_ENCODER_GPIO
+    bool "robohub-driver-encoder-gpio"
+    select RH_HAL_GPIO
+    default n
+    help
+      A input part presenting the encoder interface.
+
+endmenu

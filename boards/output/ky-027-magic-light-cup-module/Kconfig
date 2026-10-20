@@ -1,0 +1,10 @@
+menu "RoboHub ky-027-magic-light-cup module"
+
+config RH_BOARD_KY_027_MAGIC_LIGHT_CUP_MODULE
+    bool "ky-027-magic-light-cup eval board"
+    select RH_DRV_GPIO-SWITCH
+    default n
+    help
+      A KY-027 magic light cup: a mercury tilt switch and an LED on one small board, sold as a pair.
+
+endmenu

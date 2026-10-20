@@ -52,11 +52,26 @@ board:
   driver: robohub-driver-photoresistor-adc
   functions:
     - light
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: ao
+      signal: analog_in
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    ao:
+      signal: analog_in
+  peripherals:
+    - name: adc
+      instance: adc
 
 package:
   kind: library

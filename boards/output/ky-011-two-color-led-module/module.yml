@@ -3,7 +3,7 @@ module:
   type: driver-board
   version: 0.1.0
   description: >
-    A KY-011 two-colour LED on two PWM channels.
+    A KY-011 two-colour LED on two PWM channels: red and green, with no blue.
   maintainer: "Aurel Miron"
   license: "MIT"
   created: "2026-10-20"
@@ -52,11 +52,31 @@ board:
   driver: robohub-driver-rgb-pwm
   functions:
     - color
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: r
+      signal: pwm_out
+      position: 3
+    - name: g
+      signal: pwm_out
+      position: 4
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    r:
+      signal: pwm_out
+    g:
+      signal: pwm_out
+  peripherals:
+    - name: pwm
+      instance: pwm
 
 package:
   kind: library

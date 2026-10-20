@@ -65,13 +65,23 @@ board:
   functions:
     - temperature
     - humidity
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: DATA
-      signal: single_wire
-    - name: GND
+      position: 1
+    - name: gnd
       signal: ground
+      position: 2
+    - name: data
+      signal: digital_io
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    data:
+      signal: digital_io
   peripherals:
     dht:
       - name: dht0

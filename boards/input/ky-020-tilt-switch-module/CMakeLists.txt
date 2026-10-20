@@ -25,6 +25,7 @@ function(robohub_locate_module module out_var)
     set(dir "${parent}")
   endforeach()
   include(FetchContent)
+  message(STATUS "[${PROJECT_NAME}] fetching ${module}")
   FetchContent_Declare(${module}
     GIT_REPOSITORY "https://github.com/RoboHubPlatform/${module}.git"
     GIT_TAG main GIT_SHALLOW TRUE GIT_PROGRESS TRUE)
