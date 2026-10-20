@@ -1,0 +1,10 @@
+menu "RoboHub ky-028-digital-temperature-sensor module"
+
+config RH_BOARD_KY_028_DIGITAL_TEMPERATURE_SENSOR_MODULE
+    bool "ky-028-digital-temperature-sensor eval board"
+    select RH_DRV_BUTTON-GPIO
+    default n
+    help
+      A KY-028 digital temperature sensor: a thermistor and a comparator, which says when the temperature crosses the threshold its trimmer sets. Its analog output is a relative reading, not a temperature, so the threshold is the part that is used.
+
+endmenu

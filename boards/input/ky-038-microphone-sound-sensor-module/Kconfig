@@ -1,0 +1,10 @@
+menu "RoboHub ky-038-microphone-sound-sensor module"
+
+config RH_BOARD_KY_038_MICROPHONE_SOUND_SENSOR_MODULE
+    bool "ky-038-microphone-sound-sensor eval board"
+    select RH_DRV_ANALOG-ADC
+    default n
+    help
+      A KY-038 microphone sound sensor: the sound at the microphone as a level.
+
+endmenu

@@ -1,0 +1,11 @@
+menu "RoboHub ky-023-joystick-dual-axis module"
+
+config RH_BOARD_KY_023_JOYSTICK_DUAL_AXIS_MODULE
+    bool "ky-023-joystick-dual-axis eval board"
+    select RH_DRV_ANALOG_ADC
+    select RH_DRV_BUTTON_GPIO
+    default n
+    help
+      A KY-023 dual-axis joystick: two potentiometers and a push switch.
+
+endmenu

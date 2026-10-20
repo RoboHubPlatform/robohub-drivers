@@ -1,0 +1,10 @@
+menu "RoboHub ky-008-laser-transmitter module"
+
+config RH_BOARD_KY_008_LASER_TRANSMITTER_MODULE
+    bool "ky-008-laser-transmitter eval board"
+    select RH_DRV_GPIO-SWITCH
+    default n
+    help
+      A KY-008 laser transmitter: a diode you light by driving its signal.
+
+endmenu

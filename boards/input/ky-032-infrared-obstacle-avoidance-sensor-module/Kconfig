@@ -1,0 +1,10 @@
+menu "RoboHub ky-032-infrared-obstacle-avoidance-sensor module"
+
+config RH_BOARD_KY_032_INFRARED_OBSTACLE_AVOIDANCE_SENSOR_MODULE
+    bool "ky-032-infrared-obstacle-avoidance-sensor eval board"
+    select RH_DRV_BUTTON-GPIO
+    default n
+    help
+      A KY-032 infrared obstacle-avoidance sensor: it says whether something is in front of it.
+
+endmenu

@@ -1,0 +1,10 @@
+menu "RoboHub ky-001-temperature-sensor module"
+
+config RH_BOARD_KY_001_TEMPERATURE_SENSOR_MODULE
+    bool "ky-001-temperature-sensor eval board"
+    select RH_DRV_DS18B20
+    default n
+    help
+      A KY-001 temperature sensor: a DS18B20 on a 1-Wire bus.
+
+endmenu
