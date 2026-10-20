@@ -1,0 +1,10 @@
+menu "RoboHub ky-018-photoresistor module"
+
+config RH_BOARD_KY_018_PHOTORESISTOR_MODULE
+    bool "ky-018-photoresistor eval board"
+    select RH_DRV_PHOTORESISTOR_ADC
+    default n
+    help
+      A KY-018 photoresistor on an ADC channel.
+
+endmenu

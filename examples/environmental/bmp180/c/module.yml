@@ -38,7 +38,7 @@ depends:
     branch: main
   - name: bmp180-module
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/boards/bmp180-module
+    path: ${RHO_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module
   - name: robohub-driver-bmp180
     type: c
     path: ${RHO_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180
@@ -52,7 +52,7 @@ c_connection:
   headers:
     - platform.h
     - console.h
-    - bsp.h
+    - bmp180_module.h
     - bmp180.h
     - bus.h
     - registry.h
@@ -67,7 +67,7 @@ c_connection:
     - ${RHO_WORKSPACE}/robohub-pico/include/robohub/hal
     - ${RHO_WORKSPACE}/robohub-pico/include/robohub/platform
     - ${RHO_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180/inc
-    - ${RHO_WORKSPACE}/robohub-drivers/boards/bmp180-module/bsp
+    - ${RHO_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module/bsp
   variants:
     pico2w:
       target: "robohub-board-bmp180-module"

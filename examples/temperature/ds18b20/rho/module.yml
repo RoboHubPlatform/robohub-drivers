@@ -39,7 +39,7 @@ depends:
     branch: main
   - name: ds18b20-temperature-module
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/boards/ds18b20-temperature-module
+    path: ${RHO_WORKSPACE}/robohub-drivers/boards/temperature/ds18b20-temperature-module
   - name: robohub-driver-ds18b20
     type: c
     path: ${RHO_WORKSPACE}/robohub-drivers/drivers/temperature/ds18b20
@@ -50,7 +50,7 @@ c_connection:
   library: "robohub-pico"
   headers:
     - platform.h
-    - bsp.h
+    - ds18b20_temperature_module.h
     - ds18b20.h
   include_dirs:
     - ${RHO_WORKSPACE}/robohub-pico/include
@@ -60,7 +60,7 @@ c_connection:
     - ${RHO_WORKSPACE}/robohub-common/include/robohub/hal
     - ${RHO_WORKSPACE}/robohub-common/include/robohub/drivers
     - ${RHO_WORKSPACE}/robohub-drivers/drivers/temperature/ds18b20/inc
-    - ${RHO_WORKSPACE}/robohub-drivers/boards/ds18b20-temperature-module/bsp
+    - ${RHO_WORKSPACE}/robohub-drivers/boards/temperature/ds18b20-temperature-module/bsp
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"

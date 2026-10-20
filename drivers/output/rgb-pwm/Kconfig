@@ -1,0 +1,9 @@
+menu "RoboHub robohub-driver-rgb-pwm"
+
+config RH_DRV_RGB_PWM
+    bool "robohub-driver-rgb-pwm"
+    select RH_HAL_PWM\n    default n
+    help
+      A robohub-driver-rgb-pwm part.
+
+endmenu

@@ -1,0 +1,10 @@
+menu "RoboHub ky-011-two-color-led module"
+
+config RH_BOARD_KY_011_TWO_COLOR_LED_MODULE
+    bool "ky-011-two-color-led eval board"
+    select RH_DRV_RGB_PWM
+    default n
+    help
+      A KY-011 two-colour LED on two PWM channels.
+
+endmenu

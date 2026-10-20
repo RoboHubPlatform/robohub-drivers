@@ -1,0 +1,10 @@
+menu "RoboHub ky-004-key-switch module"
+
+config RH_BOARD_KY_004_KEY_SWITCH_MODULE
+    bool "ky-004-key-switch eval board"
+    select RH_DRV_BUTTON_GPIO
+    default n
+    help
+      A KY-004 key switch: a push-button on a GPIO.
+
+endmenu

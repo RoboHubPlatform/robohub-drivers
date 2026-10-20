@@ -1,0 +1,10 @@
+menu "RoboHub ky-005-ir-transmitter module"
+
+config RH_BOARD_KY_005_IR_TRANSMITTER_MODULE
+    bool "ky-005-ir-transmitter eval board"
+    select RH_DRV_INFRARED_PWM
+    default n
+    help
+      A KY-005 infrared transmitter on a PWM channel.
+
+endmenu

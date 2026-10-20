@@ -1,0 +1,9 @@
+menu "RoboHub robohub-driver-photoresistor-adc"
+
+config RH_DRV_PHOTORESISTOR_ADC
+    bool "robohub-driver-photoresistor-adc"
+    select RH_HAL_ADC\n    default n
+    help
+      A robohub-driver-photoresistor-adc part.
+
+endmenu

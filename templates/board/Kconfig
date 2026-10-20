@@ -1,0 +1,12 @@
+menu "RoboHub {{name}} module"
+
+config RH_BOARD_{{name}}_MODULE
+    bool "{{name}} eval board"
+    select RH_DRV_{{name}}
+    default n
+    help
+      The {{name}} eval board. Selecting it brings in the driver and the bus
+      the board needs; an application that does not fit the board pays for none
+      of it.
+
+endmenu

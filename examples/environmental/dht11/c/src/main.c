@@ -17,7 +17,7 @@
 #include "types.h"
 #include "error.h"
 #include "robohub/hal/console.h"
-#include "bsp.h"
+#include "dht11_module.h"
 
 #define REPORT_PERIOD_MS 2000u
 

@@ -85,7 +85,7 @@ drivers/<category>/<device>/
     Kconfig         the symbol that switches it on in an application
     CMakeLists.txt
 
-boards/<module>/
+boards/<category>/<module>/
     bsp/            the module's registry layer: bind the bus, configure the part
     module.yml
     Kconfig
@@ -149,3 +149,42 @@ example under `examples/<category>/<name>/c`. The templates are in `templates/`,
 and `{{name}}`, `{{category}}`, `{{functions}}` and `{{description}}` are
 substituted in the file names and their contents. Run `rho init --project .` with
 no arguments to see what is on offer.
+
+## Simple parts and eval boards
+
+Not every part has a protocol. A button, a light sensor, a buzzer, an LED and an
+IR transmitter are a pin or a channel each, and their drivers are the interface
+over that pin: `button-gpio` (a discrete contact), `photoresistor-adc` (a light
+level), `tone-pwm` (a frequency), `rgb-pwm` (a colour) and `infrared-pwm` (a
+mark/space sequence on a carrier). Each is reusable for any part of its kind, and
+each is in the category of what it is — `input`, `output`, `light`.
+
+The KY eval boards carry one of those parts and wire it:
+
+| Module | Driver | Function |
+|--------|--------|----------|
+| `boards/input/ky-004-key-switch-module` | `button-gpio` | button |
+| `boards/input/ky-020-tilt-switch-module` | `button-gpio` | button |
+| `boards/input/ky-002-vibration-switch-module` | `button-gpio` | button |
+| `boards/input/ky-031-knock-sensor-module` | `button-gpio` | button |
+| `boards/input/ky-017-mercury-switch-module` | `button-gpio` | button |
+| `boards/output/ky-006-passive-buzzer-module` | `tone-pwm` | tone |
+| `boards/output/ky-011-two-color-led-module` | `rgb-pwm` | color |
+| `boards/output/ky-029-dual-color-led-module` | `rgb-pwm` | color |
+| `boards/output/ky-009-rgb-led-module` | `rgb-pwm` | color |
+| `boards/output/ky-016-rgb-full-color-led-module` | `rgb-pwm` | color |
+| `boards/output/ky-005-ir-transmitter-module` | `infrared-pwm` | infrared |
+| `boards/light/ky-018-photoresistor-module` | `photoresistor-adc` | light |
+
+A board's wiring — which pin, which channel, which polarity — is a macro its BSP
+resolves from the registry, so an application fits the board without repeating
+it.
+
+## Tests
+
+The part drivers have a host test over fake GPIO, PWM, ADC and timer halves under
+`tests/`, run with:
+
+```sh
+ROBOHUB_COMMON_DIR=/path/to/robohub-common tests/run.sh
+```

@@ -1,0 +1,9 @@
+menu "RoboHub robohub-driver-infrared-pwm"
+
+config RH_DRV_INFRARED_PWM
+    bool "robohub-driver-infrared-pwm"
+    select RH_HAL_PWM\n    select RH_HAL_TIMER\n    default n
+    help
+      A robohub-driver-infrared-pwm part.
+
+endmenu
