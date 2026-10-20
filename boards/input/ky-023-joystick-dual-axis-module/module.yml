@@ -1,0 +1,104 @@
+module:
+  name: ky-023-joystick-dual-axis-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-023 dual-axis joystick: two potentiometers and a push switch.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - analog
+  - button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-analog-adc
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/analog-adc
+  - name: robohub-driver-button-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/button-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_023_joystick_dual_axis_module.h
+  cmake:
+    target: "rho::robohub-board-ky-023-joystick-dual-axis-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-analog-adc
+      - rho::robohub-driver-button-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_023_JOYSTICK_DUAL_AXIS_MODULE
+  device: ky-023-joystick-dual-axis
+  category: input
+  driver: robohub-driver-analog-adc
+  functions:
+    - analog
+    - button
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: x
+      signal: analog_in
+      position: 3
+    - name: y
+      signal: analog_in
+      position: 4
+    - name: sw
+      signal: digital_in
+      position: 5
+  pins:
+    x:
+      signal: analog_in
+      comment: the horizontal axis, a potentiometer
+    y:
+      signal: analog_in
+      comment: the vertical axis, a potentiometer
+    sw:
+      signal: digital_in
+      comment: the push switch, closed to ground
+  peripherals:
+    - name: adc0
+      instance: adc0
+    - name: gpio0
+      instance: gpio0
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

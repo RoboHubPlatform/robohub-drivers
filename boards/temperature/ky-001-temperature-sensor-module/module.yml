@@ -1,0 +1,89 @@
+module:
+  name: ky-001-temperature-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-001 temperature sensor: a DS18B20 on a 1-Wire bus.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - temperature
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-ds18b20
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_001_temperature_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-001-temperature-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-ds18b20
+      - rho::robohub-common
+
+board:
+  designation: KY_001_TEMPERATURE_SENSOR_MODULE
+  device: ky-001-temperature-sensor
+  category: temperature
+  driver: robohub-driver-ds18b20
+  functions:
+    - temperature
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: dq
+      signal: onewire
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    dq:
+      signal: onewire
+  peripherals:
+    - name: onewire
+      instance: onewire
+    - name: timer
+      instance: timer
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - temperature
+  stability: experimental
+  visibility: public

@@ -190,10 +190,32 @@ rather than off a page:
 | `boards/output/ky-027-magic-light-cup-module` | `gpio-switch` | switch, button |
 | `boards/light/ky-018-photoresistor-module` | `photoresistor-adc` | light |
 | `boards/temperature/ky-013-analog-temperature-sensor-module` | `thermistor-adc` | temperature |
+| `boards/temperature/ky-001-temperature-sensor-module` | `ds18b20` | temperature |
+| `boards/temperature/ky-028-digital-temperature-sensor-module` | `button-gpio` | button |
+| `boards/environmental/ky-015-temperature-humidity-sensor-module` | `dht11` | temperature, humidity |
+| `boards/input/ky-032-infrared-obstacle-avoidance-sensor-module` | `button-gpio` | button |
+| `boards/input/ky-033-line-tracking-sensor-module` | `button-gpio` | button |
+| `boards/input/ky-036-metal-touch-sensor-module` | `button-gpio` | button |
+| `boards/input/ky-023-joystick-dual-axis-module` | `analog-adc`, `button-gpio` | analog, button |
+| `boards/input/ky-024-linear-magnetic-hall-module` | `analog-adc` | analog |
+| `boards/input/ky-026-flame-sensor-module` | `analog-adc` | analog |
+| `boards/input/ky-037-microphone-sound-sensor-module` | `analog-adc` | analog |
+| `boards/input/ky-038-microphone-sound-sensor-module` | `analog-adc` | analog |
+| `boards/output/ky-008-laser-transmitter-module` | `gpio-switch` | switch |
+| `boards/output/ky-019-5v-relay-module` | `gpio-switch` | switch |
 
 A board's support package resolves its interface from the registry and hands it
 to the driver, so an application fits the board without repeating which pin or
 channel it is on. The wiring is a macro, so a board overrides it from the build.
+A board may carry more than one part — the joystick carries two axes and a
+switch — and binds each of them.
+
+Some of these parts are not what their name suggests, and the manufacturer's
+sheet is the one that says so: the KY-019 relay is **active-HIGH** (the opposite
+of the blue optocoupler boards), the KY-012 buzzer's middle pin is not
+connected, the KY-015 is a DHT11 and the KY-001 a DS18B20, the KY-028's analog
+output is a relative reading and its useful half is the threshold switch, and the
+KY-034 flashes by itself and can only be switched on and off.
 
 ## Tests
 

@@ -1,0 +1,87 @@
+module:
+  name: ky-037-microphone-sound-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-037 microphone sound sensor: the sound at the microphone as a level.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - analog
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-analog-adc
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/analog-adc
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_037_microphone_sound_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-037-microphone-sound-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-analog-adc
+      - rho::robohub-common
+
+board:
+  designation: KY_037_MICROPHONE_SOUND_SENSOR_MODULE
+  device: ky-037-microphone-sound-sensor
+  category: input
+  driver: robohub-driver-analog-adc
+  functions:
+    - analog
+  connectors:
+    - name: sig
+      signal: analog_in
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: gnd
+      signal: ground
+      position: 3
+  pins:
+    sig:
+      signal: analog_in
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+  peripherals:
+    - name: adc
+      instance: adc
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

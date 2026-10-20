@@ -1,0 +1,10 @@
+menu "RoboHub ky-019-5v-relay module"
+
+config RH_BOARD_KY_019_5V_RELAY_MODULE
+    bool "ky-019-5v-relay eval board"
+    select RH_DRV_GPIO-SWITCH
+    default n
+    help
+      A KY-019 5V relay: one channel that switches a load. It is active-HIGH — the relay pulls in when the signal is high, the opposite of the blue optocoupler boards.
+
+endmenu

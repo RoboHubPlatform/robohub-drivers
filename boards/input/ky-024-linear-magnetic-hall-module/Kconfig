@@ -1,0 +1,10 @@
+menu "RoboHub ky-024-linear-magnetic-hall module"
+
+config RH_BOARD_KY_024_LINEAR_MAGNETIC_HALL_MODULE
+    bool "ky-024-linear-magnetic-hall eval board"
+    select RH_DRV_ANALOG-ADC
+    default n
+    help
+      A KY-024 linear magnetic hall sensor: the field it sees as a voltage.
+
+endmenu

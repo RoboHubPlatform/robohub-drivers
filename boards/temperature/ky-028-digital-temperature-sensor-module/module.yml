@@ -1,0 +1,92 @@
+module:
+  name: ky-028-digital-temperature-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-028 digital temperature sensor: a thermistor and a comparator, which says when the temperature crosses the threshold its trimmer sets. Its analog output is a relative reading, not a temperature, so the threshold is the part that is used.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-button-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/button-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_028_digital_temperature_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-028-digital-temperature-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-button-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_028_DIGITAL_TEMPERATURE_SENSOR_MODULE
+  device: ky-028-digital-temperature-sensor
+  category: temperature
+  driver: robohub-driver-button-gpio
+  functions:
+    - button
+  connectors:
+    - name: g
+      signal: ground
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: ao
+      signal: analog_in
+      position: 3
+    - name: d0
+      signal: digital_in
+      position: 4
+  pins:
+    g:
+      signal: ground
+    vcc:
+      signal: power
+    ao:
+      signal: analog_in
+    d0:
+      signal: digital_in
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - temperature
+  stability: experimental
+  visibility: public

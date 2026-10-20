@@ -1,0 +1,10 @@
+menu "RoboHub ky-036-metal-touch-sensor module"
+
+config RH_BOARD_KY_036_METAL_TOUCH_SENSOR_MODULE
+    bool "ky-036-metal-touch-sensor eval board"
+    select RH_DRV_BUTTON-GPIO
+    default n
+    help
+      A KY-036 metal-touch sensor: a capacitive pad that says when it is touched.
+
+endmenu

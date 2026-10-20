@@ -1,0 +1,87 @@
+module:
+  name: ky-033-line-tracking-sensor-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-033 line-tracking sensor: one reflective detector that says whether it is over a dark line.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - button
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-button-gpio
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/input/button-gpio
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_033_line_tracking_sensor_module.h
+  cmake:
+    target: "rho::robohub-board-ky-033-line-tracking-sensor-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-button-gpio
+      - rho::robohub-common
+
+board:
+  designation: KY_033_LINE_TRACKING_SENSOR_MODULE
+  device: ky-033-line-tracking-sensor
+  category: input
+  driver: robohub-driver-button-gpio
+  functions:
+    - button
+  connectors:
+    - name: gnd
+      signal: ground
+      position: 1
+    - name: out
+      signal: digital_in
+      position: 2
+    - name: vcc
+      signal: power
+      position: 3
+  pins:
+    gnd:
+      signal: ground
+    out:
+      signal: digital_in
+    vcc:
+      signal: power
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - input
+  stability: experimental
+  visibility: public

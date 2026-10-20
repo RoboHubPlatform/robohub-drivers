@@ -1,0 +1,87 @@
+module:
+  name: ky-008-laser-transmitter-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-008 laser transmitter: a diode you light by driving its signal.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - switch
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-gpio-switch
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/gpio-switch
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_008_laser_transmitter_module.h
+  cmake:
+    target: "rho::robohub-board-ky-008-laser-transmitter-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-gpio-switch
+      - rho::robohub-common
+
+board:
+  designation: KY_008_LASER_TRANSMITTER_MODULE
+  device: ky-008-laser-transmitter
+  category: output
+  driver: robohub-driver-gpio-switch
+  functions:
+    - switch
+  connectors:
+    - name: s
+      signal: digital_out
+      position: 1
+    - name: vcc
+      signal: power
+      position: 2
+    - name: gnd
+      signal: ground
+      position: 3
+  pins:
+    s:
+      signal: digital_out
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+  peripherals:
+    - name: gpio
+      instance: gpio
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public
