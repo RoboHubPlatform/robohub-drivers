@@ -17,7 +17,7 @@
 #include "types.h"
 #include "error.h"
 #include "robohub/hal/console.h"
-#include "bsp.h"
+#include "bmp180_module.h"
 
 #define REPORT_PERIOD_MS 1500u
 

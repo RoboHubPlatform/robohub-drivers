@@ -41,7 +41,7 @@ depends:
     branch: main
   - name: bmp180-module
     type: c
-    path: /home/miraur/projects/robohub-drivers/boards/bmp180-module
+    path: /home/miraur/projects/robohub-drivers/boards/environmental/bmp180-module
   - name: robohub-driver-bmp180
     type: c
     path: /home/miraur/projects/robohub-drivers/drivers/environmental/bmp180
@@ -53,7 +53,7 @@ c_connection:
   library: "robohub-pico"
   headers:
     - platform.h
-    - bsp.h
+    - bmp180_module.h
     - bmp180.h
     - bus.h
     - registry.h
@@ -68,7 +68,7 @@ c_connection:
     - /home/miraur/projects/robohub-common/include/robohub/hal
     - /home/miraur/projects/robohub-common/include/robohub/drivers
     - /home/miraur/projects/robohub-drivers/drivers/environmental/bmp180/inc
-    - /home/miraur/projects/robohub-drivers/boards/bmp180-module/bsp
+    - /home/miraur/projects/robohub-drivers/boards/environmental/bmp180-module/bsp
   variants:
     pico2w:
       target: "robohub-board-bmp180-module"

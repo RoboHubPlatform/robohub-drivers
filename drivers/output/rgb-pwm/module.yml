@@ -1,0 +1,57 @@
+module:
+  name: robohub-driver-rgb-pwm
+  type: driver
+  version: 0.1.0
+  description: >
+    A robohub-driver-rgb-pwm part for the RoboHub Platform, presenting the color interface.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - color
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/rgb_pwm.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - robohub/drivers/output/rgb_pwm.h
+  cmake:
+    target: "rho::robohub-driver-rgb-pwm"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - output
+    - color
+    - rgb
+    - led
+    - pwm
+    - driver
+  stability: experimental
+  visibility: public

@@ -39,7 +39,7 @@ depends:
     branch: main
   - name: ds18b20-temperature-module
     type: c
-    path: /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module
+    path: /home/miraur/projects/robohub-drivers/boards/temperature/ds18b20-temperature-module
   - name: robohub-driver-ds18b20
     type: c
     path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
@@ -50,7 +50,7 @@ c_connection:
   library: "robohub-pico"
   headers:
     - platform.h
-    - bsp.h
+    - ds18b20_temperature_module.h
     - ds18b20.h
   include_dirs:
     - /home/miraur/projects/robohub-pico/include
@@ -60,7 +60,7 @@ c_connection:
     - /home/miraur/projects/robohub-common/include/robohub/hal
     - /home/miraur/projects/robohub-common/include/robohub/drivers
     - /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20/inc
-    - /home/miraur/projects/robohub-drivers/boards/ds18b20-temperature-module/bsp
+    - /home/miraur/projects/robohub-drivers/boards/temperature/ds18b20-temperature-module/bsp
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"

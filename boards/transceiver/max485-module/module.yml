@@ -1,0 +1,97 @@
+#
+# max485-module — MAX485 RS485 transceiver carrier.
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: max485-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    Support package for a MAX485 (or MAX3485, SN75176) RS485 transceiver
+    carrier: it binds the UART the transceiver is wired to and the GPIO its
+    direction pin is on into a RoboHubRS485, so a board without native RS485
+    gets one by fitting the module.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-14"
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/max485_module.h
+  cmake:
+    target: "rho::robohub-board-max485-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-common
+
+board:
+  designation: MAX485_MODULE
+  device: MAX485
+  category: transceiver
+  connector:
+    - name: VCC
+      signal: power
+    - name: GND
+      signal: ground
+    - name: DI
+      signal: uart_tx
+    - name: RO
+      signal: uart_rx
+    - name: DE
+      signal: gpio
+    - name: RE
+      signal: gpio
+    - name: A
+      signal: rs485_a
+    - name: B
+      signal: rs485_b
+  peripherals:
+    uart:
+      - name: uart1
+        signal: DI
+    gpio:
+      - name: gpio0
+        signal: DE
+  defaults:
+    uart: uart1
+    de_pin: 20
+    de_active_high: true
+    baud: 9600
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - transceiver
+    - rs485
+    - max485
+    - modbus
+  stability: experimental
+  visibility: public

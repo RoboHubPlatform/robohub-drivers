@@ -1,0 +1,72 @@
+module:
+  name: ky-009-rgb-led-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-009 RGB full-colour LED on three PWM channels.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - color
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-rgb-pwm
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/rgb-pwm
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_009_rgb_led_module.h
+  cmake:
+    target: "rho::robohub-board-ky-009-rgb-led-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-rgb-pwm
+      - rho::robohub-common
+
+board:
+  designation: KY_009_RGB_LED_MODULE
+  device: ky-009-rgb-led
+  category: output
+  driver: robohub-driver-rgb-pwm
+  functions:
+    - color
+  connector:
+    - name: VCC
+      signal: power
+    - name: GND
+      signal: ground
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public

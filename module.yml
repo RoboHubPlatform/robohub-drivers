@@ -28,12 +28,17 @@ functions:
   - pressure
   - altitude
   - humidity
+  - button
+  - light
+  - tone
+  - color
+  - infrared
 
 # What `rho init` can write here. Inline for a repository this small; a larger
 # one points at a generate.yml it keeps beside its sources.
 generate:
   - name: driver
-    description: A new device driver, and the example that uses it
+    description: A new device driver, the eval board that carries it, and the example that uses it
     variables:
       - name: category
         description: The category the driver belongs to, such as temperature
@@ -44,5 +49,9 @@ generate:
     outputs:
       - path: drivers/{{category}}/{{name}}
         template: templates/driver
+      # A board sits under the same category as the driver it carries, so the
+      # three trees — drivers, boards, examples — are indexed the same way.
+      - path: boards/{{category}}/{{name}}-module
+        template: templates/board
       - path: examples/{{category}}/{{name}}/c
         template: templates/example

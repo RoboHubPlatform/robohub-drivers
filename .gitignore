@@ -1,5 +1,6 @@
 # CMake build output
 build/
+build/output
 build-*/
 cmake-build-*/
 CMakeFiles/
@@ -12,7 +13,6 @@ Makefile
 # Generated configuration and staging output
 generated/
 stage/
-output/
 
 # Python caches
 __pycache__/

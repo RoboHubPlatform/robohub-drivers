@@ -1,0 +1,55 @@
+module:
+  name: robohub-driver-photoresistor-adc
+  type: driver
+  version: 0.1.0
+  description: >
+    A robohub-driver-photoresistor-adc part for the RoboHub Platform, presenting the light interface.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - light
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/photoresistor_adc.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - robohub/drivers/light/photoresistor_adc.h
+  cmake:
+    target: "rho::robohub-driver-photoresistor-adc"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - light
+    - photoresistor
+    - adc
+    - driver
+  stability: experimental
+  visibility: public

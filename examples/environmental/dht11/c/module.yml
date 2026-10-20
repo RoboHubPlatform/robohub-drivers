@@ -37,7 +37,7 @@ depends:
     branch: main
   - name: dht11-module
     type: c
-    path: /home/miraur/projects/robohub-drivers/boards/dht11-module
+    path: /home/miraur/projects/robohub-drivers/boards/environmental/dht11-module
   - name: robohub-driver-dht11
     type: c
     path: /home/miraur/projects/robohub-drivers/drivers/environmental/dht11
@@ -51,7 +51,7 @@ c_connection:
   headers:
     - platform.h
     - console.h
-    - bsp.h
+    - dht11_module.h
     - dht11.h
     - dht.h
     - registry.h
@@ -66,7 +66,7 @@ c_connection:
     - /home/miraur/projects/robohub-pico/include/robohub/hal
     - /home/miraur/projects/robohub-pico/include/robohub/platform
     - /home/miraur/projects/robohub-drivers/drivers/environmental/dht11/inc
-    - /home/miraur/projects/robohub-drivers/boards/dht11-module/bsp
+    - /home/miraur/projects/robohub-drivers/boards/environmental/dht11-module/bsp
   variants:
     pico2w:
       target: "robohub-board-dht11-module"

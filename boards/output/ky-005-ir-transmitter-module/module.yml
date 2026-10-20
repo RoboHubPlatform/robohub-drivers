@@ -1,0 +1,72 @@
+module:
+  name: ky-005-ir-transmitter-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    A KY-005 infrared transmitter on a PWM channel.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-10-20"
+
+functions:
+  - infrared
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-infrared-pwm
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/output/infrared-pwm
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ky_005_ir_transmitter_module.h
+  cmake:
+    target: "rho::robohub-board-ky-005-ir-transmitter-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-infrared-pwm
+      - rho::robohub-common
+
+board:
+  designation: KY_005_IR_TRANSMITTER_MODULE
+  device: ky-005-ir-transmitter
+  category: output
+  driver: robohub-driver-infrared-pwm
+  functions:
+    - infrared
+  connector:
+    - name: VCC
+      signal: power
+    - name: GND
+      signal: ground
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - ky
+    - output
+  stability: experimental
+  visibility: public

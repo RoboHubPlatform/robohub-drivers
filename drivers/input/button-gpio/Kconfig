@@ -1,0 +1,9 @@
+menu "RoboHub robohub-driver-button-gpio"
+
+config RH_DRV_BUTTON_GPIO
+    bool "robohub-driver-button-gpio"
+    select RH_HAL_GPIO\n    default n
+    help
+      A robohub-driver-button-gpio part.
+
+endmenu
