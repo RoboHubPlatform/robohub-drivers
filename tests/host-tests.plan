@@ -1,0 +1,44 @@
+# The drivers' host tests: what this module publishes into the generated
+# namespace, what it builds, and what it runs.
+#
+# The runner is the ecosystem's, in the orchestrator; this file is the part that
+# is the drivers' own.
+#
+# SPDX-License-Identifier: MIT
+
+D="$MODULE_ROOT/drivers"
+
+mkdir -p "$GEN/robohub/drivers/input" "$GEN/robohub/drivers/output" \
+         "$GEN/robohub/drivers/light" "$GEN/robohub/drivers/temperature"
+cp "$D/input/button-gpio/inc/button_gpio.h"            "$GEN/robohub/drivers/input/"
+cp "$D/output/tone-pwm/inc/tone_pwm.h"                 "$GEN/robohub/drivers/output/"
+cp "$D/output/rgb-pwm/inc/rgb_pwm.h"                   "$GEN/robohub/drivers/output/"
+cp "$D/output/infrared-pwm/inc/infrared_pwm.h"         "$GEN/robohub/drivers/output/"
+cp "$D/light/photoresistor-adc/inc/photoresistor_adc.h" "$GEN/robohub/drivers/light/"
+cp "$D/output/gpio-switch/inc/gpio_switch.h"           "$GEN/robohub/drivers/output/"
+cp "$D/temperature/thermistor-adc/inc/thermistor_adc.h" "$GEN/robohub/drivers/temperature/"
+cp "$D/input/analog-adc/inc/analog_adc.h"               "$GEN/robohub/drivers/input/"
+cp "$D/input/encoder-gpio/inc/encoder_gpio.h"           "$GEN/robohub/drivers/input/"
+cp "$D/input/pulse-adc/inc/pulse_adc.h"                 "$GEN/robohub/drivers/input/"
+cp "$D/input/infrared-receiver-gpio/inc/infrared_receiver_gpio.h" "$GEN/robohub/drivers/input/"
+
+$CC -std=c11 -Wall -Wextra -I"$GEN" \
+    -I"$D/input/button-gpio/inc" -I"$D/output/tone-pwm/inc" -I"$D/output/rgb-pwm/inc" \
+    -I"$D/output/infrared-pwm/inc" -I"$D/light/photoresistor-adc/inc" $BASE \
+    "$MODULE_ROOT/tests/test_parts.c" \
+    "$D/input/button-gpio/src/button_gpio.c" "$D/output/tone-pwm/src/tone_pwm.c" \
+    "$D/output/rgb-pwm/src/rgb_pwm.c" "$D/output/infrared-pwm/src/infrared_pwm.c" \
+    "$D/light/photoresistor-adc/src/photoresistor_adc.c" -o "$OUT/test_parts"
+
+$CC -std=c11 -Wall -Wextra -I"$GEN" \
+    -I"$D/output/gpio-switch/inc" -I"$D/temperature/thermistor-adc/inc" \
+    -I"$D/input/analog-adc/inc" -I"$D/input/encoder-gpio/inc" \
+    -I"$D/input/pulse-adc/inc" -I"$D/input/infrared-receiver-gpio/inc" $BASE \
+    "$MODULE_ROOT/tests/test_parts2.c" \
+    "$D/output/gpio-switch/src/gpio_switch.c" "$D/temperature/thermistor-adc/src/thermistor_adc.c" \
+    "$D/input/analog-adc/src/analog_adc.c" "$D/input/encoder-gpio/src/encoder_gpio.c" \
+    "$D/input/pulse-adc/src/pulse_adc.c" "$D/input/infrared-receiver-gpio/src/infrared_receiver_gpio.c" \
+    -lm -o "$OUT/test_parts2"
+
+run test_parts "$OUT/test_parts"
+run test_parts2 "$OUT/test_parts2"
