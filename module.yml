@@ -58,3 +58,11 @@ generate:
         template: templates/board
       - path: examples/{{category}}/{{name}}/c
         template: templates/example
+
+docs:
+  title: RoboHub Drivers
+  section: collections
+  order: "20"
+  index: docs/index.md
+  sources:
+    - docs/index.md
