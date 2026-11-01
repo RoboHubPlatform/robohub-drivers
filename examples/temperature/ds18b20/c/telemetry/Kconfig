@@ -50,3 +50,37 @@ config RH_NODE_ID
     int "Node id"
     range 1 65535
     default 1
+
+# The network sink. An empty SSID means the node streams over USB only; the
+# values here are the defaults, and a deployment writes them in project.conf.
+config RH_WIFI_SSID
+    string "WiFi SSID"
+    default ""
+
+config RH_WIFI_PASSWORD
+    string "WiFi password"
+    default ""
+
+config RH_TELEMETRY_HOST
+    string "Telemetry gateway host"
+    default ""
+
+config RH_TELEMETRY_PORT
+    int "Telemetry gateway port"
+    range 1 65535
+    default 5000
+
+# The link this node sends its frames on. The keeper writes these from the
+# network connection it configured; a hand build gets USB CDC.
+config RH_NODE_TRANSPORT
+    string "Node transport"
+    default "usb"
+
+config RH_NODE_UART
+    string "Node UART link"
+    default "uart1"
+
+config RH_NODE_BAUD
+    int "Node UART baud"
+    range 1200 3000000
+    default 115200

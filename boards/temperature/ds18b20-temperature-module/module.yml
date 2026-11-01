@@ -89,6 +89,25 @@ board:
     alarm_high_c: 30
     alarm_low_c: 0
 
+# What this module is, in the vocabulary a deployment planner reads: a sensor
+# on the OneWire bus that measures temperature. The planner matches it to a
+# board whose `capabilities.buses` include `onewire`.
+capabilities:
+  sensor: true
+  summary: "DS18B20 1-Wire temperature sensor."
+  buses: "onewire"
+  measures: "temperature"
+
+# How a deployment uses this module. A module that can be fitted to a node
+# names the example the keeper copies, the image it builds, and the Kconfig
+# values that example needs. The keeper reads these at runtime, so a new driver
+# is offered without rebuilding it.
+deployment:
+  boards: "pico2w"
+  example: "examples/temperature/ds18b20/c/telemetry"
+  binary: "build/output/telemetry.elf"
+  kconfig: "CONFIG_RH_HAL_ONEWIRE=y CONFIG_RH_BOARD_DS18B20_MODULE=y CONFIG_RH_TRANSPORT=y CONFIG_RH_TELEMETRY=y CONFIG_RH_CONSOLE_USB=y"
+
 package:
   kind: library
   binary: false
