@@ -26,6 +26,7 @@
 #include "types.h"
 #include "error.h"
 #include "robohub/hal/console.h"
+#include "robohub/hal/uart.h"
 #include "robohub/hal/onewire.h"
 #include "robohub/hal/timer.h"
 #include "robohub/drivers/temperature/ds18b20.h"
@@ -38,6 +39,12 @@
 #include "robohub/transport.h"
 #include "robohub/telemetry.h"
 #include "protocol.h"
+
+#if defined(__has_include)
+#  if __has_include("autoconf.h")
+#    include "autoconf.h"
+#  endif
+#endif
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
 #include "robohub/net.h"
 #endif
@@ -55,17 +62,55 @@
  * simply not started, so the example still builds and runs over USB alone. */
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
 #ifndef RH_WIFI_SSID
-#define RH_WIFI_SSID ""
+#  if defined(CONFIG_RH_WIFI_SSID)
+#    define RH_WIFI_SSID CONFIG_RH_WIFI_SSID
+#  else
+#    define RH_WIFI_SSID ""
+#  endif
 #endif
 #ifndef RH_WIFI_PASSWORD
-#define RH_WIFI_PASSWORD ""
+#  if defined(CONFIG_RH_WIFI_PASSWORD)
+#    define RH_WIFI_PASSWORD CONFIG_RH_WIFI_PASSWORD
+#  else
+#    define RH_WIFI_PASSWORD ""
+#  endif
 #endif
 #ifndef RH_TELEMETRY_HOST
-#define RH_TELEMETRY_HOST "192.168.1.10"
+#  if defined(CONFIG_RH_TELEMETRY_HOST)
+#    define RH_TELEMETRY_HOST CONFIG_RH_TELEMETRY_HOST
+#  else
+#    define RH_TELEMETRY_HOST "192.168.1.10"
+#  endif
 #endif
 #ifndef RH_TELEMETRY_PORT
-#define RH_TELEMETRY_PORT 5000
+#  if defined(CONFIG_RH_TELEMETRY_PORT)
+#    define RH_TELEMETRY_PORT CONFIG_RH_TELEMETRY_PORT
+#  else
+#    define RH_TELEMETRY_PORT 5000
+#  endif
 #endif
+#endif
+
+#ifndef RH_NODE_TRANSPORT
+#  if defined(CONFIG_RH_NODE_TRANSPORT)
+#    define RH_NODE_TRANSPORT CONFIG_RH_NODE_TRANSPORT
+#  else
+#    define RH_NODE_TRANSPORT "usb"
+#  endif
+#endif
+#ifndef RH_NODE_UART
+#  if defined(CONFIG_RH_NODE_UART)
+#    define RH_NODE_UART CONFIG_RH_NODE_UART
+#  else
+#    define RH_NODE_UART "uart1"
+#  endif
+#endif
+#ifndef RH_NODE_BAUD
+#  if defined(CONFIG_RH_NODE_BAUD)
+#    define RH_NODE_BAUD CONFIG_RH_NODE_BAUD
+#  else
+#    define RH_NODE_BAUD 115200
+#  endif
 #endif
 
 /* The event the reading travels as, and its layout, both from the schema. The
@@ -102,10 +147,12 @@ static void emit(const char* text)
 }
 
 /* -------------------------------------------------------------------------- */
-/*  The link: USB CDC, raw bytes                                              */
+/*  The link: the transport the network step chose                            */
 /* -------------------------------------------------------------------------- */
 
-static RoboHubTransport usb_link;
+static RoboHubTransport node_link;
+static RoboHubUART* node_uart;
+static rh_bool link_is_net;
 
 static int usb_phy_write(const rh_u8* data, rh_size length, void* context)
 {
@@ -118,20 +165,63 @@ static int usb_phy_write(const rh_u8* data, rh_size length, void* context)
     return 0;
 }
 
+static int uart_phy_write(const rh_u8* data, rh_size length, void* context)
+{
+    (void)context;
+    if (node_uart == 0 || node_uart->write == 0) {
+        return -1;
+    }
+    return (node_uart->write(node_uart, data, length) == ROBOHUB_OK) ? 0 : -1;
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Sensor application                                                        */
 /* -------------------------------------------------------------------------- */
 
 static RoboHubDS18B20 sensor;
+static RoboHubDS18B20Config sensor_config;
 static RoboHubTimer* system_timer;
+static rh_u32 next_sensor_attempt_ms;
+static RoboHubError sensor_error = ROBOHUB_OK;
+
+/* A board whose sensor did not answer still reports: the runtime starts, and
+ * every reading carries FAULT. A gateway then says "this device is there and
+ * its sensor is not", which is more useful than a device that is simply absent
+ * because its init refused to let the runtime run. */
+static rh_bool sensor_ready = RH_FALSE;
 
 static RoboHubError read_and_publish(robohub_core_task_id id, void* user)
 {
     (void)id;
     (void)user;
 
+    /* A sensor connected after boot is still picked up: the one-time init at
+     * startup is retried every few seconds while the bus says nothing. Without
+     * this, plugging the part in later leaves the node reporting FAULT until it
+     * is reset, even though the bus and the part are fine. */
+    if (!sensor_ready && sensor_config.bus != 0 && system_timer != 0) {
+        rh_u32 now_ms = to_ms_since_boot(get_absolute_time());
+        if (now_ms >= next_sensor_attempt_ms) {
+            next_sensor_attempt_ms = now_ms + 5000u;
+            sensor_error = robohub_ds18b20_init(&sensor, &sensor_config);
+            if (ROBOHUB_SUCCEEDED(sensor_error)) {
+                sensor_ready = RH_TRUE;
+            }
+        }
+    }
+
     rh_f32 celsius = 0.0f;
-    RoboHubError err = robohub_ds18b20_get_celsius(&sensor, &celsius);
+    RoboHubError err = ROBOHUB_ERR_NOT_FOUND;
+    if (sensor_ready) {
+        err = robohub_ds18b20_get_celsius(&sensor, &celsius);
+        if (ROBOHUB_FAILED(err)) {
+            sensor_error = err;
+            sensor_ready = RH_FALSE;
+            next_sensor_attempt_ms = to_ms_since_boot(get_absolute_time()) + 1000u;
+        } else {
+            sensor_error = ROBOHUB_OK;
+        }
+    }
 
     /* A failed read is still published, carrying FAULT: a gateway that sees the
      * status knows the difference between a stale reading and a dead sensor,
@@ -154,24 +244,30 @@ static RoboHubError sensor_init(void)
     RoboHubOneWire* bus = robohub_get_onewire(ONEWIRE_NAME);
     system_timer = robohub_get_timer(TIMER_NAME);
     if (bus == 0 || system_timer == 0) {
-        return ROBOHUB_ERR_NOT_FOUND;
+        sensor_error = ROBOHUB_ERR_NOT_FOUND;
+        return ROBOHUB_OK;
     }
-    RoboHubDS18B20Config config = {
-        .bus = bus,
-        .timer = system_timer,
-        .resolution_bits = 12,
-        .alarm_high_c = 30,
-        .alarm_low_c = 0,
-    };
+    sensor_config.bus = bus;
+    sensor_config.timer = system_timer;
+    sensor_config.resolution_bits = 12;
+    sensor_config.alarm_high_c = 30;
+    sensor_config.alarm_low_c = 0;
+    next_sensor_attempt_ms = 0u;
     RoboHubError err = ROBOHUB_ERR_IO;
     for (rh_u32 attempt = 0; attempt < 5u; attempt++) {
-        err = robohub_ds18b20_init(&sensor, &config);
+        err = robohub_ds18b20_init(&sensor, &sensor_config);
         if (ROBOHUB_SUCCEEDED(err)) {
+            sensor_ready = RH_TRUE;
+            sensor_error = ROBOHUB_OK;
             return ROBOHUB_OK;
         }
         system_timer->delay_ms(system_timer, 200u);
     }
-    return err;
+    /* The sensor is absent or not answering. That is a fault to report, not a
+     * reason to leave the board without a runtime. */
+    sensor_ready = RH_FALSE;
+    sensor_error = err;
+    return ROBOHUB_OK;
 }
 
 static robohub_core_task_id sample_task = RH_CORE_TASK_INVALID;
@@ -256,7 +352,8 @@ static RoboHubError on_diag(robohub_event_id id, const void* payload, rh_size si
         .handler_errors = counters.handler_errors,
         .tasks_run = counters.tasks_run,
         .task_errors = counters.task_errors,
-        .last_error = (rh_u16)counters.last_error,
+        .last_error = (rh_u16)(counters.last_error != (rh_u16)ROBOHUB_OK
+            ? counters.last_error : sensor_error),
         .probe_ok = probe_ok,
         .probe_fault = probe_fault,
     };
@@ -276,12 +373,23 @@ static RoboHubError on_diag(robohub_event_id id, const void* payload, rh_size si
 static void pump_link(rh_u32 now_ms)
 {
     (void)now_ms;
+    if (link_is_net) {
+        return;
+    }
+    if (node_uart != 0 && node_uart->read_available != 0) {
+        rh_u8 buffer[64];
+        rh_size got = node_uart->read_available(node_uart, buffer, sizeof(buffer));
+        for (rh_size i = 0; i < got; i++) {
+            robohub_transport_feed_byte(&node_link, buffer[i]);
+        }
+        return;
+    }
     for (int i = 0; i < 64; i++) {
         int byte = getchar_timeout_us(0);
         if (byte == PICO_ERROR_TIMEOUT) {
             break;
         }
-        robohub_transport_feed_byte(&usb_link, (rh_u8)byte);
+        robohub_transport_feed_byte(&node_link, (rh_u8)byte);
     }
 }
 
@@ -364,19 +472,35 @@ int main(void)
     /* Telemetry first, so the bridge is in place before anything publishes. */
     (void)robohub_telemetry_init();
 
-    const RoboHubTransportPhy link = { .write = usb_phy_write, .context = 0 };
-    (void)robohub_transport_init(&usb_link, &link);
+    link_is_net = (strcmp(RH_NODE_TRANSPORT, "wifi") == 0) ||
+                  (strcmp(RH_NODE_TRANSPORT, "socket") == 0);
+    RoboHubTransportPhy link = { .write = usb_phy_write, .context = 0 };
+    if (strcmp(RH_NODE_TRANSPORT, "uart") == 0) {
+        node_uart = robohub_get_uart(RH_NODE_UART);
+        if (node_uart != 0 && node_uart->init != 0 &&
+            ROBOHUB_SUCCEEDED(node_uart->init(node_uart, RH_NODE_BAUD))) {
+            link.write = uart_phy_write;
+        } else {
+            node_uart = 0;
+            emit("uart: no link; using USB CDC\n");
+        }
+    }
 
-    RoboHubTelemetrySink sink = {
-        .type = ROBOHUB_SINK_TRANSPORT,
-        .handle.transport = &usb_link,
-        .enabled = RH_TRUE,
-    };
-    (void)robohub_telemetry_add_sink(&sink);
+    if (!link_is_net) {
+        (void)robohub_transport_init(&node_link, &link);
+        RoboHubTelemetrySink sink = {
+            .type = ROBOHUB_SINK_TRANSPORT,
+            .handle.transport = &node_link,
+            .enabled = RH_TRUE,
+        };
+        (void)robohub_telemetry_add_sink(&sink);
+    }
 
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
-    /* The same readings, a second way out. Failure here is not fatal. */
-    net_sink_start();
+    /* WiFi and socket are their own outgoing link; the console stays text. */
+    if (link_is_net) {
+        net_sink_start();
+    }
 #endif
 
     (void)robohub_core_app_register(&sensor_app);

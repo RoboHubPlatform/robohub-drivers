@@ -225,3 +225,7 @@ The part drivers have host tests over fake GPIO, PWM, ADC and timer halves under
 ```sh
 ROBOHUB_COMMON_DIR=/path/to/robohub-common tests/run.sh
 ```
+
+## Release history
+
+[CHANGELOG.md](CHANGELOG.md) — the changes in 0.2.0 and earlier releases.

@@ -72,7 +72,7 @@ another of them gateways:
 
 | Example | Role | Senses | Downstream | Upstream |
 |---|---|---|---|---|
-| `temperature/ds18b20/c/telemetry` | `node` | a DS18B20 | — | USB CDC |
+| `temperature/ds18b20/c/telemetry` | `node` | a DS18B20 | — | USB CDC, UART, Console, WiFi or Socket |
 | `gateway/c/repeater` | `edge` | a DS18B20 | `uart1` | USB CDC |
 | `gateway/c/relay` | `relay` | — | `uart1` | USB CDC |
 
@@ -88,6 +88,11 @@ at the top lists every board below it.
 Wiring a board behind an edge or a relay is three wires: GP4 (UART1 TX) to the
 board's RX, GP5 (UART1 RX) to the board's TX, and GND. The board runs the node
 firmware with its own `CONFIG_RH_AREA_ID` and `CONFIG_RH_NODE_ID`.
+
+The telemetry node's transport is a build-time choice the keeper's Mesh network
+step makes: `CONFIG_RH_NODE_TRANSPORT` selects `uart`, `usb`, `console`, `wifi`
+or `socket`; `CONFIG_RH_NODE_UART` and `CONFIG_RH_NODE_BAUD` carry the UART end.
+A hand build keeps the USB CDC default.
 
 A relay routes **down**: a command or a diagnostic the parent sends for a board
 behind it goes down the downstream link with the parent's transaction id intact,
