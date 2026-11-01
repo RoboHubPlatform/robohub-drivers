@@ -1,0 +1,124 @@
+#
+# ds18b20-waterproof-probe-module — waterproof DS18B20 temperature probe.
+#
+# The same Maxim DS18B20 part and the same driver as the breakout module, in a
+# sealed stainless-steel probe on a one-metre cable. The medium is the point:
+# the probe can be immersed or pushed into soil, which the bare breakout cannot.
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: ds18b20-waterproof-probe-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    Support package for a waterproof DS18B20 temperature probe: a sealed 1-Wire
+    sensor on a one-metre cable, with the driver, signals and defaults it is
+    reached with.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-11-02"
+
+# The driver interfaces the part presents, mirrored from the driver's own
+# manifest so the module can be found by function as well as by name.
+functions:
+  - temperature
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-ds18b20
+    type: c
+    path: /home/miraur/projects/robohub-drivers/drivers/temperature/ds18b20
+  - name: robohub-common
+    type: c
+    path: /home/miraur/projects/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/ds18b20_waterproof_probe_module.h
+  cmake:
+    target: "rho::robohub-board-ds18b20-waterproof-probe-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-ds18b20
+      - rho::robohub-common
+
+board:
+  designation: DS18B20_WATERPROOF_PROBE
+  device: DS18B20
+  category: temperature
+  bus:
+    type: onewire
+    instance: onewire0
+  driver: robohub-driver-ds18b20
+  functions:
+    - temperature
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: dq
+      signal: onewire
+      position: 3
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    dq:
+      signal: onewire
+  peripherals:
+    - name: onewire
+      instance: onewire
+    - name: timer
+      instance: timer
+  defaults:
+    resolution_bits: 12
+    alarm_high_c: 30
+    alarm_low_c: 0
+
+# What this module is, in the vocabulary a deployment planner reads: a sensor
+# on the OneWire bus that measures temperature. The planner matches it to a
+# board whose `capabilities.buses` include `onewire`.
+capabilities:
+  sensor: true
+  summary: "Waterproof DS18B20 1-Wire temperature probe."
+  buses: "onewire"
+  measures: "temperature"
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - eval
+    - temperature
+    - ds18b20
+    - probe
+    - waterproof
+    - water
+    - dirt
+  stability: experimental
+  visibility: public

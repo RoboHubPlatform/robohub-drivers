@@ -49,6 +49,10 @@ board:
   designation: KY_037_MICROPHONE_SOUND_SENSOR_MODULE
   device: ky-037-microphone-sound-sensor
   category: input
+  bus:
+    type: adc
+    instance: adc0
+    channel: "0"
   driver: robohub-driver-analog-adc
   functions:
     - analog

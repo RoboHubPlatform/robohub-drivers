@@ -49,6 +49,9 @@ board:
   designation: KY_028_DIGITAL_TEMPERATURE_SENSOR_MODULE
   device: ky-028-digital-temperature-sensor
   category: temperature
+  bus:
+    type: gpio
+    instance: d0
   driver: robohub-driver-button-gpio
   functions:
     - button
@@ -88,5 +91,6 @@ metadata:
     - eval
     - ky
     - temperature
+    - air
   stability: experimental
   visibility: public

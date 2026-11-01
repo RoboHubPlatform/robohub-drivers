@@ -1,6 +1,6 @@
 # RoboHub Drivers
 
-**Version:** 0.2.0
+**Version:** 0.2.2
 
 The drivers the devices are driven by, and the boards they are fitted to. Each
 driver implements the interfaces declared by `robohub-common`.
@@ -30,6 +30,11 @@ driver implements the interfaces declared by `robohub-common`.
 ### Environmental
 - **bmp180**: BMP180 barometric pressure sensor
 - **dht11**: DHT11 temperature and humidity sensor
+
+Boards and drivers carry environment tags in `metadata.tags`: `water` for a part
+that can be immersed, `dirt` for one that can go into soil, and `air` for one
+that measures ambient air. The waterproof DS18B20 probe carries `water` and
+`dirt`; the bare DS18B20, BMP180 and DHT11 parts carry `air`.
 
 ### Transceiver
 - **max485-module**: MAX485 RS485 transceiver module

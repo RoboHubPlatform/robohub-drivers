@@ -49,6 +49,10 @@ board:
   designation: KY_018_PHOTORESISTOR_MODULE
   device: ky-018-photoresistor
   category: light
+  bus:
+    type: adc
+    instance: adc0
+    channel: "0"
   driver: robohub-driver-photoresistor-adc
   functions:
     - light

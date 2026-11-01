@@ -11,6 +11,15 @@ module:
 functions:
   - temperature
 
+# What this module is, in the vocabulary a deployment planner reads. The
+# thermistor has no example of its own, so it is fitted to a node but cannot be
+# the module that names the node's program.
+capabilities:
+  sensor: true
+  summary: "NTC thermistor temperature sensor on an ADC channel."
+  buses: "adc"
+  measures: "temperature"
+
 build:
   language: c
   standard: c11
@@ -50,5 +59,6 @@ metadata:
     - driver
     - temperature
     - thermistor temperature ntc adc
+    - air
   stability: experimental
   visibility: public

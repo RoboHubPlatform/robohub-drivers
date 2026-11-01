@@ -60,6 +60,9 @@ board:
   designation: DS18B20_MODULE
   device: DS18B20
   category: temperature
+  bus:
+    type: onewire
+    instance: onewire0
   driver: robohub-driver-ds18b20
   functions:
     - temperature
@@ -81,9 +84,9 @@ board:
     dq:
       signal: onewire
   peripherals:
-    onewire:
-      - name: onewire0
-        signal: DQ
+    - name: onewire0
+      type: onewire
+      dq: DQ
   defaults:
     resolution_bits: 12
     alarm_high_c: 30
@@ -94,7 +97,7 @@ board:
 # board whose `capabilities.buses` include `onewire`.
 capabilities:
   sensor: true
-  summary: "DS18B20 1-Wire temperature sensor."
+  summary: "DS18B20 1-Wire temperature sensor for ambient air."
   buses: "onewire"
   measures: "temperature"
 
@@ -118,5 +121,6 @@ metadata:
     - eval
     - temperature
     - ds18b20
+    - air
   stability: experimental
   visibility: public

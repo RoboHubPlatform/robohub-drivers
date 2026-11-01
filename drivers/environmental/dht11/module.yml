@@ -17,6 +17,21 @@ functions:
   - temperature
   - humidity
 
+# What this module is, in the vocabulary a deployment planner reads.
+capabilities:
+  sensor: true
+  summary: "DHT11 temperature and humidity sensor for ambient air."
+  buses: "gpio"
+  measures: "temperature,humidity"
+
+# How a deployment uses it: the example the keeper copies and the symbols it
+# needs. A DHT11 can be the primary module of a node.
+deployment:
+  boards: "pico2w"
+  example: "examples/environmental/dht11/c"
+  binary: "build/output/dht11-environmental-c.elf"
+  kconfig: "CONFIG_RH_HAL_GPIO=y CONFIG_RH_BOARD_DHT11_MODULE=y CONFIG_RH_CONSOLE_USB=y"
+
 build:
   language: c
   standard: c11
@@ -63,5 +78,6 @@ metadata:
     - environmental
     - single-wire
     - dht11
+    - air
   stability: experimental
   visibility: public

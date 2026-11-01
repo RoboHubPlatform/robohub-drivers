@@ -49,6 +49,10 @@ board:
   designation: KY_039_HEARTBEAT_SENSOR_MODULE
   device: ky-039-heartbeat-sensor
   category: input
+  bus:
+    type: adc
+    instance: adc0
+    channel: "0"
   driver: robohub-driver-pulse-adc
   functions:
     - pulse
