@@ -95,12 +95,12 @@ board:
     b:
       signal: rs485_b
   peripherals:
-    uart:
-      - name: uart1
-        signal: DI
-    gpio:
-      - name: gpio0
-        signal: DE
+    - name: uart1
+      type: uart
+      tx: DI
+    - name: gpio0
+      type: gpio
+      gpio: DE
   defaults:
     uart: uart1
     de_pin: 20

@@ -20,6 +20,21 @@ functions:
   - pressure
   - altitude
 
+# What this module is, in the vocabulary a deployment planner reads.
+capabilities:
+  sensor: true
+  summary: "BMP180 temperature, pressure and altitude sensor for ambient air."
+  buses: "i2c spi"
+  measures: "temperature,pressure,altitude"
+
+# How a deployment uses it: the example the keeper copies and the symbols it
+# needs. A BMP180 can be the primary module of a node.
+deployment:
+  boards: "pico2w"
+  example: "examples/environmental/bmp180/c"
+  binary: "build/output/bmp180-environmental-c.elf"
+  kconfig: "CONFIG_RH_HAL_I2C=y CONFIG_RH_BOARD_BMP180_MODULE=y CONFIG_RH_CONSOLE_USB=y"
+
 build:
   language: c
   standard: c11
@@ -72,5 +87,6 @@ metadata:
     - i2c
     - spi
     - bmp180
+    - air
   stability: experimental
   visibility: public

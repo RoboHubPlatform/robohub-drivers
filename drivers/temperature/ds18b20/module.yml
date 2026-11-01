@@ -21,7 +21,7 @@ functions:
 # board whose `capabilities.buses` include `onewire`.
 capabilities:
   sensor: true
-  summary: "DS18B20 1-Wire temperature sensor."
+  summary: "DS18B20 1-Wire temperature sensor; boards are rated for air, water and soil."
   buses: "onewire"
   measures: "temperature"
 
@@ -79,5 +79,8 @@ metadata:
     - temperature
     - onewire
     - ds18b20
+    - air
+    - water
+    - dirt
   stability: experimental
   visibility: public

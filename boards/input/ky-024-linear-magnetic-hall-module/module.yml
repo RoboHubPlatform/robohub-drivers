@@ -49,6 +49,10 @@ board:
   designation: KY_024_LINEAR_MAGNETIC_HALL_MODULE
   device: ky-024-linear-magnetic-hall
   category: input
+  bus:
+    type: adc
+    instance: adc0
+    channel: "0"
   driver: robohub-driver-analog-adc
   functions:
     - analog

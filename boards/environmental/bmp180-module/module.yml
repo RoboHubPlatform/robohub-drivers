@@ -62,6 +62,10 @@ board:
   designation: BMP180_MODULE
   device: BMP180
   category: environmental
+  bus:
+    type: i2c
+    instance: i2c0
+    address: "0x77"
   driver: robohub-driver-bmp180
   functions:
     - temperature
@@ -100,12 +104,13 @@ board:
     csb:
       signal: spi_cs
   peripherals:
-    i2c:
-      - name: i2c0
-        signal: SDA
-    spi:
-      - name: spi0
-        signal: SDO
+    - name: i2c0
+      type: i2c
+      sda: SDA
+      scl: SCL
+    - name: spi0
+      type: spi
+      tx: SDO
   defaults:
     transport: i2c
     address: 0x77
@@ -125,5 +130,6 @@ metadata:
     - altitude
     - environmental
     - bmp180
+    - air
   stability: experimental
   visibility: public

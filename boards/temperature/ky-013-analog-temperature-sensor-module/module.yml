@@ -49,6 +49,10 @@ board:
   designation: KY_013_ANALOG_TEMPERATURE_SENSOR_MODULE
   device: ky-013-analog-temperature-sensor
   category: temperature
+  bus:
+    type: adc
+    instance: adc0
+    channel: "0"
   driver: robohub-driver-thermistor-adc
   functions:
     - temperature
@@ -83,5 +87,6 @@ metadata:
     - eval
     - ky
     - temperature
+    - air
   stability: experimental
   visibility: public

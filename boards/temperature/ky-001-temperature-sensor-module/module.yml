@@ -49,6 +49,9 @@ board:
   designation: KY_001_TEMPERATURE_SENSOR_MODULE
   device: ky-001-temperature-sensor
   category: temperature
+  bus:
+    type: onewire
+    instance: onewire0
   driver: robohub-driver-ds18b20
   functions:
     - temperature
@@ -85,5 +88,6 @@ metadata:
     - eval
     - ky
     - temperature
+    - air
   stability: experimental
   visibility: public

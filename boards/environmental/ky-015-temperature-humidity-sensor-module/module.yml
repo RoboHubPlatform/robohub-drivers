@@ -50,6 +50,9 @@ board:
   designation: KY_015_TEMPERATURE_HUMIDITY_SENSOR_MODULE
   device: ky-015-temperature-humidity-sensor
   category: environmental
+  bus:
+    type: gpio
+    instance: dht0
   driver: robohub-driver-dht11
   functions:
     - temperature
@@ -87,5 +90,6 @@ metadata:
     - eval
     - ky
     - environmental
+    - air
   stability: experimental
   visibility: public

@@ -1,0 +1,13 @@
+menu "RoboHub DS18B20 waterproof probe"
+
+config RH_BOARD_DS18B20_WATERPROOF_PROBE
+    bool "DS18B20 waterproof temperature probe"
+    select RH_DRV_DS18B20
+    default n
+    help
+      A sealed DS18B20 temperature probe on a one-metre cable, for water,
+      soil and ambient temperature. Selecting it brings in the driver and the
+      1-Wire bus and timer the probe needs; an application that does not fit
+      the probe pays for none of it.
+
+endmenu

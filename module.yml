@@ -14,7 +14,7 @@
 module:
   name: robohub-drivers
   type: collection
-  version: 0.2.0
+  version: 0.2.2
   description: >
     Device drivers for the RoboHub Platform, and the examples that use them.
 
