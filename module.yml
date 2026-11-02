@@ -14,7 +14,7 @@
 module:
   name: robohub-drivers
   type: collection
-  version: 0.2.2
+  version: 0.2.3
   description: >
     Device drivers for the RoboHub Platform, and the examples that use them.
 
@@ -36,6 +36,67 @@ functions:
   - analog
   - encoder
   - pulse
+
+# The contract a board manifest is written to.
+#
+# A board is a module of type driver-board, at boards/<category>/<name>/module.yml.
+# The tree is the index: Mesh and the orchestrator discover boards by walking it,
+# so a board added here is available without a list elsewhere being edited.
+contracts:
+  board:
+    discovery: "boards/*/*/module.yml"
+    description: >
+      One board in one folder, with its support package beside its manifest.
+      The folder name is the board's module name; the category is the folder
+      above it and is the section the Mesh module picker groups by.
+    requires:
+      module:
+        - name
+        - type
+        - version
+        - description
+      board:
+        - designation
+        - device
+        - category
+        - driver
+        - connectors
+      capabilities:
+        - sensor
+        - summary
+        - buses
+        - measures
+      metadata:
+        - tags
+    bus:
+      description: >
+        How the board reaches a node. A missing block is a module that makes no
+        claim about its bus; the Mesh bus plan says so rather than guessing.
+      fields:
+        type: "onewire, i2c, spi, adc, pwm, gpio or uart"
+        instance: "the bus or peripheral instance, such as i2c0"
+        address: "an I2C address a fixed part answers on"
+        addresses: "an I2C address range a configurable part can be set to"
+        cs: "an SPI chip select, or auto for the node to choose one"
+        channel: "an ADC or PWM channel"
+    media_tags:
+      description: >
+        A board rated for a medium carries the tag in metadata.tags so a water,
+        garden or air application can find it.
+      values:
+        - water
+        - dirt
+        - air
+    exports:
+      description: >
+        The CMake target and public includes a node links the board with. A
+        board whose target is already the example's own target is not linked a
+        second time.
+      fields:
+        - headers
+        - cmake.target
+        - cmake.include_dirs
+        - cmake.link_libraries
 
 # What `rho init` can write here. Inline for a repository this small; a larger
 # one points at a generate.yml it keeps beside its sources.

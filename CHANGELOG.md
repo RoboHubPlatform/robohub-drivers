@@ -2,6 +2,19 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.2.3] - 2026-11-02
+
+The collection's root manifest states the board module contract under
+`contracts.board`: the discovery path (`boards/*/*/module.yml`), the fields a
+board manifest carries, the `board.bus` fields a node plans with, the
+`water`/`dirt`/`air` media tags, and the CMake exports a node links. The README
+states the same contract for a person adding a board.
+
+The DHT11, BMP180 and thermistor drivers declare `capabilities`, and DHT11 and
+BMP180 carry the example and Kconfig a node is built from, so either can be the
+first module of a node. A module attached to a node is linked into the node's
+image; only the node is built and programmed.
+
 ## [0.2.2] - 2026-11-02
 
 Sensor boards now declare how they reach a node in `board.bus`: the bus type and
@@ -14,6 +27,11 @@ left out of the node image so the parent still builds.
 The DHT11, BMP180 and thermistor drivers declare `capabilities` and, where they
 have one, the example a node is built from. DHT11 or BMP180 can now be the first
 module of a node, with further modules linked into the same image.
+
+The collection's root manifest states the board module contract under
+`contracts.board`: where a board lives, the fields its manifest carries, the
+`board.bus` fields a node plans with, and the `water`/`dirt`/`air` media tags.
+The README says the same for a person adding a board.
 
 ## [0.2.1] - 2026-11-02
 

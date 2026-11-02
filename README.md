@@ -229,6 +229,28 @@ waterproof probe is sealed for immersion but is not a pressure sensor, and the
 bare breakouts are for air. A part with no tag is not rated for any of the three
 media.
 
+## Board module contract
+
+A board is a module of type `driver-board` at
+`boards/<category>/<name>/module.yml`. The folder name is the board's module
+name, the folder above it is its category, and the support package (`bsp/`,
+`CMakeLists.txt`, `Kconfig`) sits beside the manifest. Mesh and the orchestrator
+discover boards by walking that tree — there is no separate list to keep in
+step.
+
+The manifest carries:
+
+- `module`: name, type, version, description;
+- `board`: designation, device, category, driver, connectors and functions;
+- `capabilities`: `sensor`, `summary`, `buses`, `measures`;
+- `board.bus`: how it reaches a node (see below);
+- `metadata.tags`: including `water`, `dirt` or `air` when the board is rated
+  for that medium;
+- `exports`: the header and CMake target a node links.
+
+The root `module.yml` states the same contract under `contracts.board`, so a
+new board can be checked against it without reading a consumer.
+
 ## Bus metadata
 
 A sensor board says how it reaches the node in `board.bus`, so a node with more
