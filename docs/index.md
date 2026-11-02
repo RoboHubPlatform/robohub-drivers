@@ -1,6 +1,6 @@
 # RoboHub Drivers
 
-**Version:** 0.2.2
+**Version:** 0.2.3
 
 The drivers the devices are driven by, and the boards they are fitted to. Each
 driver implements the interfaces declared by `robohub-common`.
