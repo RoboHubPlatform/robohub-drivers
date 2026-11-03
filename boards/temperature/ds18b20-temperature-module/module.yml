@@ -101,6 +101,17 @@ capabilities:
   buses: "onewire"
   measures: "temperature"
 
+# What a dashboard may bind to. A temperature sensor is an input only: a
+# number, a chart or a table can show it, and a switch cannot drive it.
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The temperature the probe reads, in degrees Celsius.
+
 # How a deployment uses this module. A module that can be fitted to a node
 # names the example the keeper copies, the image it builds, and the Kconfig
 # values that example needs. The keeper reads these at runtime, so a new driver
