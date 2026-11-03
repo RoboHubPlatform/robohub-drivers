@@ -39,6 +39,27 @@ that measures ambient air. The waterproof DS18B20 probe carries `water` and
 ### Transceiver
 - **max485-module**: MAX485 RS485 transceiver module
 
+## Signals
+
+A board declares what a dashboard may bind to in a top-level `signals:` list.
+Each item names an `id`, a `label`, a `direction` (input or output), a `unit`,
+the gateway `field` it reads, and the widget `kinds` it can feed:
+
+```yaml
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+```
+
+A sensor is input-only, so it is not offered to a switch. A board without the
+block falls back to its `functions:`, with the unit for each function; a signal
+whose field the gateway does not carry yet reads empty rather than being
+guessed.
+
 ## Building
 
 ```sh

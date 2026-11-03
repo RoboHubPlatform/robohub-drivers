@@ -106,6 +106,15 @@ capabilities:
   buses: "onewire"
   measures: "temperature"
 
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The water temperature the probe reads, in degrees Celsius.
+
 package:
   kind: library
   binary: false
