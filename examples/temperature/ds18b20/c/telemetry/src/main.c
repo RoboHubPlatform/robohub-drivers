@@ -236,7 +236,30 @@ static RoboHubError read_and_publish(robohub_core_task_id id, void* user)
     if (Telemetry_serialize(&message, payload, sizeof(payload)) == 0u) {
         return ROBOHUB_ERR_PROTOCOL;
     }
-    return robohub_core_event_publish(EVENT_TEMP_READING, payload, (rh_size)TELEMETRY_WIRE_SIZE);
+    RoboHubError published = robohub_core_event_publish(
+        EVENT_TEMP_READING, payload, (rh_size)TELEMETRY_WIRE_SIZE);
+    if (ROBOHUB_FAILED(published)) {
+        return published;
+    }
+
+    /* The same measurement as a generic reading. A sensor that is not a
+     * temperature uses only this path; the typed message stays for the boards
+     * and hosts that already speak it. The field name is the one a device
+     * manifest declares, so a gateway stores it under that name without
+     * knowing the part. */
+    SensorReading generic = {
+        .device = { .area_id = RH_AREA_ID, .node_id = RH_NODE_ID },
+        .timestamp_ms = message.timestamp_ms,
+        .status = (uint16_t)message.status,
+        .field = "temperature_c",
+        .value = message.temperature_c,
+    };
+    rh_u8 generic_payload[SENSOR_READING_WIRE_SIZE];
+    if (SensorReading_serialize(&generic, generic_payload, sizeof(generic_payload)) == 0u) {
+        return ROBOHUB_ERR_PROTOCOL;
+    }
+    return robohub_core_event_publish(MESSAGE_ID_SENSOR_READING, generic_payload,
+                                      (rh_size)SENSOR_READING_WIRE_SIZE);
 }
 
 static RoboHubError sensor_init(void)
@@ -516,6 +539,7 @@ int main(void)
     /* Subscribe after the runtime is up: bringing it up initialises the event
      * bus, which starts with no subscriptions and would drop this one. */
     (void)robohub_telemetry_enable_event(EVENT_TEMP_READING, 1u);
+    (void)robohub_telemetry_enable_event(MESSAGE_ID_SENSOR_READING, 1u);
     /* The acknowledgement goes back out the same link, with the caller's tx. */
     (void)robohub_telemetry_enable_event(MESSAGE_ID_CONTROL_RESPONSE, 1u);
     (void)robohub_telemetry_enable_event(MESSAGE_ID_DIAG_RESPONSE, 1u);
