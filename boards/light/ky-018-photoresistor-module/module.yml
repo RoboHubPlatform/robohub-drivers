@@ -89,3 +89,15 @@ metadata:
     - light
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_018_photoresistor_module.h"
+  init: "robohub_ky_018_photoresistor_module_init"
+signals:
+  - id: light
+    label: Light
+    direction: input
+    unit: ""
+    field: light
+    kinds: "numeric chart table"
+    summary: The light the module reports.

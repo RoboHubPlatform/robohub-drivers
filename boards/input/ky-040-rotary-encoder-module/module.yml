@@ -96,3 +96,22 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_040_rotary_encoder_module.h"
+  init: "robohub_ky_040_rotary_encoder_module_init"
+signals:
+  - id: steps
+    label: Steps
+    direction: input
+    unit: ""
+    field: steps
+    kinds: "numeric chart table"
+    summary: The steps the module reports.
+  - id: clockwise
+    label: Clockwise
+    direction: input
+    unit: ""
+    field: clockwise
+    kinds: "boolean switch table"
+    summary: The clockwise the module reports.

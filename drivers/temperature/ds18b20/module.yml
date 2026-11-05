@@ -84,3 +84,8 @@ metadata:
     - dirt
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubDS18B20
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|interface|get_celsius|0"

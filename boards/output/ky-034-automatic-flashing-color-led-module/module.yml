@@ -85,3 +85,15 @@ metadata:
     - output
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_034_automatic_flashing_color_led_module.h"
+  init: "robohub_ky_034_automatic_flashing_color_led_module_init"
+signals:
+  - id: state
+    label: State
+    direction: input
+    unit: ""
+    field: state
+    kinds: "toggle button"
+    summary: The state the module reports.

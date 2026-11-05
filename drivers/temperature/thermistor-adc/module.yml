@@ -62,3 +62,8 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubThermistorAdc
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|interface|get_celsius|0"

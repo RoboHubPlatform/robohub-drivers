@@ -86,3 +86,15 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_002_vibration_switch_module.h"
+  init: "robohub_ky_002_vibration_switch_module_init"
+signals:
+  - id: pressed
+    label: Pressed
+    direction: input
+    unit: ""
+    field: pressed
+    kinds: "boolean switch table"
+    summary: The pressed the module reports.

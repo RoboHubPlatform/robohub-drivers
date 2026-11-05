@@ -2,6 +2,14 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.3.0] - 2026-11-05
+
+Drivers and board modules now describe their telemetry: a driver names the
+device type and one line per readable signal, and a board module names its BSP
+header, entry point and signals. Every sensor driver and every board module
+with a read path carries the descriptor, and the telemetry node template keeps
+its DS18B20 default while Mesh generates `sensors.c` for the modules in a plan.
+
 ## [0.2.3] - 2026-11-02
 
 The collection's root manifest states the board module contract under

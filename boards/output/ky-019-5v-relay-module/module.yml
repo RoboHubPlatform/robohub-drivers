@@ -100,3 +100,15 @@ metadata:
     - output
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_019_5v_relay_module.h"
+  init: "robohub_ky_019_5v_relay_module_init"
+signals:
+  - id: state
+    label: State
+    direction: input
+    unit: ""
+    field: state
+    kinds: "toggle button"
+    summary: The state the module reports.

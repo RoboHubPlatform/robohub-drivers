@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "code received"
+  buses: "gpio"
+  summary: "An infrared receiver on a GPIO."
+
 metadata:
   tags:
     - driver
@@ -52,3 +58,9 @@ metadata:
     - infrared receiver nec ir
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubInfraredReceiverGpio
+telemetry_fields:
+  - "code|code||u32|interface|read|0"
+  - "received|received||bool|interface|read|1"

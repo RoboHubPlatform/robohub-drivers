@@ -85,3 +85,15 @@ metadata:
     - output
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_008_laser_transmitter_module.h"
+  init: "robohub_ky_008_laser_transmitter_module_init"
+signals:
+  - id: state
+    label: State
+    direction: input
+    unit: ""
+    field: state
+    kinds: "toggle button"
+    summary: The state the module reports.

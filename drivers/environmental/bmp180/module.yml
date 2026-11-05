@@ -90,3 +90,10 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubBMP180
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|temperature|get_celsius|0"
+  - "pressure|pressure_pa|Pa|f32|pressure|get_pressure|0"
+  - "altitude|altitude_m|m|f32|altitude|get_altitude|0"

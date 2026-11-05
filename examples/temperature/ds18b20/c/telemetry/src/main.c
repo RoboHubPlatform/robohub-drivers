@@ -4,7 +4,7 @@
  *
  * Three modules meet here and none of them knows the others:
  *
- *   robohub-drivers   the DS18B20 publishes EVENT_TEMP_READING
+ *   sensors.c         the fitted modules publish SensorReading
  *   robohub-core      carries the event to its subscribers
  *   robohub-telemetry subscribed to that event, writes each reading to a sink
  *   robohub-transport frames each write as COBS and hands it to the link
@@ -27,9 +27,7 @@
 #include "error.h"
 #include "robohub/hal/console.h"
 #include "robohub/hal/uart.h"
-#include "robohub/hal/onewire.h"
 #include "robohub/hal/timer.h"
-#include "robohub/drivers/temperature/ds18b20.h"
 #include "robohub/core/core.h"
 #include "robohub/core/app.h"
 #include "robohub/core/event.h"
@@ -39,6 +37,7 @@
 #include "robohub/transport.h"
 #include "robohub/telemetry.h"
 #include "protocol.h"
+#include "sensors.h"
 
 #if defined(__has_include)
 #  if __has_include("autoconf.h")
@@ -49,9 +48,8 @@
 #include "robohub/net.h"
 #endif
 
-/* The names the Pico's board support package registers; the module's defaults. */
-#define ONEWIRE_NAME "onewire0"
-#define TIMER_NAME   "system_timer"
+/* The name the Pico's board support package registers its timer under. */
+#define TIMER_NAME "system_timer"
 #define REPORT_PERIOD_MS 500u
 
 /* When the network is enabled, the same frames also go to a TCP gateway.
@@ -113,15 +111,6 @@
 #  endif
 #endif
 
-/* The event the reading travels as, and its layout, both from the schema. The
- * gateway is generated from the same schemas/link.rho, so the two ends write one
- * layout; the schema names the reading MESSAGE_ID_TELEMETRY (0x0201).
- *
- * The payload is the schema's `Telemetry` — a version byte, the device (an area
- * and a node), timestamp_ms, temperature_c and status — serialized here rather
- * than the bare float this example once published. A gateway that decoded the
- * bare float could not be sure what it was; the schema's message it can. */
-#define EVENT_TEMP_READING MESSAGE_ID_TELEMETRY
 
 /* This board's identity on the bus: the area it is in and its node id within it.
  * A gateway numbers several areas, so the pair — not the node id alone — is what
@@ -178,133 +167,37 @@ static int uart_phy_write(const rh_u8* data, rh_size length, void* context)
 /*  Sensor application                                                        */
 /* -------------------------------------------------------------------------- */
 
-static RoboHubDS18B20 sensor;
-static RoboHubDS18B20Config sensor_config;
 static RoboHubTimer* system_timer;
-static rh_u32 next_sensor_attempt_ms;
-static RoboHubError sensor_error = ROBOHUB_OK;
 
-/* A board whose sensor did not answer still reports: the runtime starts, and
- * every reading carries FAULT. A gateway then says "this device is there and
- * its sensor is not", which is more useful than a device that is simply absent
- * because its init refused to let the runtime run. */
-static rh_bool sensor_ready = RH_FALSE;
-
-static RoboHubError read_and_publish(robohub_core_task_id id, void* user)
-{
-    (void)id;
-    (void)user;
-
-    /* A sensor connected after boot is still picked up: the one-time init at
-     * startup is retried every few seconds while the bus says nothing. Without
-     * this, plugging the part in later leaves the node reporting FAULT until it
-     * is reset, even though the bus and the part are fine. */
-    if (!sensor_ready && sensor_config.bus != 0 && system_timer != 0) {
-        rh_u32 now_ms = to_ms_since_boot(get_absolute_time());
-        if (now_ms >= next_sensor_attempt_ms) {
-            next_sensor_attempt_ms = now_ms + 5000u;
-            sensor_error = robohub_ds18b20_init(&sensor, &sensor_config);
-            if (ROBOHUB_SUCCEEDED(sensor_error)) {
-                sensor_ready = RH_TRUE;
-            }
-        }
-    }
-
-    rh_f32 celsius = 0.0f;
-    RoboHubError err = ROBOHUB_ERR_NOT_FOUND;
-    if (sensor_ready) {
-        err = robohub_ds18b20_get_celsius(&sensor, &celsius);
-        if (ROBOHUB_FAILED(err)) {
-            sensor_error = err;
-            sensor_ready = RH_FALSE;
-            next_sensor_attempt_ms = to_ms_since_boot(get_absolute_time()) + 1000u;
-        } else {
-            sensor_error = ROBOHUB_OK;
-        }
-    }
-
-    /* A failed read is still published, carrying FAULT: a gateway that sees the
-     * status knows the difference between a stale reading and a dead sensor,
-     * which a missing frame could not tell it. */
-    Telemetry message = {
-        .device = { .area_id = RH_AREA_ID, .node_id = RH_NODE_ID },
-        .timestamp_ms = to_ms_since_boot(get_absolute_time()),
-        .temperature_c = (ROBOHUB_SUCCEEDED(err)) ? celsius : 0.0f,
-        .status = (ROBOHUB_SUCCEEDED(err)) ? NODE_STATUS_OK : NODE_STATUS_FAULT,
-    };
-    rh_u8 payload[TELEMETRY_WIRE_SIZE];
-    if (Telemetry_serialize(&message, payload, sizeof(payload)) == 0u) {
-        return ROBOHUB_ERR_PROTOCOL;
-    }
-    RoboHubError published = robohub_core_event_publish(
-        EVENT_TEMP_READING, payload, (rh_size)TELEMETRY_WIRE_SIZE);
-    if (ROBOHUB_FAILED(published)) {
-        return published;
-    }
-
-    /* The same measurement as a generic reading. A sensor that is not a
-     * temperature uses only this path; the typed message stays for the boards
-     * and hosts that already speak it. The field name is the one a device
-     * manifest declares, so a gateway stores it under that name without
-     * knowing the part. */
-    SensorReading generic = {
-        .device = { .area_id = RH_AREA_ID, .node_id = RH_NODE_ID },
-        .timestamp_ms = message.timestamp_ms,
-        .status = (uint16_t)message.status,
-        .field = "temperature_c",
-        .value = message.temperature_c,
-    };
-    rh_u8 generic_payload[SENSOR_READING_WIRE_SIZE];
-    if (SensorReading_serialize(&generic, generic_payload, sizeof(generic_payload)) == 0u) {
-        return ROBOHUB_ERR_PROTOCOL;
-    }
-    return robohub_core_event_publish(MESSAGE_ID_SENSOR_READING, generic_payload,
-                                      (rh_size)SENSOR_READING_WIRE_SIZE);
-}
-
+/* The board's sensors are the generated set in sensors.c. The timer is still
+ * owned here because the diagnostics smoke runs against it. */
 static RoboHubError sensor_init(void)
 {
-    RoboHubOneWire* bus = robohub_get_onewire(ONEWIRE_NAME);
     system_timer = robohub_get_timer(TIMER_NAME);
-    if (bus == 0 || system_timer == 0) {
-        sensor_error = ROBOHUB_ERR_NOT_FOUND;
-        return ROBOHUB_OK;
-    }
-    sensor_config.bus = bus;
-    sensor_config.timer = system_timer;
-    sensor_config.resolution_bits = 12;
-    sensor_config.alarm_high_c = 30;
-    sensor_config.alarm_low_c = 0;
-    next_sensor_attempt_ms = 0u;
-    RoboHubError err = ROBOHUB_ERR_IO;
-    for (rh_u32 attempt = 0; attempt < 5u; attempt++) {
-        err = robohub_ds18b20_init(&sensor, &sensor_config);
-        if (ROBOHUB_SUCCEEDED(err)) {
-            sensor_ready = RH_TRUE;
-            sensor_error = ROBOHUB_OK;
-            return ROBOHUB_OK;
-        }
-        system_timer->delay_ms(system_timer, 200u);
-    }
-    /* The sensor is absent or not answering. That is a fault to report, not a
-     * reason to leave the board without a runtime. */
-    sensor_ready = RH_FALSE;
-    sensor_error = err;
+    sensors_init();
     return ROBOHUB_OK;
 }
 
 static robohub_core_task_id sample_task = RH_CORE_TASK_INVALID;
 static rh_u16 sample_period_ms = REPORT_PERIOD_MS;
 
+static RoboHubError poll_sensors(robohub_core_task_id id, void* user)
+{
+    (void)id;
+    (void)user;
+    sensors_poll();
+    return ROBOHUB_OK;
+}
+
 static RoboHubError sensor_start(void)
 {
-    return robohub_core_task_add("temp", read_and_publish, 0, sample_period_ms, &sample_task);
+    return robohub_core_task_add("sensors", poll_sensors, 0, sample_period_ms, &sample_task);
 }
 
 /* A control from the gateway: `CONTROL_REQUEST` in, `CONTROL_RESPONSE` out, the
  * caller's tx_id carried back so it can match the answer to its request. The
  * request names the device it is for and carries one argument; sampling rate is
- * opcode 1, and the period is clamped to one a DS18B20 conversion can meet. The
+ * opcode 1, and the period is clamped to one a sensor conversion can meet. The
  * acknowledgement repeats the device and the opcode and reports what was
  * actually set, not what was asked for. */
 static RoboHubError on_control(robohub_event_id id, const void* payload, rh_size size, void* user)
@@ -376,7 +269,7 @@ static RoboHubError on_diag(robohub_event_id id, const void* payload, rh_size si
         .tasks_run = counters.tasks_run,
         .task_errors = counters.task_errors,
         .last_error = (rh_u16)(counters.last_error != (rh_u16)ROBOHUB_OK
-            ? counters.last_error : sensor_error),
+            ? counters.last_error : sensors_last_error()),
         .probe_ok = probe_ok,
         .probe_fault = probe_fault,
     };
@@ -538,7 +431,6 @@ int main(void)
 
     /* Subscribe after the runtime is up: bringing it up initialises the event
      * bus, which starts with no subscriptions and would drop this one. */
-    (void)robohub_telemetry_enable_event(EVENT_TEMP_READING, 1u);
     (void)robohub_telemetry_enable_event(MESSAGE_ID_SENSOR_READING, 1u);
     /* The acknowledgement goes back out the same link, with the caller's tx. */
     (void)robohub_telemetry_enable_event(MESSAGE_ID_CONTROL_RESPONSE, 1u);

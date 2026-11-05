@@ -91,3 +91,22 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_039_heartbeat_sensor_module.h"
+  init: "robohub_ky_039_heartbeat_sensor_module_init"
+signals:
+  - id: bpm
+    label: Heart rate
+    direction: input
+    unit: ""
+    field: bpm
+    kinds: "numeric chart table"
+    summary: The heart rate the module reports.
+  - id: beat
+    label: Beat
+    direction: input
+    unit: ""
+    field: beat
+    kinds: "boolean switch table"
+    summary: The beat the module reports.

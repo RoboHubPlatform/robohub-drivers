@@ -133,3 +133,30 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "bmp180_module.h"
+  init: "robohub_bmp180_module_init"
+  config: "NULL"
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The temperature the module reports.
+  - id: pressure
+    label: Pressure
+    direction: input
+    unit: "Pa"
+    field: pressure_pa
+    kinds: "numeric chart table"
+    summary: The pressure the module reports.
+  - id: altitude
+    label: Altitude
+    direction: input
+    unit: "m"
+    field: altitude_m
+    kinds: "numeric chart table"
+    summary: The altitude the module reports.

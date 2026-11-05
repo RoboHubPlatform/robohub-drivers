@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "bpm beat"
+  buses: "adc"
+  summary: "A pulse source on an ADC."
+
 metadata:
   tags:
     - driver
@@ -52,3 +58,9 @@ metadata:
     - pulse heartbeat rate adc
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubPulseAdc
+telemetry_fields:
+  - "bpm|bpm||u16|interface|read|0"
+  - "beat|beat||bool|interface|read|1"

@@ -70,3 +70,15 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_017_mercury_switch_module.h"
+  init: "robohub_ky_017_mercury_switch_module_init"
+signals:
+  - id: pressed
+    label: Pressed
+    direction: input
+    unit: ""
+    field: pressed
+    kinds: "boolean switch table"
+    summary: The pressed the module reports.
