@@ -510,3 +510,93 @@ bool SensorReading_deserialize(const uint8_t* data, size_t length, SensorReading
     return true;
 }
 
+size_t Announce_serialize(const Announce* value, uint8_t* out, size_t capacity)
+{
+    if (value == 0 || out == 0 || capacity < ANNOUNCE_WIRE_SIZE) {
+        return 0u;
+    }
+    size_t off = 0u;
+    robohub_v1_put_u8(out + off, (uint8_t)1);
+    off += 1u;
+    if (GatewayId_serialize(&value->gateway, out + off, capacity - off) == 0u) {
+        return 0u;
+    }
+    off += GATEWAY_ID_WIRE_SIZE;
+    robohub_v1_put_u16(out + off, (uint16_t)value->firmware_version);
+    off += 2u;
+    robohub_v1_put_u16(out + off, (uint16_t)value->mode);
+    off += 2u;
+    robohub_v1_put_u16(out + off, (uint16_t)value->capabilities);
+    off += 2u;
+    robohub_v1_put_u16(out + off, (uint16_t)value->area_id);
+    off += 2u;
+    return off;
+}
+
+bool Announce_deserialize(const uint8_t* data, size_t length, Announce* out)
+{
+    if (data == 0 || out == 0 || length < ANNOUNCE_WIRE_SIZE) {
+        return false;
+    }
+    if (data[0] != (uint8_t)1) {
+        return false;
+    }
+    size_t off = 1u;
+    if (!GatewayId_deserialize(data + off, length - off, &out->gateway)) {
+        return false;
+    }
+    off += GATEWAY_ID_WIRE_SIZE;
+    out->firmware_version = robohub_v1_get_u16(data + off);
+    off += 2u;
+    out->mode = robohub_v1_get_u16(data + off);
+    off += 2u;
+    out->capabilities = robohub_v1_get_u16(data + off);
+    off += 2u;
+    out->area_id = robohub_v1_get_u16(data + off);
+    off += 2u;
+    return true;
+}
+
+size_t Reading_serialize(const Reading* value, uint8_t* out, size_t capacity)
+{
+    if (value == 0 || out == 0 || capacity < READING_WIRE_SIZE) {
+        return 0u;
+    }
+    size_t off = 0u;
+    robohub_v1_put_u8(out + off, (uint8_t)1);
+    off += 1u;
+    if (DeviceId_serialize(&value->device, out + off, capacity - off) == 0u) {
+        return 0u;
+    }
+    off += DEVICE_ID_WIRE_SIZE;
+    robohub_v1_put_u32(out + off, (uint32_t)value->timestamp_ms);
+    off += 4u;
+    robohub_v1_put_f32(out + off, value->temperature_c);
+    off += 4u;
+    robohub_v1_put_u16(out + off, (uint16_t)value->status);
+    off += 2u;
+    return off;
+}
+
+bool Reading_deserialize(const uint8_t* data, size_t length, Reading* out)
+{
+    if (data == 0 || out == 0 || length < READING_WIRE_SIZE) {
+        return false;
+    }
+    if (data[0] != (uint8_t)1) {
+        return false;
+    }
+    size_t off = 1u;
+    if (!DeviceId_deserialize(data + off, length - off, &out->device)) {
+        return false;
+    }
+    off += DEVICE_ID_WIRE_SIZE;
+    out->timestamp_ms = robohub_v1_get_u32(data + off);
+    off += 4u;
+    out->temperature_c = robohub_v1_get_f32(data + off);
+    off += 4u;
+    out->status = robohub_v1_get_u16(data + off);
+    off += 2u;
+    return true;
+}
+
