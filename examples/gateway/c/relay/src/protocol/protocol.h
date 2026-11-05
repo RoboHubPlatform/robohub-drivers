@@ -262,6 +262,31 @@ typedef struct __attribute__((packed)) {
 size_t SensorReading_serialize(const SensorReading* value, uint8_t* out, size_t capacity);
 bool SensorReading_deserialize(const uint8_t* data, size_t length, SensorReading* out);
 
+/* message Announce */
+typedef struct __attribute__((packed)) {
+    GatewayId gateway;
+    uint16_t firmware_version;
+    uint16_t mode;
+    uint16_t capabilities;
+    uint16_t area_id;
+} Announce;
+
+#define ANNOUNCE_WIRE_SIZE 14
+size_t Announce_serialize(const Announce* value, uint8_t* out, size_t capacity);
+bool Announce_deserialize(const uint8_t* data, size_t length, Announce* out);
+
+/* message Reading */
+typedef struct __attribute__((packed)) {
+    DeviceId device;
+    uint32_t timestamp_ms;
+    float temperature_c;
+    uint16_t status;
+} Reading;
+
+#define READING_WIRE_SIZE 16
+size_t Reading_serialize(const Reading* value, uint8_t* out, size_t capacity);
+bool Reading_deserialize(const uint8_t* data, size_t length, Reading* out);
+
 #ifdef __cplusplus
 }
 #endif
