@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "level"
+  buses: "adc"
+  summary: "An analog input on an ADC."
+
 metadata:
   tags:
     - driver
@@ -52,3 +58,8 @@ metadata:
     - analog adc input
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubAnalogAdc
+telemetry_fields:
+  - "level|level||f32|interface|get_level|0"

@@ -135,3 +135,8 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ds18b20_temperature_module.h"
+  init: "robohub_ds18b20_module_init"
+  config: "NULL"

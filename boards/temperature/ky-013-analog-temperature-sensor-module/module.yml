@@ -90,3 +90,15 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_013_analog_temperature_sensor_module.h"
+  init: "robohub_ky_013_analog_temperature_sensor_module_init"
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The temperature the module reports.

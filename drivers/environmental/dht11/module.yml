@@ -81,3 +81,9 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubDHT11
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|temperature|get_celsius|0"
+  - "humidity|humidity|%|f32|humidity|get_humidity|0"

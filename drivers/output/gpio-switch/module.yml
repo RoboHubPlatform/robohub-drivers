@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "state"
+  buses: "gpio"
+  summary: "An on/off output on a GPIO."
+
 metadata:
   tags:
     - driver
@@ -52,3 +58,8 @@ metadata:
     - gpio switch output
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubGpioSwitch
+telemetry_fields:
+  - "state|state||bool|interface|get|0"

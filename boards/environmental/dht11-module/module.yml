@@ -107,3 +107,23 @@ metadata:
     - air
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "dht11_module.h"
+  init: "robohub_dht11_module_init"
+  config: "NULL"
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The temperature the module reports.
+  - id: humidity
+    label: Humidity
+    direction: input
+    unit: "%"
+    field: humidity
+    kinds: "numeric chart table"
+    summary: The humidity the module reports.

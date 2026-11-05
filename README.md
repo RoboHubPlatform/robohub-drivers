@@ -293,3 +293,50 @@ ROBOHUB_COMMON_DIR=/path/to/robohub-common tests/run.sh
 ## Release history
 
 [CHANGELOG.md](CHANGELOG.md) — the changes in 0.2.0 and earlier releases.
+
+## Telemetry descriptors
+
+A driver and its board module describe what a node can publish, so Mesh can
+build a firmware for the modules in a plan without a per-driver example.
+
+A driver names its device type and one line per signal it can read:
+
+```yaml
+telemetry:
+  device: RoboHubDHT11
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|temperature|get_celsius|0"
+  - "humidity|humidity|%|f32|humidity|get_humidity|0"
+```
+
+The line is `signal|field|unit|type|member|read|output`. `signal` is the source
+ID Mesh publishes, `field` is the name on the wire, `member` is the interface
+member on the device, `read` is its function pointer, and `output` is the
+argument position for a read that returns more than one value.
+
+A board module names the BSP entry point and carries the signals it exposes:
+
+```yaml
+telemetry:
+  header: "dht11_module.h"
+  init: "robohub_dht11_module_init"
+  config: "NULL"          # omit when init takes only the device
+
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+```
+
+Mesh copies the telemetry node template and generates `sensors.c` from these
+descriptors. A module field is stored as `m<node-index>.<field>`, so two sensors
+measuring the same quantity on one node remain two series. A module with no
+read path (an RGB output, a tone output) is still linked and still gets its
+Kconfig, it simply contributes no reading.
+
+The dual-axis joystick is the one module that does not yet have a descriptor:
+it presents two analog axes and a button through three init calls, and the
+descriptor grammar currently describes one device per module.

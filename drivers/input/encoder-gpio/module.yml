@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "steps clockwise"
+  buses: "gpio"
+  summary: "A quadrature encoder on two GPIO pins."
+
 metadata:
   tags:
     - driver
@@ -52,3 +58,9 @@ metadata:
     - encoder rotary knob
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubEncoderGpio
+telemetry_fields:
+  - "steps|steps||i32|interface|read|0"
+  - "clockwise|clockwise||bool|interface|read|1"

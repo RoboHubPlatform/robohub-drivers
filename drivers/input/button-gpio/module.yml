@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "pressed"
+  buses: "gpio"
+  summary: "A discrete contact on a GPIO."
+
 metadata:
   tags:
     - input
@@ -53,3 +59,8 @@ metadata:
     - driver
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubButtonGpio
+telemetry_fields:
+  - "pressed|pressed||bool|interface|get|0"

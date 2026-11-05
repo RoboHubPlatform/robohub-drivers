@@ -87,3 +87,22 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_022_infrared_receiver_module.h"
+  init: "robohub_ky_022_infrared_receiver_module_init"
+signals:
+  - id: code
+    label: Code
+    direction: input
+    unit: ""
+    field: code
+    kinds: "numeric chart table"
+    summary: The code the module reports.
+  - id: received
+    label: Received
+    direction: input
+    unit: ""
+    field: received
+    kinds: "boolean switch table"
+    summary: The received the module reports.

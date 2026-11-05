@@ -131,3 +131,8 @@ metadata:
     - dirt
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ds18b20_waterproof_probe_module.h"
+  init: "robohub_ds18b20_waterproof_probe_init"
+  config: "NULL"

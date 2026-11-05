@@ -1,5 +1,9 @@
 #
-# ds18b20/c/telemetry — the whole stack: sensor -> core bus -> telemetry -> USB CDC.
+# telemetry node — the whole stack: sensors -> core bus -> telemetry -> link.
+#
+# This is the node template Mesh copies. Its default sensors.c fits one DS18B20;
+# Mesh replaces that file with the modules the plan selected, so the same
+# program carries a DHT11, a BMP180, a relay or any other read path.
 #
 # The sensor application publishes a reading and knows nothing else. Telemetry
 # has subscribed to that event and writes each frame to a transport whose bytes
@@ -26,8 +30,9 @@ module:
   type: module
   version: 0.1.0
   description: >
-    Reads the DS18B20 and streams each reading as a COBS frame over USB CDC,
-    through robohub-core, robohub-telemetry and robohub-transport.
+    The telemetry node template. Its default sensors.c reads a DS18B20; Mesh
+    generates that file from the modules in a plan so the same program carries
+    every sensor fitted to the node.
 
   maintainer: "Aurel Miron"
   license: "MIT"
@@ -39,6 +44,7 @@ build:
   language: c
   sources:
     - src/main.c
+    - src/sensors.c
     # The payloads, generated from schemas/link.rho. The same schema
     # generates the gateway's Rho, so both ends write one layout.
     - src/protocol/protocol.c

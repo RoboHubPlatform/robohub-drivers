@@ -89,3 +89,15 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_024_linear_magnetic_hall_module.h"
+  init: "robohub_ky_024_linear_magnetic_hall_module_init"
+signals:
+  - id: level
+    label: Level
+    direction: input
+    unit: ""
+    field: level
+    kinds: "numeric chart table"
+    summary: The level the module reports.

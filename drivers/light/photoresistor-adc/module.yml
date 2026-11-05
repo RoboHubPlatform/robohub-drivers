@@ -45,6 +45,12 @@ package:
   kind: library
   binary: false
 
+capabilities:
+  sensor: true
+  measures: "light"
+  buses: "adc"
+  summary: "A photoresistor on an ADC."
+
 metadata:
   tags:
     - light
@@ -53,3 +59,8 @@ metadata:
     - driver
   stability: experimental
   visibility: public
+
+telemetry:
+  device: RoboHubPhotoresistorAdc
+telemetry_fields:
+  - "light|light||f32|interface|get_level|0"

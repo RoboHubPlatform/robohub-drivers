@@ -85,3 +85,15 @@ metadata:
     - input
   stability: experimental
   visibility: public
+
+telemetry:
+  header: "ky_033_line_tracking_sensor_module.h"
+  init: "robohub_ky_033_line_tracking_sensor_module_init"
+signals:
+  - id: pressed
+    label: Pressed
+    direction: input
+    unit: ""
+    field: pressed
+    kinds: "boolean switch table"
+    summary: The pressed the module reports.
