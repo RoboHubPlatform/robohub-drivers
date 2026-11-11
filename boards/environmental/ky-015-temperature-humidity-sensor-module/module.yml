@@ -1,5 +1,6 @@
 module:
   name: ky-015-temperature-humidity-sensor-module
+  id: robohub-drivers.boards.environmental.ky-015-temperature-humidity-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

@@ -15,6 +15,7 @@
 
 module:
   name: robohub-gateway-relay-host
+  id: robohub-drivers.examples.gateway.c.relay-host
   type: module
   version: 0.1.0
   description: >

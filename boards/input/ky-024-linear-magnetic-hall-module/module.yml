@@ -1,5 +1,6 @@
 module:
   name: ky-024-linear-magnetic-hall-module
+  id: robohub-drivers.boards.input.ky-024-linear-magnetic-hall-module
   type: driver-board
   version: 0.1.0
   description: >

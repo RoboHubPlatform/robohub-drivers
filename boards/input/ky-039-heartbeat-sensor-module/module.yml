@@ -1,5 +1,6 @@
 module:
   name: ky-039-heartbeat-sensor-module
+  id: robohub-drivers.boards.input.ky-039-heartbeat-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

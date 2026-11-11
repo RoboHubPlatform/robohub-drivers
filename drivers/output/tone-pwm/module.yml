@@ -1,5 +1,6 @@
 module:
   name: robohub-driver-tone-pwm
+  id: robohub-drivers.drivers.output.tone-pwm
   type: driver
   version: 0.1.0
   description: >

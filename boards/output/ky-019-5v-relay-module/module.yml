@@ -1,5 +1,6 @@
 module:
   name: ky-019-5v-relay-module
+  id: robohub-drivers.boards.output.ky-019-5v-relay-module
   type: driver-board
   version: 0.1.0
   description: >

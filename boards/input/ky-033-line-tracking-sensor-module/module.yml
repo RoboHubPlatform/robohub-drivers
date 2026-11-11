@@ -1,5 +1,6 @@
 module:
   name: ky-033-line-tracking-sensor-module
+  id: robohub-drivers.boards.input.ky-033-line-tracking-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

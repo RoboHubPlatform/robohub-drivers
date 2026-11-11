@@ -1,5 +1,6 @@
 module:
   name: ky-002-vibration-switch-module
+  id: robohub-drivers.boards.input.ky-002-vibration-switch-module
   type: driver-board
   version: 0.1.0
   description: >

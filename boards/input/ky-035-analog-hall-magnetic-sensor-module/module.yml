@@ -1,5 +1,6 @@
 module:
   name: ky-035-analog-hall-magnetic-sensor-module
+  id: robohub-drivers.boards.input.ky-035-analog-hall-magnetic-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

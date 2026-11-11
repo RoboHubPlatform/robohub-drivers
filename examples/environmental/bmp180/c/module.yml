@@ -10,6 +10,7 @@
 
 module:
   name: bmp180-environmental-c
+  id: robohub-drivers.examples.environmental.bmp180.c
   type: module
   version: 0.1.0
   description: >

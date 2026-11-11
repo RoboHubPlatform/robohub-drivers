@@ -1,5 +1,6 @@
 module:
   name: ky-010-photo-interrupter-module
+  id: robohub-drivers.boards.input.ky-010-photo-interrupter-module
   type: driver-board
   version: 0.1.0
   description: >

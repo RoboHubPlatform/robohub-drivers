@@ -27,6 +27,7 @@
 
 module:
   name: ds18b20-temperature-c-telemetry
+  id: robohub-drivers.examples.temperature.ds18b20.c.telemetry
   type: module
   version: 0.1.0
   description: >

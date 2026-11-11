@@ -14,6 +14,7 @@
 
 module:
   name: robohub-gateway-uplink-host
+  id: robohub-drivers.examples.gateway.c.uplink-host
   type: module
   version: 0.1.0
   description: >

@@ -1,5 +1,6 @@
 module:
   name: ky-003-hall-magnetic-sensor-module
+  id: robohub-drivers.boards.input.ky-003-hall-magnetic-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

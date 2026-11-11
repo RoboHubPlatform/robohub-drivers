@@ -14,6 +14,7 @@
 
 module:
   name: ds18b20-temperature-c-freertos
+  id: robohub-drivers.examples.temperature.ds18b20.c.freertos
   type: module
   version: 0.1.0
   description: >

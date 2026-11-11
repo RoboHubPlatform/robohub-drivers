@@ -1,5 +1,6 @@
 module:
   name: ky-012-active-buzzer-module
+  id: robohub-drivers.boards.output.ky-012-active-buzzer-module
   type: driver-board
   version: 0.1.0
   description: >

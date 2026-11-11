@@ -13,6 +13,7 @@
 
 module:
   name: dht11-environmental-rho
+  id: robohub-drivers.examples.environmental.dht11.rho
   type: module
   version: 0.1.0
   description: >

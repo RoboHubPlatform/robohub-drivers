@@ -1,5 +1,6 @@
 module:
   name: ky-038-microphone-sound-sensor-module
+  id: robohub-drivers.boards.input.ky-038-microphone-sound-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

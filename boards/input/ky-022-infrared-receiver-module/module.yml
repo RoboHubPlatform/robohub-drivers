@@ -1,5 +1,6 @@
 module:
   name: ky-022-infrared-receiver-module
+  id: robohub-drivers.boards.input.ky-022-infrared-receiver-module
   type: driver-board
   version: 0.1.0
   description: >

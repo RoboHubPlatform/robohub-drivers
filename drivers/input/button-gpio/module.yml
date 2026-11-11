@@ -1,5 +1,6 @@
 module:
   name: robohub-driver-button-gpio
+  id: robohub-drivers.drivers.input.button-gpio
   type: driver
   version: 0.1.0
   description: >

@@ -13,6 +13,7 @@
 
 module:
   name: robohub-drivers
+  id: robohub-drivers
   type: collection
   version: 0.3.0
   description: >
@@ -97,6 +98,15 @@ contracts:
         - cmake.target
         - cmake.include_dirs
         - cmake.link_libraries
+
+# The interfaces every module in the collection is written against. A
+# collection is not built, but it belongs to the ecosystem that declares those
+# interfaces, and naming it is what lets a tool recognize the platform and find
+# the module contract the ecosystem publishes.
+depends:
+  - name: robohub-common
+    type: c
+    path: ../robohub-common
 
 # What `rho init` can write here. Inline for a repository this small; a larger
 # one points at a generate.yml it keeps beside its sources.

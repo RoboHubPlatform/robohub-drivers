@@ -1,5 +1,6 @@
 module:
   name: ky-008-laser-transmitter-module
+  id: robohub-drivers.boards.output.ky-008-laser-transmitter-module
   type: driver-board
   version: 0.1.0
   description: >

@@ -1,5 +1,6 @@
 module:
   name: ky-016-rgb-full-color-led-module
+  id: robohub-drivers.boards.output.ky-016-rgb-full-color-led-module
   type: driver-board
   version: 0.1.0
   description: >
