@@ -1,6 +1,8 @@
 module:
   name: ky-032-infrared-obstacle-avoidance-sensor-module
-  id: robohub-drivers.boards.input.ky-032-infrared-obstacle-avoidance-sensor-module
+  id: robohub.board.ky-032-infrared-obstacle-avoidance-sensor-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-032-infrared-obstacle-avoidance-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

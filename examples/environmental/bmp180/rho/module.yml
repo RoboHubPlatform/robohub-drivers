@@ -14,7 +14,9 @@
 
 module:
   name: bmp180-environmental-rho
-  id: robohub-drivers.examples.environmental.bmp180.rho
+  id: robohub.module.bmp180-environmental-rho
+  previous_ids:
+    - robohub-drivers.examples.environmental.bmp180.rho
   type: module
   version: 0.1.0
   description: >

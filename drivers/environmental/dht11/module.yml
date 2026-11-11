@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-dht11
-  id: robohub-drivers.drivers.environmental.dht11
+  id: robohub.driver.dht11
+  previous_ids:
+    - robohub-drivers.drivers.environmental.dht11
   type: driver
   version: 0.1.0
   description: >

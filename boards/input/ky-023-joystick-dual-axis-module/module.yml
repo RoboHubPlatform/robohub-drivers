@@ -1,6 +1,8 @@
 module:
   name: ky-023-joystick-dual-axis-module
-  id: robohub-drivers.boards.input.ky-023-joystick-dual-axis-module
+  id: robohub.board.ky-023-joystick-dual-axis-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-023-joystick-dual-axis-module
   type: driver-board
   version: 0.1.0
   description: >

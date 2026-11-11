@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-ds18b20
-  id: robohub-drivers.drivers.temperature.ds18b20
+  id: robohub.driver.ds18b20
+  previous_ids:
+    - robohub-drivers.drivers.temperature.ds18b20
   type: driver
   version: 0.1.0
   description: >

@@ -1,6 +1,8 @@
 module:
   name: ky-009-rgb-led-module
-  id: robohub-drivers.boards.output.ky-009-rgb-led-module
+  id: robohub.board.ky-009-rgb-led-module
+  previous_ids:
+    - robohub-drivers.boards.output.ky-009-rgb-led-module
   type: driver-board
   version: 0.1.0
   description: >

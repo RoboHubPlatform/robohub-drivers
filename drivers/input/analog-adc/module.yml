@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-analog-adc
-  id: robohub-drivers.drivers.input.analog-adc
+  id: robohub.driver.analog-adc
+  previous_ids:
+    - robohub-drivers.drivers.input.analog-adc
   type: driver
   version: 0.1.0
   description: >

@@ -1,6 +1,8 @@
 module:
   name: ky-040-rotary-encoder-module
-  id: robohub-drivers.boards.input.ky-040-rotary-encoder-module
+  id: robohub.board.ky-040-rotary-encoder-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-040-rotary-encoder-module
   type: driver-board
   version: 0.1.0
   description: >

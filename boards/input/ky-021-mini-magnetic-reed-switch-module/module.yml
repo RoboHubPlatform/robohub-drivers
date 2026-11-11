@@ -1,6 +1,8 @@
 module:
   name: ky-021-mini-magnetic-reed-switch-module
-  id: robohub-drivers.boards.input.ky-021-mini-magnetic-reed-switch-module
+  id: robohub.board.ky-021-mini-magnetic-reed-switch-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-021-mini-magnetic-reed-switch-module
   type: driver-board
   version: 0.1.0
   description: >

@@ -7,7 +7,9 @@
 
 module:
   name: dht11-module
-  id: robohub-drivers.boards.environmental.dht11-module
+  id: robohub.board.dht11-module
+  previous_ids:
+    - robohub-drivers.boards.environmental.dht11-module
   type: driver-board
   version: 0.1.0
   description: >

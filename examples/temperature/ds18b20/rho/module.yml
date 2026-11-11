@@ -13,7 +13,9 @@
 
 module:
   name: ds18b20-temperature-rho
-  id: robohub-drivers.examples.temperature.ds18b20.rho
+  id: robohub.module.ds18b20-temperature-rho
+  previous_ids:
+    - robohub-drivers.examples.temperature.ds18b20.rho
   type: module
   version: 0.1.0
   description: >

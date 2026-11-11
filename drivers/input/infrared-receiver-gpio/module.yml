@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-infrared-receiver-gpio
-  id: robohub-drivers.drivers.input.infrared-receiver-gpio
+  id: robohub.driver.infrared-receiver-gpio
+  previous_ids:
+    - robohub-drivers.drivers.input.infrared-receiver-gpio
   type: driver
   version: 0.1.0
   description: >

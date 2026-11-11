@@ -1,6 +1,8 @@
 module:
   name: ky-029-dual-color-led-module
-  id: robohub-drivers.boards.output.ky-029-dual-color-led-module
+  id: robohub.board.ky-029-dual-color-led-module
+  previous_ids:
+    - robohub-drivers.boards.output.ky-029-dual-color-led-module
   type: driver-board
   version: 0.1.0
   description: >

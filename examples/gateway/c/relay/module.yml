@@ -14,7 +14,9 @@
 
 module:
   name: robohub-gateway-relay
-  id: robohub-drivers.examples.gateway.c.relay
+  id: robohub.module.gateway-relay
+  previous_ids:
+    - robohub-drivers.examples.gateway.c.relay
   type: module
   version: 0.1.0
   description: >

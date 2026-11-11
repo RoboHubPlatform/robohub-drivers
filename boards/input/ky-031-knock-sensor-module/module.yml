@@ -1,6 +1,8 @@
 module:
   name: ky-031-knock-sensor-module
-  id: robohub-drivers.boards.input.ky-031-knock-sensor-module
+  id: robohub.board.ky-031-knock-sensor-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-031-knock-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

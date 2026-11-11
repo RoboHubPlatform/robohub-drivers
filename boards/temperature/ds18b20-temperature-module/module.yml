@@ -7,7 +7,9 @@
 
 module:
   name: ds18b20-temperature-module
-  id: robohub-drivers.boards.temperature.ds18b20-temperature-module
+  id: robohub.board.ds18b20-temperature-module
+  previous_ids:
+    - robohub-drivers.boards.temperature.ds18b20-temperature-module
   type: driver-board
   version: 0.1.0
   description: >

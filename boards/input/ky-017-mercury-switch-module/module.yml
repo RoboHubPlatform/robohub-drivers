@@ -1,6 +1,8 @@
 module:
   name: ky-017-mercury-switch-module
-  id: robohub-drivers.boards.input.ky-017-mercury-switch-module
+  id: robohub.board.ky-017-mercury-switch-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-017-mercury-switch-module
   type: driver-board
   version: 0.1.0
   description: >

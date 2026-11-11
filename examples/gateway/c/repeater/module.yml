@@ -32,7 +32,9 @@
 
 module:
   name: robohub-gateway-repeater
-  id: robohub-drivers.examples.gateway.c.repeater
+  id: robohub.module.gateway-repeater
+  previous_ids:
+    - robohub-drivers.examples.gateway.c.repeater
   type: module
   version: 0.1.0
   description: >

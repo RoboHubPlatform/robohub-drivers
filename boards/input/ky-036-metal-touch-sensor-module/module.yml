@@ -1,6 +1,8 @@
 module:
   name: ky-036-metal-touch-sensor-module
-  id: robohub-drivers.boards.input.ky-036-metal-touch-sensor-module
+  id: robohub.board.ky-036-metal-touch-sensor-module
+  previous_ids:
+    - robohub-drivers.boards.input.ky-036-metal-touch-sensor-module
   type: driver-board
   version: 0.1.0
   description: >

@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-thermistor-adc
-  id: robohub-drivers.drivers.temperature.thermistor-adc
+  id: robohub.driver.thermistor-adc
+  previous_ids:
+    - robohub-drivers.drivers.temperature.thermistor-adc
   type: driver
   version: 0.1.0
   description: >

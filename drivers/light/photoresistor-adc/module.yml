@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-photoresistor-adc
-  id: robohub-drivers.drivers.light.photoresistor-adc
+  id: robohub.driver.photoresistor-adc
+  previous_ids:
+    - robohub-drivers.drivers.light.photoresistor-adc
   type: driver
   version: 0.1.0
   description: >

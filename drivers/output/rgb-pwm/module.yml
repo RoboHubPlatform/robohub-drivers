@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-rgb-pwm
-  id: robohub-drivers.drivers.output.rgb-pwm
+  id: robohub.driver.rgb-pwm
+  previous_ids:
+    - robohub-drivers.drivers.output.rgb-pwm
   type: driver
   version: 0.1.0
   description: >

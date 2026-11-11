@@ -7,7 +7,9 @@
 
 module:
   name: max485-module
-  id: robohub-drivers.boards.transceiver.max485-module
+  id: robohub.board.max485-module
+  previous_ids:
+    - robohub-drivers.boards.transceiver.max485-module
   type: driver-board
   version: 0.1.0
   description: >

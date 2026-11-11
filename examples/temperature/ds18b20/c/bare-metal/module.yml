@@ -13,7 +13,9 @@
 
 module:
   name: ds18b20-temperature-c-bare-metal
-  id: robohub-drivers.examples.temperature.ds18b20.c.bare-metal
+  id: robohub.module.ds18b20-temperature-c-bare-metal
+  previous_ids:
+    - robohub-drivers.examples.temperature.ds18b20.c.bare-metal
   type: module
   version: 0.1.0
   description: >

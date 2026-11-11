@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-gpio-switch
-  id: robohub-drivers.drivers.output.gpio-switch
+  id: robohub.driver.gpio-switch
+  previous_ids:
+    - robohub-drivers.drivers.output.gpio-switch
   type: driver
   version: 0.1.0
   description: >

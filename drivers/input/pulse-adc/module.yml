@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-pulse-adc
-  id: robohub-drivers.drivers.input.pulse-adc
+  id: robohub.driver.pulse-adc
+  previous_ids:
+    - robohub-drivers.drivers.input.pulse-adc
   type: driver
   version: 0.1.0
   description: >

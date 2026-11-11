@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-bmp180
-  id: robohub-drivers.drivers.environmental.bmp180
+  id: robohub.driver.bmp180
+  previous_ids:
+    - robohub-drivers.drivers.environmental.bmp180
   type: driver
   version: 0.1.0
   description: >

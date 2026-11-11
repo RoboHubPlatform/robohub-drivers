@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-encoder-gpio
-  id: robohub-drivers.drivers.input.encoder-gpio
+  id: robohub.driver.encoder-gpio
+  previous_ids:
+    - robohub-drivers.drivers.input.encoder-gpio
   type: driver
   version: 0.1.0
   description: >

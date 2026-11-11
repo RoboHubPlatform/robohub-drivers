@@ -1,6 +1,8 @@
 module:
   name: robohub-driver-infrared-pwm
-  id: robohub-drivers.drivers.output.infrared-pwm
+  id: robohub.driver.infrared-pwm
+  previous_ids:
+    - robohub-drivers.drivers.output.infrared-pwm
   type: driver
   version: 0.1.0
   description: >

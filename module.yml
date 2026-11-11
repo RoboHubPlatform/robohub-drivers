@@ -13,7 +13,9 @@
 
 module:
   name: robohub-drivers
-  id: robohub-drivers
+  id: robohub.collection.drivers
+  previous_ids:
+    - robohub-drivers
   type: collection
   version: 0.3.0
   description: >

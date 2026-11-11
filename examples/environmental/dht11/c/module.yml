@@ -9,7 +9,9 @@
 
 module:
   name: dht11-environmental-c
-  id: robohub-drivers.examples.environmental.dht11.c
+  id: robohub.module.dht11-environmental-c
+  previous_ids:
+    - robohub-drivers.examples.environmental.dht11.c
   type: module
   version: 0.1.0
   description: >

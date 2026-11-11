@@ -1,6 +1,8 @@
 module:
   name: ky-027-magic-light-cup-module
-  id: robohub-drivers.boards.output.ky-027-magic-light-cup-module
+  id: robohub.board.ky-027-magic-light-cup-module
+  previous_ids:
+    - robohub-drivers.boards.output.ky-027-magic-light-cup-module
   type: driver-board
   version: 0.1.0
   description: >
