@@ -37,15 +37,15 @@ build:
 depends:
   - name: robohub-pico
     type: c
-    path: ${RHO_WORKSPACE}/robohub-pico
+    path: ${ROBOHUB_WORKSPACE}/robohub-pico
     git: https://github.com/RoboHubPlatform/robohub-pico
     branch: main
   - name: bmp180-module
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module
   - name: robohub-driver-bmp180
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180
 
 # The headers rho-cimport reads to write the foreign interface `ffi`. The board
 # BSP is the whole of what this program calls; the driver and the bus come with
@@ -62,14 +62,14 @@ c_connection:
     - error.h
     - types.h
   include_dirs:
-    - ${RHO_WORKSPACE}/robohub-pico/include
-    - ${RHO_WORKSPACE}/robohub-pico/include/robohub/hal
-    - ${RHO_WORKSPACE}/robohub-pico/include/robohub/platform
-    - ${RHO_WORKSPACE}/robohub-common/include
-    - ${RHO_WORKSPACE}/robohub-common/include/robohub/hal
-    - ${RHO_WORKSPACE}/robohub-common/include/robohub/drivers
-    - ${RHO_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180/inc
-    - ${RHO_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module/bsp
+    - ${ROBOHUB_WORKSPACE}/robohub-pico/include
+    - ${ROBOHUB_WORKSPACE}/robohub-pico/include/robohub/hal
+    - ${ROBOHUB_WORKSPACE}/robohub-pico/include/robohub/platform
+    - ${ROBOHUB_WORKSPACE}/robohub-common/include
+    - ${ROBOHUB_WORKSPACE}/robohub-common/include/robohub/hal
+    - ${ROBOHUB_WORKSPACE}/robohub-common/include/robohub/drivers
+    - ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180/inc
+    - ${ROBOHUB_WORKSPACE}/robohub-drivers/boards/environmental/bmp180-module/bsp
   variants:
     pico2w:
       target: "robohub-board-bmp180-module"

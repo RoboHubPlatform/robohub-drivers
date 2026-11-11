@@ -23,10 +23,10 @@ build:
 depends:
   - name: robohub-driver-gpio-switch
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/output/gpio-switch
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/output/gpio-switch
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 

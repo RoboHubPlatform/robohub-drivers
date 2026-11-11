@@ -24,10 +24,10 @@ build:
 depends:
   - name: robohub-driver-{{name}}
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/{{category}}/{{name}}
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/{{category}}/{{name}}
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 

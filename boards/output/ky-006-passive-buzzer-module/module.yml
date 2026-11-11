@@ -23,10 +23,10 @@ build:
 depends:
   - name: robohub-driver-tone-pwm
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/output/tone-pwm
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/output/tone-pwm
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 

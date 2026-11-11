@@ -36,10 +36,10 @@ build:
 depends:
   - name: robohub-driver-bmp180
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/environmental/bmp180
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 

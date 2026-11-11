@@ -42,17 +42,17 @@ build:
 depends:
   - name: robohub-linux
     type: c
-    path: ${RHO_WORKSPACE}/robohub-linux
+    path: ${ROBOHUB_WORKSPACE}/robohub-linux
     git: https://github.com/RoboHubPlatform/robohub-linux
     branch: main
   - name: robohub-transport
     type: c
-    path: ${RHO_WORKSPACE}/robohub-transport
+    path: ${ROBOHUB_WORKSPACE}/robohub-transport
     git: https://github.com/RoboHubPlatform/robohub-transport
     branch: main
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 
@@ -62,13 +62,13 @@ c_connection:
     - platform.h
     - robohub/net.h
   include_dirs:
-    - ${RHO_WORKSPACE}/robohub-drivers/examples/gateway/c/uplink-host/src/protocol
-    - ${RHO_WORKSPACE}/robohub-linux/include
-    - ${RHO_WORKSPACE}/robohub-common/include
-    - ${RHO_WORKSPACE}/robohub-common/include/robohub/hal
-    - ${RHO_WORKSPACE}/robohub-core/include
-    - ${RHO_WORKSPACE}/robohub-core/include/robohub/core
-    - ${RHO_WORKSPACE}/robohub-transport/include
+    - ${ROBOHUB_WORKSPACE}/robohub-drivers/examples/gateway/c/uplink-host/src/protocol
+    - ${ROBOHUB_WORKSPACE}/robohub-linux/include
+    - ${ROBOHUB_WORKSPACE}/robohub-common/include
+    - ${ROBOHUB_WORKSPACE}/robohub-common/include/robohub/hal
+    - ${ROBOHUB_WORKSPACE}/robohub-core/include
+    - ${ROBOHUB_WORKSPACE}/robohub-core/include/robohub/core
+    - ${ROBOHUB_WORKSPACE}/robohub-transport/include
   variants:
     native:
       libraries:

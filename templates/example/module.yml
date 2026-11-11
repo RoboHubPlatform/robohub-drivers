@@ -23,9 +23,9 @@ build:
 depends:
   - name: robohub-pico
     type: c
-    path: ${RHO_WORKSPACE}/robohub-pico
+    path: ${ROBOHUB_WORKSPACE}/robohub-pico
     git: https://github.com/RoboHubPlatform/robohub-pico
     branch: main
   - name: robohub-driver-{{name}}
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/{{category}}/{{name}}
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/{{category}}/{{name}}

@@ -24,13 +24,13 @@ build:
 depends:
   - name: robohub-driver-analog-adc
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/input/analog-adc
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/input/analog-adc
   - name: robohub-driver-button-gpio
     type: c
-    path: ${RHO_WORKSPACE}/robohub-drivers/drivers/input/button-gpio
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/input/button-gpio
   - name: robohub-common
     type: c
-    path: ${RHO_WORKSPACE}/robohub-common
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
     git: https://github.com/RoboHubPlatform/robohub-common
     branch: main
 
