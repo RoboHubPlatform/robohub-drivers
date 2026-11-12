@@ -7,6 +7,7 @@ module:
   name: {{name}}-c
   type: module
   version: 0.1.0
+  license: "MIT"
   description: >
     {{description}}
 
