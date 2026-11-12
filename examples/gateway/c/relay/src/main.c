@@ -44,6 +44,16 @@
 #include "robohub/telemetry.h"
 #include "protocol.h"
 #include "uplink.h"
+
+/* This relay's id and key, written into its build by Mesh when it planned the
+ * relay and tracked by no repository. With them the uplink to the parent is
+ * authenticated (robohub-transport's secure.h); without them it is plain, and a
+ * parent that requires authentication drops it. */
+#if defined(__has_include)
+#  if __has_include("robohub_secret.h")
+#    include "robohub_secret.h"
+#  endif
+#endif
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
 #include "robohub/net.h"
 #endif
@@ -123,6 +133,17 @@ static int downstream_write(const rh_u8* data, rh_size length, void* context)
 
 static RoboHubTransport uplink_link;
 static RoboHubRelayUplink relay_uplink;
+#if defined(RH_SECURE_PROVISIONED)
+static RoboHubSecure uplink_secure;
+/* Whether the announcement has gone up under the session. The first one is sent
+ * before there is a session, and is what makes the link say hello. */
+static rh_bool announced_sealed;
+
+static rh_u32 uplink_now_ms(void)
+{
+    return system_timer != 0 ? (rh_u32)system_timer->get_millis(system_timer) : 0u;
+}
+#endif
 static RoboHubSocket parent_socket;
 
 static int uplink_write(const rh_u8* data, rh_size length, void* context)
@@ -170,6 +191,15 @@ static void uplink_start(void)
 
     const RoboHubTransportPhy phy = { .write = uplink_write, .context = 0 };
     (void)robohub_transport_init(&uplink_link, &phy);
+#if defined(RH_SECURE_PROVISIONED)
+    /* Every frame up is sealed under a session with the parent, and every frame
+     * down must be; the first send says hello. */
+    if (robohub_secure_init(&uplink_secure, RH_DEVICE_UID, RH_DEVICE_KEY,
+                            robohub_platform_nonce, uplink_now_ms) == ROBOHUB_OK) {
+        (void)robohub_transport_secure(&uplink_link, &uplink_secure);
+        emit("uplink: authenticated\n");
+    }
+#endif
 
     relay_uplink.link = &uplink_link;
     relay_uplink.gateway_area = RH_AREA_ID;
@@ -194,6 +224,15 @@ static void uplink_pump(void)
     if (got > 0) {
         robohub_transport_feed(&uplink_link, buf, (rh_size)got);
     }
+#if defined(RH_SECURE_PROVISIONED)
+    /* The parent learns of this relay once the session is open: the first
+     * announcement only opened it. */
+    if (!announced_sealed && robohub_secure_ready(&uplink_secure)) {
+        robohub_uplink_announce(&relay_uplink);
+        announced_sealed = RH_TRUE;
+        emit("uplink: announced under the session\n");
+    }
+#endif
 }
 
 #endif /* CONFIG_RH_NET */

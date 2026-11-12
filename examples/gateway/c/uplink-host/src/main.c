@@ -13,6 +13,10 @@
  *     rho build -target native .
  *     ./build/output/uplink-host <host> <port>
  *
+ * With RH_UPLINK_UID (16 hex digits) and RH_UPLINK_KEY (32) in the environment —
+ * the relay's id and the key its parent derives for it — the uplink is
+ * authenticated: it opens a session first, and announces and reports under it.
+ *
  * @project RoboHub Platform
  * @license MIT
  */
@@ -28,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
+#include <time.h>
 #include <unistd.h>
 
 static RoboHubSocket parent;
@@ -36,6 +41,46 @@ static int write_socket(const rh_u8* data, rh_size length, void* context)
 {
     (void)context;
     return (robohub_socket_send(parent, data, length) < 0) ? -1 : 0;
+}
+
+static rh_u32 now_ms(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (rh_u32)(t.tv_sec * 1000 + t.tv_nsec / 1000000);
+}
+
+/* hex reads `count` bytes of hex from text, and reports whether it was that. */
+static int hex(const char* text, rh_u8* out, size_t count)
+{
+    if (text == 0 || strlen(text) != count * 2) {
+        return 0;
+    }
+    for (size_t i = 0; i < count; i++) {
+        unsigned value;
+        if (sscanf(text + 2 * i, "%2x", &value) != 1) {
+            return 0;
+        }
+        out[i] = (rh_u8)value;
+    }
+    return 1;
+}
+
+/* pump feeds whatever the parent sent into the link, for up to `ms`, and stops
+ * early once `ready` says the session is open. */
+static void pump(RoboHubTransport* link, RoboHubSecure* secure, rh_u32 ms)
+{
+    rh_u32 start = now_ms();
+    while (now_ms() - start < ms) {
+        rh_u8 buffer[128];
+        int got = robohub_socket_recv(parent, buffer, (rh_size)sizeof(buffer), 20u);
+        if (got > 0) {
+            robohub_transport_feed(link, buffer, (rh_size)got);
+        }
+        if (secure != 0 && robohub_secure_ready(secure)) {
+            return;
+        }
+    }
 }
 
 /* A non-blocking connect finishes in the background; wait for it rather than
@@ -90,6 +135,26 @@ int main(int argc, char** argv)
         .area = 9,
         .announced = RH_FALSE,
     };
+
+    static RoboHubSecure secure;
+    rh_u8 uid[RH_SECURE_UID_SIZE], key[RH_SECURE_KEY_SIZE];
+    int authenticated = hex(getenv("RH_UPLINK_UID"), uid, sizeof(uid)) &&
+                        hex(getenv("RH_UPLINK_KEY"), key, sizeof(key));
+    if (authenticated) {
+        if (robohub_secure_init(&secure, uid, key, robohub_platform_nonce, now_ms) != ROBOHUB_OK ||
+            robohub_transport_secure(&link, &secure) != ROBOHUB_OK) {
+            fprintf(stderr, "the uplink could not be authenticated\n");
+            return 1;
+        }
+        /* The first send has no session to go under; it says hello instead. */
+        robohub_uplink_announce(&uplink);
+        pump(&link, &secure, 3000u);
+        if (!robohub_secure_ready(&secure)) {
+            fprintf(stderr, "the parent opened no session\n");
+            return 1;
+        }
+        printf("uplink: session open\n");
+    }
     robohub_uplink_announce(&uplink);
 
     Telemetry reading;

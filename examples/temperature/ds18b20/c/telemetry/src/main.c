@@ -155,6 +155,21 @@ static RoboHubSecure node_secure;
 static RoboHubUART* node_uart;
 static rh_bool link_is_net;
 
+/* Attach the board's authentication to the link, when this build was given the
+ * board's id and key: every frame is sealed, and the first send says hello to the
+ * gateway, so nothing leaves unauthenticated whichever link it is. */
+static rh_u32 node_now_ms(void);
+static void secure_link(void)
+{
+#if defined(RH_SECURE_PROVISIONED)
+    if (robohub_secure_init(&node_secure, RH_DEVICE_UID, RH_DEVICE_KEY,
+                            robohub_platform_nonce, node_now_ms) == ROBOHUB_OK) {
+        (void)robohub_transport_secure(&node_link, &node_secure);
+        emit("link: authenticated\n");
+    }
+#endif
+}
+
 static int usb_phy_write(const rh_u8* data, rh_size length, void* context)
 {
     (void)context;
@@ -304,10 +319,25 @@ static rh_u32 node_now_ms(void)
     return system_timer != 0 ? (rh_u32)system_timer->get_millis(system_timer) : 0u;
 }
 
+#if defined(CONFIG_RH_NET) && CONFIG_RH_NET
+static RoboHubSocket net_socket;
+#endif
+
 static void pump_link(rh_u32 now_ms)
 {
     (void)now_ms;
     if (link_is_net) {
+#if defined(CONFIG_RH_NET) && CONFIG_RH_NET
+        /* What the gateway sends back — the session, a command — arrives on the
+         * socket and is read into the same transport the readings leave by. */
+        if (net_socket != 0) {
+            rh_u8 buffer[64];
+            int got = robohub_socket_recv(net_socket, buffer, (rh_size)sizeof(buffer), 0u);
+            if (got > 0) {
+                robohub_transport_feed(&node_link, buffer, (rh_size)got);
+            }
+        }
+#endif
         return;
     }
     if (node_uart != 0 && node_uart->read_available != 0) {
@@ -339,6 +369,15 @@ static const robohub_core_app sensor_app = {
 /* -------------------------------------------------------------------------- */
 
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
+
+static int net_phy_write(const rh_u8* data, rh_size length, void* context)
+{
+    (void)context;
+    if (net_socket == 0) {
+        return -1;
+    }
+    return (robohub_socket_send(net_socket, data, length) < 0) ? -1 : 0;
+}
 
 /* Bring the interface up and open a TCP socket to the gateway. Best effort: a
  * board that cannot reach one still streams over USB, and says so. */
@@ -377,17 +416,25 @@ static void net_sink_start(void)
         return;
     }
 
+    /* The socket is a link like the serial one: frames go out through the
+     * transport, so they are sealed exactly as a serial link's are, and the
+     * gateway's answers come back through it. */
+    net_socket = socket;
+    const RoboHubTransportPhy phy = { .write = net_phy_write, .context = 0 };
+    (void)robohub_transport_init(&node_link, &phy);
+    secure_link();
     RoboHubTelemetrySink net_sink = {
-        .type = ROBOHUB_SINK_SOCKET,
-        .handle.socket = socket,
+        .type = ROBOHUB_SINK_TRANSPORT,
+        .handle.transport = &node_link,
         .enabled = RH_TRUE,
     };
     if (robohub_telemetry_add_sink(&net_sink) != ROBOHUB_OK) {
         robohub_socket_close(socket);
-        emit("net: no room for the socket sink; streaming over USB only\n");
+        net_socket = 0;
+        emit("net: no room for the network sink; streaming over USB only\n");
         return;
     }
-    emit("net: telemetry also streams over TCP\n");
+    emit("net: telemetry streams over TCP\n");
 }
 
 #endif /* CONFIG_RH_NET */
@@ -422,15 +469,7 @@ int main(void)
 
     if (!link_is_net) {
         (void)robohub_transport_init(&node_link, &link);
-#if defined(RH_SECURE_PROVISIONED)
-        /* Every frame on the link is sealed, and the first send says hello to
-         * the gateway; nothing leaves unauthenticated. */
-        if (robohub_secure_init(&node_secure, RH_DEVICE_UID, RH_DEVICE_KEY,
-                                robohub_platform_nonce, node_now_ms) == ROBOHUB_OK) {
-            (void)robohub_transport_secure(&node_link, &node_secure);
-            emit("link: authenticated\n");
-        }
-#endif
+        secure_link();
         RoboHubTelemetrySink sink = {
             .type = ROBOHUB_SINK_TRANSPORT,
             .handle.transport = &node_link,
