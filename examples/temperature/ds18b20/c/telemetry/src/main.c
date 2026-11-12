@@ -39,6 +39,15 @@
 #include "protocol.h"
 #include "sensors.h"
 
+/* The board's id and key, written into this build by Mesh when it planned the
+ * board, and tracked by no repository. With them the link is authenticated
+ * (robohub-transport's secure.h); a build without them has a plain link. */
+#if defined(__has_include)
+#  if __has_include("robohub_secret.h")
+#    include "robohub_secret.h"
+#  endif
+#endif
+
 #if defined(__has_include)
 #  if __has_include("autoconf.h")
 #    include "autoconf.h"
@@ -140,6 +149,9 @@ static void emit(const char* text)
 /* -------------------------------------------------------------------------- */
 
 static RoboHubTransport node_link;
+#if defined(RH_SECURE_PROVISIONED)
+static RoboHubSecure node_secure;
+#endif
 static RoboHubUART* node_uart;
 static rh_bool link_is_net;
 
@@ -286,6 +298,12 @@ static RoboHubError on_diag(robohub_event_id id, const void* payload, rh_size si
 /* Called every pass. Reads whatever the link has delivered and feeds the
  * transport one byte at a time, so a command from the gateway becomes an event
  * exactly as a frame from a node does. */
+/* Milliseconds since boot, for an authenticated session's lifetime. */
+static rh_u32 node_now_ms(void)
+{
+    return system_timer != 0 ? (rh_u32)system_timer->get_millis(system_timer) : 0u;
+}
+
 static void pump_link(rh_u32 now_ms)
 {
     (void)now_ms;
@@ -404,6 +422,15 @@ int main(void)
 
     if (!link_is_net) {
         (void)robohub_transport_init(&node_link, &link);
+#if defined(RH_SECURE_PROVISIONED)
+        /* Every frame on the link is sealed, and the first send says hello to
+         * the gateway; nothing leaves unauthenticated. */
+        if (robohub_secure_init(&node_secure, RH_DEVICE_UID, RH_DEVICE_KEY,
+                                robohub_platform_nonce, node_now_ms) == ROBOHUB_OK) {
+            (void)robohub_transport_secure(&node_link, &node_secure);
+            emit("link: authenticated\n");
+        }
+#endif
         RoboHubTelemetrySink sink = {
             .type = ROBOHUB_SINK_TRANSPORT,
             .handle.transport = &node_link,

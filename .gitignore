@@ -34,3 +34,6 @@ coverage/
 # The configuration a build resolves, written beside the sources that use it.
 /.config
 include/generated/
+
+# The id and key Mesh writes into a board's build: secret, and never tracked.
+robohub_secret.h
