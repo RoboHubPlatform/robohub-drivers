@@ -109,11 +109,26 @@ static rh_u16 ds18b20_conversion_time(rh_u8 resolution_bits)
     return ds18b20_conversion_ms[resolution_bits - ROBOHUB_DS18B20_RESOLUTION_MIN];
 }
 
+static RoboHubError ds18b20_read_scratchpad(RoboHubDS18B20* dev);
+
 /* Write the resolution and the alarm limits into the scratchpad and commit
  * them to EEPROM, so a part that has been powered off comes back as this
- * device. */
+ * device — but only when the part does not hold them already. The scratchpad
+ * is read first (at power-up it holds what the EEPROM recalled): a part that
+ * is set up as asked is left alone. An EEPROM is rated for some tens of
+ * thousands of writes, and a copy needs a strong pull-up a parasite-powered
+ * part may not get, so a driver that re-initialises after a failed read must
+ * not write it each time; doing so kept a struggling probe failing. */
 static RoboHubError ds18b20_configure(RoboHubDS18B20* dev)
 {
+    rh_u8 wanted_config = ds18b20_config_byte(dev->resolution_bits);
+    if (ROBOHUB_SUCCEEDED(ds18b20_read_scratchpad(dev)) &&
+        dev->scratchpad[2] == (rh_u8)dev->alarm_high_c &&
+        dev->scratchpad[3] == (rh_u8)dev->alarm_low_c &&
+        (dev->scratchpad[4] & 0x60u) == (wanted_config & 0x60u)) {
+        return ROBOHUB_OK;
+    }
+
     RoboHubError err = ds18b20_command(dev, DS18B20_CMD_WRITE_SCRATCH);
     if (ROBOHUB_FAILED(err)) {
         return err;
