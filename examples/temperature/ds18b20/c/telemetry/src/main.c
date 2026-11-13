@@ -321,11 +321,17 @@ static rh_u32 node_now_ms(void)
 
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
 static RoboHubSocket net_socket;
+/* The network link comes back by itself: a dropped connection or Wi-Fi is
+ * joined and dialled again, waiting a little longer after each failure. */
+static rh_u32 net_next_try_ms;
+static rh_u32 net_backoff_ms = 1000u;
+static rh_bool net_sink_added;
+static void net_reconnect(rh_u32 now_ms);
+static void net_drop(const char* why);
 #endif
 
 static void pump_link(rh_u32 now_ms)
 {
-    (void)now_ms;
     if (link_is_net) {
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
         /* What the gateway sends back — the session, a command — arrives on the
@@ -335,7 +341,13 @@ static void pump_link(rh_u32 now_ms)
             int got = robohub_socket_recv(net_socket, buffer, (rh_size)sizeof(buffer), 0u);
             if (got > 0) {
                 robohub_transport_feed(&node_link, buffer, (rh_size)got);
+            } else if (got == ROBOHUB_SOCKET_ERROR) {
+                /* The gateway went away (a restart, a dropped access point):
+                 * the connection is closed and dialled again. */
+                net_drop("net: the gateway closed the connection; dialling again\n");
             }
+        } else {
+            net_reconnect(now_ms);
         }
 #endif
         return;
@@ -379,62 +391,89 @@ static int net_phy_write(const rh_u8* data, rh_size length, void* context)
     return (robohub_socket_send(net_socket, data, length) < 0) ? -1 : 0;
 }
 
-/* Bring the interface up and open a TCP socket to the gateway. Best effort: a
- * board that cannot reach one still streams over USB, and says so. */
-static void net_sink_start(void)
+/* Close a connection that failed. The next pass dials again, after the back-off. */
+static void net_drop(const char* why)
 {
-    if (RH_WIFI_SSID[0] == '\0') {
-        emit("wifi: no credentials configured; streaming over USB only\n");
+    if (net_socket != 0) {
+        robohub_socket_close(net_socket);
+        net_socket = 0;
+    }
+    emit(why);
+    net_next_try_ms = node_now_ms() + net_backoff_ms;
+}
+
+/* Join Wi-Fi when it is down and dial the gateway, at most once per back-off,
+ * which doubles after each failure up to half a minute and starts again from a
+ * second after a success. A new connection says hello again: the session the
+ * board held belongs to the connection the gateway closed. */
+static void net_reconnect(rh_u32 now_ms)
+{
+    if (!net_sink_added || (rh_i32)(now_ms - net_next_try_ms) < 0) {
         return;
     }
-
-    RoboHubWiFiConfig wifi = {
-        .ssid = RH_WIFI_SSID,
-        .password = RH_WIFI_PASSWORD,
-        .timeout_ms = 15000u,
-    };
-    if (robohub_net_wifi_connect(&wifi) != ROBOHUB_OK) {
-        emit("wifi: could not join; streaming over USB only\n");
-        return;
+    net_next_try_ms = now_ms + net_backoff_ms;
+    if (net_backoff_ms < 30000u) {
+        net_backoff_ms = net_backoff_ms * 2u;
     }
-
-    char ip[16];
-    if (robohub_net_ip(ip, sizeof(ip)) == ROBOHUB_OK) {
-        emit("wifi: joined, address ");
-        emit(ip);
-        emit("\n");
+    if (robohub_net_status() != ROBOHUB_NET_CONNECTED) {
+        RoboHubWiFiConfig wifi = {
+            .ssid = RH_WIFI_SSID,
+            .password = RH_WIFI_PASSWORD,
+            .timeout_ms = 15000u,
+        };
+        if (robohub_net_wifi_connect(&wifi) != ROBOHUB_OK) {
+            emit("wifi: could not join; trying again\n");
+            return;
+        }
+        char ip[16];
+        if (robohub_net_ip(ip, sizeof(ip)) == ROBOHUB_OK) {
+            emit("wifi: joined, address ");
+            emit(ip);
+            emit("\n");
+        }
     }
-
     RoboHubSocket socket = robohub_socket_create(ROBOHUB_SOCKET_TCP);
     if (socket == 0) {
-        emit("net: no socket available; streaming over USB only\n");
+        emit("net: no socket available; trying again\n");
         return;
     }
     if (robohub_socket_connect(socket, RH_TELEMETRY_HOST, RH_TELEMETRY_PORT) != ROBOHUB_OK) {
         robohub_socket_close(socket);
-        emit("net: gateway unreachable; streaming over USB only\n");
+        emit("net: gateway unreachable; trying again\n");
         return;
     }
+    net_socket = socket;
+    net_backoff_ms = 1000u;
+    secure_link();
+    emit("net: telemetry streams over TCP\n");
+}
 
+/* Set the network link up: the transport and the telemetry sink once, and the
+ * connection as net_reconnect makes it now and again whenever it drops. A board
+ * that cannot reach the gateway keeps trying; it has no other way to report. */
+static void net_sink_start(void)
+{
+    if (RH_WIFI_SSID[0] == '\0') {
+        emit("wifi: no credentials configured; the board cannot report\n");
+        return;
+    }
     /* The socket is a link like the serial one: frames go out through the
      * transport, so they are sealed exactly as a serial link's are, and the
      * gateway's answers come back through it. */
-    net_socket = socket;
     const RoboHubTransportPhy phy = { .write = net_phy_write, .context = 0 };
     (void)robohub_transport_init(&node_link, &phy);
-    secure_link();
     RoboHubTelemetrySink net_sink = {
         .type = ROBOHUB_SINK_TRANSPORT,
         .handle.transport = &node_link,
         .enabled = RH_TRUE,
     };
     if (robohub_telemetry_add_sink(&net_sink) != ROBOHUB_OK) {
-        robohub_socket_close(socket);
-        net_socket = 0;
-        emit("net: no room for the network sink; streaming over USB only\n");
+        emit("net: no room for the network sink\n");
         return;
     }
-    emit("net: telemetry streams over TCP\n");
+    net_sink_added = RH_TRUE;
+    net_next_try_ms = node_now_ms();
+    net_reconnect(node_now_ms());
 }
 
 #endif /* CONFIG_RH_NET */

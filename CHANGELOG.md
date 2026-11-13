@@ -2,6 +2,16 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.3.1] - 2026-11-13
+
+- The telemetry node on Wi-Fi comes back by itself: a connection the gateway
+  closes, or Wi-Fi that drops, is joined and dialled again, waiting from a
+  second up to half a minute between tries, and each new connection says hello
+  again for a new session. Before, the board dialled once at boot and stayed
+  silent until it was power-cycled; its message that it was "streaming over USB
+  only" was not true, since nothing streamed.
+- The Wi-Fi link and the relay uplink are sealed (2026-11-12, carried here).
+
 ## [0.3.0] - 2026-11-05
 
 Drivers and board modules now describe their telemetry: a driver names the
