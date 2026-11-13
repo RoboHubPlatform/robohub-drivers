@@ -2,6 +2,10 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.3.3] - 2026-11-14
+
+The gateway and DS18B20 examples' protocol schemas are copies of robohub-protocol 1.0.0, written by its tools/sync.py; the generated C is unchanged.
+
 ## [0.3.2] - 2026-11-13
 
 The DS18B20 driver writes its configuration only when the part does not hold it already: the scratchpad is read first, and the EEPROM is copied only when the alarms or the resolution differ. It wrote the EEPROM at every initialisation, so a node that re-initialised after a failed read wrote it twice a second — wearing the EEPROM, and on a parasite-powered probe keeping it failing.
