@@ -88,3 +88,5 @@ The C relay carries sealed boards end to end: their handshake and frames go up u
 ## [0.5.0] - 2026-11-14
 
 The relays and the telemetry example start with the build's key epoch and scope. relay-host reads `<epoch>:<hex>` key files and can use its console as the parent link (`RHO_PARENT_LINK=console`), logging to stderr.
+
+The protocol copies know `SESSION_RESET`; the relays pass it to their boards inside `RELAYED`.
