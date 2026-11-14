@@ -97,9 +97,13 @@
 #define CONFIG_RH_LINK_ID 1
 #endif
 
+/* What the relay says goes to stderr, not to the console: the console is a
+ * frame link (its parent's serial link, when it has no socket to one), and a
+ * line of text written between two frames would be read as part of the next. */
 static void emit(const char* text)
 {
-    (void)robohub_console_puts(text);
+    (void)fputs(text, stderr);
+    (void)fflush(stderr);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -108,6 +112,10 @@ static void emit(const char* text)
 
 static rh_u8 relay_uid[RH_SECURE_UID_SIZE];
 static rh_u8 relay_key[RH_SECURE_KEY_SIZE];
+/* The epoch of relay_key, and the key scope a rotated key is stored with: the
+ * build's (robohub_secret.h), or for a key file its epoch and no scope. */
+static rh_u32 relay_epoch;
+static const rh_u8* relay_scope;
 static rh_bool provisioned;
 static RoboHubTimer* system_timer;
 
@@ -154,6 +162,12 @@ static int load_identity(void)
 #if defined(RH_SECURE_PROVISIONED)
     memcpy(relay_uid, RH_DEVICE_UID, sizeof(relay_uid));
     memcpy(relay_key, RH_DEVICE_KEY, sizeof(relay_key));
+#  if defined(RH_DEVICE_KEY_EPOCH)
+    relay_epoch = (rh_u32)RH_DEVICE_KEY_EPOCH;
+#  endif
+#  if defined(RH_HAS_KEY_SCOPE)
+    relay_scope = RH_KEY_SCOPE;
+#  endif
     provisioned = RH_TRUE;
     return 0;
 #else
@@ -169,7 +183,20 @@ static int load_identity(void)
         key_text[got] = '\0';
         fclose(file);
     }
-    rh_bool ok = hex_bytes(uid_text, relay_uid, sizeof(relay_uid)) && hex_bytes(key_text, relay_key, sizeof(relay_key));
+    /* A key file is `<epoch>:<hex>`, or the hex alone (epoch 0). */
+    const char* key_hex = key_text;
+    const char* colon = strchr(key_text, ':');
+    rh_bool ok = RH_TRUE;
+    if (colon != NULL) {
+        relay_epoch = 0u;
+        for (const char* p = key_text; p < colon && ok; p++) {
+            ok = (*p >= '0' && *p <= '9' && relay_epoch <= 400000000u) ? RH_TRUE : RH_FALSE;
+            relay_epoch = relay_epoch * 10u + (rh_u32)(*p - '0');
+        }
+        ok = ok && colon != key_text;
+        key_hex = colon + 1;
+    }
+    ok = ok && hex_bytes(uid_text, relay_uid, sizeof(relay_uid)) && hex_bytes(key_hex, relay_key, sizeof(relay_key));
     memset(key_text, 0, sizeof(key_text));
     if (!ok) {
         emit("relay: RH_SECURE_UID or RH_SECURE_KEY_FILE is not a relay id and key\n");
@@ -210,6 +237,9 @@ static int downstream_write(const rh_u8* data, rh_size length, void* context)
 }
 
 #if defined(CONFIG_RH_NET) && CONFIG_RH_NET
+/* RHO_PARENT_LINK=console: the parent is on the console — this relay is wired
+ * to a gateway's serial link — and no socket is dialled. */
+static rh_bool console_parent;
 static RoboHubTransport uplink_link;
 static RoboHubSecure uplink_secure;
 static RoboHubRelayUplink relay_uplink;
@@ -380,7 +410,8 @@ static void uplink_dial(void)
     (void)robohub_transport_init(&uplink_link, &phy);
     (void)robohub_transport_on_frame(&uplink_link, on_parent_frame, &uplink_link);
     if (provisioned &&
-        robohub_secure_init(&uplink_secure, relay_uid, relay_key, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
+        robohub_secure_init_epoch(&uplink_secure, relay_uid, relay_key, relay_epoch, relay_scope,
+                                  robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
         (void)robohub_transport_secure(&uplink_link, &uplink_secure);
     }
 
@@ -402,6 +433,9 @@ static void uplink_dial(void)
  * the parent went away; and announce whenever the session is new. */
 static void uplink_pump(void)
 {
+    if (console_parent) {
+        return;
+    }
     if (parent_socket == 0) {
         if (!ever_dialled || (rh_u32)(relay_now_ms() - lost_at_ms) >= REDIAL_MS) {
             uplink_dial();
@@ -456,7 +490,8 @@ static RoboHubError relay_init(void)
 static RoboHubError relay_start(void)
 {
     if (provisioned &&
-        robohub_secure_init(&upstream_secure, relay_uid, relay_key, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
+        robohub_secure_init_epoch(&upstream_secure, relay_uid, relay_key, relay_epoch, relay_scope,
+                                  robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
         (void)robohub_transport_secure(&upstream, &upstream_secure);
     }
     console_uplink.link = &upstream;
@@ -528,6 +563,13 @@ int main(void)
     if (!provisioned) {
         emit("relay: no id and key; its links are plain and a parent hears nothing from it\n");
     }
+#if defined(CONFIG_RH_NET) && CONFIG_RH_NET
+    const char* parent_link_env = getenv("RHO_PARENT_LINK");
+    console_parent = (parent_link_env != 0 && strcmp(parent_link_env, "console") == 0) ? RH_TRUE : RH_FALSE;
+    if (console_parent) {
+        emit("relay: the parent is on the console; no uplink is dialled\n");
+    }
+#endif
 
     const RoboHubTransportPhy up_phy = { .write = upstream_write, .context = 0 };
     (void)robohub_transport_init(&upstream, &up_phy);

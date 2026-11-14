@@ -138,10 +138,18 @@ int main(int argc, char** argv)
 
     static RoboHubSecure secure;
     rh_u8 uid[RH_SECURE_UID_SIZE], key[RH_SECURE_KEY_SIZE];
+    /* RH_UPLINK_KEY is `<epoch>:<hex>` or the hex alone (epoch 0), as a host's
+     * key file is; a key given this way has no key scope. */
+    const char* key_text = getenv("RH_UPLINK_KEY");
+    rh_u32 epoch = 0u;
+    if (key_text != NULL && strchr(key_text, ':') != NULL) {
+        epoch = (rh_u32)strtoul(key_text, NULL, 10);
+        key_text = strchr(key_text, ':') + 1;
+    }
     int authenticated = hex(getenv("RH_UPLINK_UID"), uid, sizeof(uid)) &&
-                        hex(getenv("RH_UPLINK_KEY"), key, sizeof(key));
+                        hex(key_text, key, sizeof(key));
     if (authenticated) {
-        if (robohub_secure_init(&secure, uid, key, robohub_platform_nonce, now_ms) != ROBOHUB_OK ||
+        if (robohub_secure_init_epoch(&secure, uid, key, epoch, NULL, robohub_platform_nonce, now_ms) != ROBOHUB_OK ||
             robohub_transport_secure(&link, &secure) != ROBOHUB_OK) {
             fprintf(stderr, "the uplink could not be authenticated\n");
             return 1;

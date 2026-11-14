@@ -112,6 +112,17 @@ static rh_u32 relay_now_ms(void)
     return system_timer != 0 ? (rh_u32)system_timer->get_millis(system_timer) : 0u;
 }
 
+/* The epoch of the key the build carries, and the gateway's key scope a
+ * rotated key is stored with (robohub-transport's secure.h). */
+#ifndef RH_DEVICE_KEY_EPOCH
+#define RH_DEVICE_KEY_EPOCH 0u
+#endif
+#if defined(RH_HAS_KEY_SCOPE)
+#define RELAY_KEY_SCOPE RH_KEY_SCOPE
+#else
+#define RELAY_KEY_SCOPE 0
+#endif
+
 /* The build's id and key: a board has no other place to read them from. */
 static int load_identity(void)
 {
@@ -319,7 +330,8 @@ static void uplink_dial(void)
     (void)robohub_transport_init(&uplink_link, &phy);
     (void)robohub_transport_on_frame(&uplink_link, on_parent_frame, &uplink_link);
     if (provisioned &&
-        robohub_secure_init(&uplink_secure, relay_uid, relay_key, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
+        robohub_secure_init_epoch(&uplink_secure, relay_uid, relay_key, (rh_u32)RH_DEVICE_KEY_EPOCH,
+                                  RELAY_KEY_SCOPE, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
         (void)robohub_transport_secure(&uplink_link, &uplink_secure);
     }
 
@@ -395,7 +407,8 @@ static RoboHubError relay_init(void)
 static RoboHubError relay_start(void)
 {
     if (provisioned &&
-        robohub_secure_init(&upstream_secure, relay_uid, relay_key, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
+        robohub_secure_init_epoch(&upstream_secure, relay_uid, relay_key, (rh_u32)RH_DEVICE_KEY_EPOCH,
+                                  RELAY_KEY_SCOPE, robohub_platform_nonce, relay_now_ms) == ROBOHUB_OK) {
         (void)robohub_transport_secure(&upstream, &upstream_secure);
     }
     console_uplink.link = &upstream;

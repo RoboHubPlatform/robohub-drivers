@@ -21,7 +21,8 @@ rho build -target native .
 |---|---|
 | `RHO_UART1` | the downstream tty the boards are wired to |
 | `RHO_PARENT_HOST`, `RHO_PARENT_PORT` | the gateway above, a `robohub-gateway` with `UPLINK_PORT` set |
-| `RH_SECURE_UID`, `RH_SECURE_KEY_FILE` | the relay's id (16 hex digits) and a file holding its key (32 hex digits), as every host node has them; a build with `robohub_secret.h` carries them instead. Without them its links are plain and a parent hears nothing from it |
+| `RHO_PARENT_LINK` | `console`: the gateway above is on the console instead — this relay is wired to a gateway's serial link (`SERIAL_PORT`) — and no socket is dialled |
+| `RH_SECURE_UID`, `RH_SECURE_KEY_FILE` | the relay's id (16 hex digits) and a file holding its key (`<epoch>:<32 hex digits>`, or the hex alone for epoch 0), as every host node has them; a key the parent rotates it to is kept in its keystore (robohub-linux: `<key file>.keystore`); a build with `robohub_secret.h` carries them instead. Without them its links are plain and a parent hears nothing from it |
 | `CONFIG_RH_AREA_ID` (build) | the area this relay speaks for |
 
 ## The whole tree on one machine
@@ -31,9 +32,11 @@ boards (a pseudo-terminal) together and checks that a board behind the relay
 gets a session and its reading reaches the master as the board's, that a command
 reaches the board and its answer comes back, that a relay cannot forge a
 reading, that a plain command written to the relay's console (a board's USB
-CDC) reaches no board, and that after the master restarts the relay dials again,
-announces again, and the board is heard. It builds this relay when it is not
-built.
+CDC) reaches no board, that after the master restarts the relay dials again,
+announces again, and the board is heard, that a board's key rotation (REKEY and
+its answer) passes through it, and that a second relay wired to the master's
+serial link (`RHO_PARENT_LINK=console`) carries a board the same way. It builds
+this relay when it is not built.
 
 ```sh
 cd ../robohub-gateway
@@ -46,7 +49,8 @@ It is a **relay**: it measures nothing, acts only on what its parent sends under
 its session — `RELAYED` for a board, and a diagnostic about itself (node 0 of
 its area) — and dials its parent again when the parent goes away. Its console is
 a parent link only when it is sealed; unsealed, a frame written to it is
-dropped. Its downstream read is the UART HAL's, one byte at a
+dropped. What it says goes to stderr, never to the console, which carries
+frames. Its downstream read is the UART HAL's, one byte at a
 time — the contract transfers the bytes it is asked for and reports whether it
 did, so a byte is the unit that carries a count without a platform-specific "how
 much is waiting". That is the one change that makes the board relay's program a

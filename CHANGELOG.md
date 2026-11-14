@@ -84,3 +84,7 @@ declare the capabilities and deployment metadata a Mesh planner reads.
 ## [0.4.0] - 2026-11-14
 
 The C relay carries sealed boards end to end: their handshake and frames go up unchanged inside `RELAYED`, sealed under the relay's own session, and the parent's answers come back the same way; the relay holds no board keys. Its USB port takes nothing unless it is sealed. After the parent restarts it reconnects and announces again. relay-host reads its identity like other host nodes.
+
+## [0.5.0] - 2026-11-14
+
+The relays and the telemetry example start with the build's key epoch and scope. relay-host reads `<epoch>:<hex>` key files and can use its console as the parent link (`RHO_PARENT_LINK=console`), logging to stderr.

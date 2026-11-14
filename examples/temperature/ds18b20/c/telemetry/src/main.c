@@ -162,8 +162,18 @@ static rh_u32 node_now_ms(void);
 static void secure_link(void)
 {
 #if defined(RH_SECURE_PROVISIONED)
-    if (robohub_secure_init(&node_secure, RH_DEVICE_UID, RH_DEVICE_KEY,
-                            robohub_platform_nonce, node_now_ms) == ROBOHUB_OK) {
+    /* The key's epoch and the gateway's key scope: a key the gateway rotates
+     * this board to is kept with the scope, and used after a reboot. */
+#  if !defined(RH_DEVICE_KEY_EPOCH)
+#    define RH_DEVICE_KEY_EPOCH 0u
+#  endif
+#  if defined(RH_HAS_KEY_SCOPE)
+    const rh_u8* scope = RH_KEY_SCOPE;
+#  else
+    const rh_u8* scope = 0;
+#  endif
+    if (robohub_secure_init_epoch(&node_secure, RH_DEVICE_UID, RH_DEVICE_KEY, (rh_u32)RH_DEVICE_KEY_EPOCH, scope,
+                                  robohub_platform_nonce, node_now_ms) == ROBOHUB_OK) {
         (void)robohub_transport_secure(&node_link, &node_secure);
         emit("link: authenticated\n");
     }
