@@ -1,9 +1,16 @@
 # RoboHub Drivers
 
-**Version:** 0.2.3
+The drivers the devices are driven by, and the boards they are fitted to. A
+driver is code for a part, written once and run on every platform that
+implements the interfaces it is written against: it reaches its part through the
+interfaces `robohub-common` declares (the register bus `RoboHubBus` with its I2C
+and SPI backends, `RoboHubOneWire`, `RoboHubDHT`, GPIO, ADC, PWM) and presents
+the driver interface of its kind, such as `RoboHubTemperature`. It names no
+vendor SDK and no chip. See {ref}`robohub-common/index`.
 
-The drivers the devices are driven by, and the boards they are fitted to. Each
-driver implements the interfaces declared by `robohub-common`.
+Sensors live here. A device in `robohub-devices` composes drivers into the
+equipment a node is part of — the smart plug is the relay and the DS18B20
+together (see {ref}`robohub-devices/index`).
 
 ## The drivers
 
@@ -36,8 +43,13 @@ that can be immersed, `dirt` for one that can go into soil, and `air` for one
 that measures ambient air. The waterproof DS18B20 probe carries `water` and
 `dirt`; the bare DS18B20, BMP180 and DHT11 parts carry `air`.
 
-### Transceiver
-- **max485-module**: MAX485 RS485 transceiver module
+## The boards
+
+`boards/` holds the modules a part is sold on — the KY-0xx sensor kit, the
+DS18B20 module and waterproof probe, the BMP180 and DHT11 modules, the MAX485
+RS485 transceiver module — grouped as the drivers are (`environmental`,
+`input`, `light`, `output`, `temperature`, `transceiver`). A board names the
+driver it is read with, its pins and its `signals:`.
 
 ## Signals
 
@@ -60,17 +72,26 @@ block falls back to its `functions:`, with the unit for each function; a signal
 whose field the gateway does not carry yet reads empty rather than being
 guessed.
 
+## The examples
+
+`examples/` holds programs that show the drivers on real boards, in C and in
+Rho side by side: the DS18B20 (bare metal, with FreeRTOS, and the `telemetry`
+node a gateway reads), the BMP180 and the DHT11. `examples/gateway/c` holds the
+gateway firmwares built on the same parts: `repeater` (a Pico that measures and
+forwards the boards on its UART), `relay`, and the host builds `relay-host` and
+`uplink-host` (see {ref}`robohub-gateway/index`).
+
 ## Building
 
 ```sh
-cd nodes/gateway-node
-rho build .
+cd examples/temperature/ds18b20/c/telemetry
+rho build -target pico2w .
 ```
 
 ## Testing
 
 ```sh
-ROBOHUB_COMMON_DIR=/path/to/robohub-common \\
-ROBOHUB_ORCHESTRATOR_DIR=/path/to/robohub \\
+ROBOHUB_COMMON_DIR=/path/to/robohub-common \
+ROBOHUB_ORCHESTRATOR_DIR=/path/to/robohub \
   tests/run.sh
 ```
