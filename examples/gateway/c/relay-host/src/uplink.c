@@ -1,6 +1,6 @@
 /**
  * @file uplink.c
- * @brief The relay's uplink: announce, and re-frame readings up.
+ * @brief The relay's uplink: announce, and carry boards' frames up in RELAYED.
  *
  * @project RoboHub Platform
  * @license MIT
@@ -29,46 +29,58 @@ void robohub_uplink_announce(RoboHubRelayUplink* uplink)
     if (Announce_serialize(&announce, bytes, sizeof(bytes)) == 0u) {
         return;
     }
-    (void)robohub_transport_send(uplink->link, MESSAGE_ID_ANNOUNCE, 0u, bytes, (rh_u16)ANNOUNCE_WIRE_SIZE);
-    uplink->announced = RH_TRUE;
+    if (robohub_transport_send(uplink->link, MESSAGE_ID_ANNOUNCE, 0u, bytes, (rh_u16)ANNOUNCE_WIRE_SIZE) == ROBOHUB_OK) {
+        uplink->announced = RH_TRUE;
+    }
 }
 
-RoboHubError robohub_uplink_reframe(const rh_u8* telemetry, rh_size size, rh_u8* out, rh_size capacity)
+rh_bool robohub_relayed_carried(rh_u16 msg_id)
 {
-    if (telemetry == 0 || out == 0 || capacity < READING_WIRE_SIZE) {
-        return ROBOHUB_ERR_INVALID_ARG;
-    }
+    return (msg_id == RH_SECURE_MSG_HELLO || (msg_id & RH_SECURE_FLAG) != 0u) ? RH_TRUE : RH_FALSE;
+}
 
-    Telemetry reading_in;
-    if (!Telemetry_deserialize(telemetry, (size_t)size, &reading_in)) {
+rh_size robohub_relayed_wrap(rh_u8 port, rh_u16 msg_id, rh_u16 tx_id,
+                             const rh_u8* payload, rh_size length,
+                             rh_u8* out, rh_size capacity)
+{
+    if (out == 0 || (length > 0u && payload == 0) || capacity < RH_RELAYED_HEADER_SIZE ||
+        length > capacity - RH_RELAYED_HEADER_SIZE) {
+        return 0u;
+    }
+    out[0] = port;
+    out[1] = (rh_u8)(msg_id & 0xFFu);
+    out[2] = (rh_u8)(msg_id >> 8);
+    out[3] = (rh_u8)(tx_id & 0xFFu);
+    out[4] = (rh_u8)(tx_id >> 8);
+    if (length > 0u) {
+        memcpy(out + RH_RELAYED_HEADER_SIZE, payload, length);
+    }
+    return RH_RELAYED_HEADER_SIZE + length;
+}
+
+RoboHubError robohub_relayed_unwrap(const rh_u8* payload, rh_size length, RoboHubRelayed* out)
+{
+    if (payload == 0 || out == 0 || length < RH_RELAYED_HEADER_SIZE) {
         return ROBOHUB_ERR_PROTOCOL;
     }
-
-    /* The same reading, in the uplink's shape: the device, time, temperature and
-     * status, with the status narrowed to the uplink's u16. */
-    Reading reading;
-    memset(&reading, 0, sizeof(reading));
-    reading.device = reading_in.device;
-    reading.timestamp_ms = reading_in.timestamp_ms;
-    reading.temperature_c = reading_in.temperature_c;
-    reading.status = (rh_u16)reading_in.status;
-
-    if (Reading_serialize(&reading, out, (size_t)capacity) == 0u) {
-        return ROBOHUB_ERR_PROTOCOL;
-    }
+    out->port = payload[0];
+    out->msg_id = (rh_u16)(payload[1] | ((rh_u16)payload[2] << 8));
+    out->tx_id = (rh_u16)(payload[3] | ((rh_u16)payload[4] << 8));
+    out->payload = payload + RH_RELAYED_HEADER_SIZE;
+    out->length = length - RH_RELAYED_HEADER_SIZE;
     return ROBOHUB_OK;
 }
 
-RoboHubError robohub_uplink_send_telemetry(RoboHubRelayUplink* uplink, const rh_u8* payload, rh_size size)
+RoboHubError robohub_uplink_carry(RoboHubRelayUplink* uplink, rh_u8 port, rh_u16 msg_id, rh_u16 tx_id,
+                                  const rh_u8* payload, rh_size length)
 {
     if (uplink == 0 || uplink->link == 0) {
         return ROBOHUB_ERR_INVALID_ARG;
     }
-
-    rh_u8 bytes[READING_WIRE_SIZE];
-    RoboHubError err = robohub_uplink_reframe(payload, size, bytes, (rh_size)sizeof(bytes));
-    if (ROBOHUB_FAILED(err)) {
-        return err;
+    rh_u8 relayed[RH_TRANSPORT_MAX_FRAME_SIZE];
+    rh_size size = robohub_relayed_wrap(port, msg_id, tx_id, payload, length, relayed, sizeof(relayed));
+    if (size == 0u) {
+        return ROBOHUB_ERR_INVALID_ARG;
     }
-    return robohub_transport_send(uplink->link, MESSAGE_ID_READING, 0u, bytes, (rh_u16)READING_WIRE_SIZE);
+    return robohub_transport_send(uplink->link, MESSAGE_ID_RELAYED, 0u, relayed, (rh_u16)size);
 }

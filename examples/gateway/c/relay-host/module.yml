@@ -2,10 +2,10 @@
 # gateway/c/relay-host — a relay that is a hop, on a host.
 #
 # The board relay (`examples/gateway/c/relay`) built for robohub-linux: it hears
-# boards on a downstream tty, gateways them to the USB... no — to the gateway
-# above it over TCP, and routes a command or a diagnostic addressed to a board
-# behind it down and the answer back up. It is the whole middle of a RoboHub
-# tree without a board, so the tree can be run and tested on one machine.
+# boards on a downstream tty, dials the gateway above it over TCP, and carries
+# each board's hello and sealed frames up unchanged inside RELAYED, and what the
+# gateway sends a board back down. It is the whole middle of a RoboHub tree
+# without a board, so the tree can be run and tested on one machine.
 #
 #     rho build -target native .
 #
@@ -22,8 +22,9 @@ module:
   version: 0.1.0
   description: >
     A relay on a host: hears boards on a downstream tty, dials the gateway above
-    it, forwards their readings up, and routes a command or a diagnostic for a
-    board behind it down and the answer back up. Runs on robohub-linux.
+    it, and carries their hellos and sealed frames up unchanged inside RELAYED,
+    and their sessions and commands back down. It holds no board's key. Runs on
+    robohub-linux.
 
   maintainer: "Aurel Miron"
   license: "MIT"

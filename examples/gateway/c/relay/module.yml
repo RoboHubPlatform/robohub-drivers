@@ -1,10 +1,10 @@
 #
 # gateway/c/relay — a Pico that gateways without measuring.
 #
-# The edge's stack minus the sensor: frames that arrive on uart1 publish
-# Telemetry on the event bus, and robohub-telemetry bridges that bus to the
-# upstream USB CDC. With nothing of its own to send, a relay is a pure hop: the
-# boards behind it are its readings, and its parent reads them through it.
+# A pure hop: it carries each board's hello and sealed frames, unchanged, inside
+# RELAYED sealed under its own session with its parent, and writes what the
+# parent sends a board to the board's port. It holds no board's key and builds
+# no reading of its own.
 #
 # Built for the board with: rho build -target pico2w .
 #
@@ -20,9 +20,10 @@ module:
   type: module
   version: 0.1.0
   description: >
-    A gateway that only gateways: receives frames from boards on uart1 and
-    streams all of them over USB CDC through robohub-core, robohub-telemetry and
-    robohub-transport. It measures nothing of its own.
+    A gateway that only gateways: carries the boards on uart1 to its parent
+    unchanged, their hellos and sealed frames inside RELAYED under its own
+    session, and their sessions and commands back down. It holds no board's key
+    and measures nothing of its own.
 
   maintainer: "Aurel Miron"
   license: "MIT"
