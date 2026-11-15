@@ -19,7 +19,7 @@ const VALUE_ERROR: i32 = -1000000
 // percent, so the fraction is always three digits.
 fn print_fixed(value: i32, scale: i32) void {
     let negative: bool = value < 0
-    let magnitude: i32 = value
+    var magnitude: i32 = value
     if negative {
         magnitude = 0 - value
     }

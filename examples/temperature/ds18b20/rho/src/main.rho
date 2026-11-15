@@ -36,7 +36,7 @@ fn main() void {
             print("read failed\n")
         } else {
             let negative: bool = raw < 0
-            let magnitude: i32 = raw
+            var magnitude: i32 = raw
             if negative { magnitude = 0 - raw }
 
             let whole: i32 = magnitude / 1000

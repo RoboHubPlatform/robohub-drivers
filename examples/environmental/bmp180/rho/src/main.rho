@@ -18,7 +18,7 @@ const VALUE_ERROR: i32 = -1000000
 // for centimetres — by hand, so the program needs no float formatting.
 fn print_fixed(value: i32, scale: i32) void {
     let negative: bool = value < 0
-    let magnitude: i32 = value
+    var magnitude: i32 = value
     if negative {
         magnitude = 0 - value
     }
