@@ -10,6 +10,7 @@
 
 #include <string.h>
 
+// @req DRV-GW-0003
 void robohub_uplink_announce(RoboHubRelayUplink* uplink)
 {
     if (uplink == 0 || uplink->link == 0) {
@@ -34,6 +35,7 @@ void robohub_uplink_announce(RoboHubRelayUplink* uplink)
     }
 }
 
+// @req DRV-GW-0001
 rh_bool robohub_relayed_carried(rh_u16 msg_id)
 {
     return (msg_id == RH_SECURE_MSG_HELLO || (msg_id & RH_SECURE_FLAG) != 0u) ? RH_TRUE : RH_FALSE;

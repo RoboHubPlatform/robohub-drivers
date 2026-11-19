@@ -73,6 +73,7 @@ static RoboHubError bmp180_write(RoboHubBMP180* dev, rh_u8 reg, rh_u8 value)
 /* Wait out a conversion. With a timer, sleep for the part's own conversion time.
  * Without one, poll the end-of-conversion bit rather than guessing, which is
  * exact regardless of how fast the bus is. */
+// @req DRV-ENV-0003
 static RoboHubError bmp180_wait(RoboHubBMP180* dev, rh_u32 ms)
 {
     if (dev->timer != NULL && dev->timer->delay_ms != NULL) {
@@ -147,14 +148,31 @@ static RoboHubError bmp180_read_up(RoboHubBMP180* dev, rh_i32* up)
     return ROBOHUB_OK;
 }
 
-/* Bring the part up: read the factory calibration and confirm the identity.
- * Called once from init, and again by an interface's own init. */
+/* Bring the part up: confirm the identity and read the factory calibration.
+ * Called once from init, and again by an interface's own init.
+ *
+ * The identity read is the first thing the part is asked, so it is where an
+ * absent part shows, and it shows in one of two ways. On I2C nothing
+ * acknowledges the address, and the bus reports the transfer failed — an I/O
+ * error or a timeout, which is what every backend returns for a NACK. On SPI
+ * nothing drives MISO, so the transfer succeeds and the byte reads as the
+ * line's idle level, all ones or all zeros. Either is `ROBOHUB_ERR_NOT_FOUND`.
+ * A part that answers with another identity is there and is not a BMP180,
+ * which is `ROBOHUB_ERR_PROTOCOL`; a bus that cannot do the transfer at all
+ * says so with its own error. */
+// @req DRV-ENV-0001, DRV-ENV-0006
 static RoboHubError bmp180_bring_up(RoboHubBMP180* dev)
 {
     rh_u8 chip_id = 0u;
     RoboHubError err = bmp180_read(dev, BMP180_REG_CHIP_ID, &chip_id, 1u);
+    if (err == ROBOHUB_ERR_IO || err == ROBOHUB_ERR_TIMEOUT || err == ROBOHUB_ERR_NOT_FOUND) {
+        return ROBOHUB_ERR_NOT_FOUND;
+    }
     if (ROBOHUB_FAILED(err)) {
         return err;
+    }
+    if (chip_id == 0x00u || chip_id == 0xFFu) {
+        return ROBOHUB_ERR_NOT_FOUND;
     }
     if (chip_id != ROBOHUB_BMP180_CHIP_ID) {
         return ROBOHUB_ERR_PROTOCOL;
@@ -351,6 +369,7 @@ static RoboHubError bmp180_alt_get(RoboHubAltitude* self, rh_f32* metres)
 /*  Public API                                                                */
 /* -------------------------------------------------------------------------- */
 
+// @req DRV-0001, DRV-ENV-0002
 RoboHubError robohub_bmp180_init(RoboHubBMP180* dev, const RoboHubBMP180Config* config)
 {
     if (dev == NULL || config == NULL || config->bus == NULL) {

@@ -28,6 +28,7 @@ static RoboHubError analog_op_deinit(RoboHubAnalog* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-IN-0002
 static RoboHubError analog_op_get_level(RoboHubAnalog* self, rh_f32* level)
 {
     RoboHubAnalogAdc* sensor = (RoboHubAnalogAdc*)self->context;

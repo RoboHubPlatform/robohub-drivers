@@ -51,6 +51,7 @@ static RoboHubError ir_gate(RoboHubInfraredPwm* ir, rh_bool on)
     return ir->pwm->set_duty(ir->pwm, ir->channel, 0.0f);
 }
 
+// @req DRV-OUT-0004
 static RoboHubError ir_op_send(RoboHubInfrared* self, const rh_u32* durations, rh_size count)
 {
     RoboHubInfraredPwm* ir = (RoboHubInfraredPwm*)self->context;

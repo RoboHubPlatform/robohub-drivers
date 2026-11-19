@@ -2,15 +2,26 @@
  * infrared_receiver_gpio.c — an infrared receiver on a GPIO.
  *
  * What reaches the pin is a burst of pulses, and a protocol is what gives it a
- * meaning. NEC is decoded here: a header mark of about nine milliseconds, a gap
- * of about four and a half, then thirty-two bits — a mark of about 560
- * microseconds followed by a gap of about 1125 for a zero or about 2250 for a
- * one — and then the same thirty-two bits inverted, which is how a code is
- * checked rather than merely read.
+ * meaning. NEC is decoded here: a header mark of about nine milliseconds, a
+ * space of about four and a half, then thirty-two bits sent least-significant
+ * first — each a mark of about 560 microseconds followed by a space of about
+ * 560 for a zero or about 1690 for a one (a bit period of 1.125 or 2.25 ms) —
+ * and a closing mark.
+ *
+ * The thirty-two bits are four bytes: an address, its inverse, a command and
+ * its inverse. That is the original NEC; most remotes now send the extended
+ * form, whose second byte is the high byte of a 16-bit address rather than the
+ * inverse of the first. The command's inverse is in both, and it is what checks
+ * a code: a frame whose command does not invert is refused. The address is read
+ * as 8 bits when its second byte inverts it and as 16 bits when it does not, and
+ * the code is `(address << 8) | command`.
+ *
+ * A held button sends a repeat code — the header mark, a 2.25 ms space and a
+ * mark — which carries no code and is reported as nothing received.
  *
  * The pulses are timed by polling the pin. The shortest thing that has to be
- * told apart is a mark against a gap, and the gaps differ by about a
- * millisecond, so a poll of tens of microseconds is enough.
+ * told apart is a zero's space against a one's, about a millisecond apart, so a
+ * poll of tens of microseconds is enough.
  *
  * @project RoboHub Platform
  * @license MIT
@@ -20,25 +31,29 @@
 
 #include <stddef.h>
 
-/* The NEC timings, in microseconds. The window each one is allowed to fall in
- * is what tells a mark from a gap and a zero from a one. */
+/* The NEC timings, in microseconds: how long the line holds each level. The
+ * window each one is allowed to fall in is what tells a zero from a one. */
 #define NEC_HEADER_MARK_US      9000u
-#define NEC_HEADER_GAP_US       4500u
+#define NEC_HEADER_SPACE_US     4500u
 #define NEC_BIT_MARK_US          560u
-#define NEC_ZERO_GAP_US         1125u
-#define NEC_ONE_GAP_US          2250u
+#define NEC_ZERO_SPACE_US        563u
+#define NEC_ONE_SPACE_US        1688u
 /* How far a timing may be from the one it is compared with. */
 #define NEC_TOLERANCE_US         400u
-/* The longest a gap may be and still be a gap rather than the end of a burst. */
-#define NEC_MAX_GAP_US          8000u
+/* A level held longer than this ends the burst: the silence after a frame, or a
+ * line stuck at one level. The longest level inside a frame is the header mark. */
+#define NEC_END_US             10000u
 /* How long to wait for the first mark before deciding nothing is arriving. */
 #define NEC_IDLE_TIMEOUT_US    20000u
 
-/* How many edges a burst may have. A NEC frame is a header and thirty-three
- * bits, which is sixty-eight edges. */
+/* How many levels a burst may have. A NEC frame is a header mark and space,
+ * thirty-two marks and spaces and a closing mark: sixty-seven. */
 #define NEC_MAX_EDGES           72u
+#define NEC_FRAME_LEVELS        (2u + 2u * 32u + 1u)
 
-/* The line is idle at this level; a mark pulls it the other way. */
+/* Is the line at mark? The module drives it away from idle for a mark; which
+ * level that is, is the wiring (`active_low`). A pin that cannot be read is
+ * idle. */
 static rh_bool ir_line(RoboHubInfraredReceiverGpio* ir)
 {
     rh_u32 level = 0;
@@ -51,23 +66,32 @@ static rh_bool ir_line(RoboHubInfraredReceiverGpio* ir)
     return level != 0u ? RH_TRUE : RH_FALSE;
 }
 
-/* Time the gaps between the edges of one burst. */
-static rh_size ir_capture(RoboHubInfraredReceiverGpio* ir, rh_u32* gaps, rh_size max)
+/* Time one burst: wait for its first mark, then record how long each level is
+ * held — mark, space, mark, ... — until a level outlasts NEC_END_US. Returns
+ * how many durations were recorded; zero when nothing arrived. */
+static rh_size ir_capture(RoboHubInfraredReceiverGpio* ir, rh_u32* levels, rh_size max)
 {
-    rh_size count = 0u;
-    rh_micros previous = ir->timer->get_micros(ir->timer);
-    rh_micros last_edge = previous;
+    rh_micros started = ir->timer->get_micros(ir->timer);
+    rh_micros now = started;
+    while (ir_line(ir) != RH_TRUE) {
+        now = ir->timer->get_micros(ir->timer);
+        if ((now - started) > NEC_IDLE_TIMEOUT_US) {
+            return 0u;   /* nothing is arriving */
+        }
+    }
 
+    rh_size count = 0u;
+    rh_bool mark = RH_TRUE;
+    rh_micros last_edge = now;
     while (count < max) {
-        rh_micros now = ir->timer->get_micros(ir->timer);
-        if (ir_line(ir) != RH_TRUE) {
-            /* An edge: the gap that just ended is the time since the last one. */
-            rh_u32 gap = (rh_u32)(now - previous);
-            gaps[count++] = gap;
-            previous = now;
+        now = ir->timer->get_micros(ir->timer);
+        rh_bool line = ir_line(ir);
+        if (line != mark) {
+            levels[count++] = (rh_u32)(now - last_edge);
             last_edge = now;
-        } else if ((now - last_edge) > NEC_IDLE_TIMEOUT_US) {
-            break; /* nothing more is coming */
+            mark = line;
+        } else if ((now - last_edge) > NEC_END_US) {
+            break;       /* the burst is over, or the line is stuck */
         }
     }
     return count;
@@ -80,47 +104,48 @@ static rh_bool near(rh_u32 measured, rh_u32 expected)
     return difference <= NEC_TOLERANCE_US ? RH_TRUE : RH_FALSE;
 }
 
-/* Decode a captured burst as NEC, into the code. */
-static rh_bool ir_decode(const rh_u32* gaps, rh_size count, rh_u32* code)
+/* Decode a captured burst as NEC, standard or extended, into the code. */
+// @req DRV-IN-0005, DRV-IN-0006
+static rh_bool ir_decode(const rh_u32* levels, rh_size count, rh_u32* code)
 {
-    if (count < 3u) {
+    if (count < NEC_FRAME_LEVELS) {
+        return RH_FALSE;   /* a repeat code, a frame cut short, or noise */
+    }
+    if (!near(levels[0], NEC_HEADER_MARK_US) || !near(levels[1], NEC_HEADER_SPACE_US)) {
         return RH_FALSE;
     }
-    /* The first gap is the header mark, the second the gap after it. */
-    if (!near(gaps[0], NEC_HEADER_MARK_US) || !near(gaps[1], NEC_HEADER_GAP_US)) {
-        return RH_FALSE;
-    }
-    /* Then thirty-two bits, each a mark and a gap, and the inverted copy. */
-    if (count < 2u + 2u * 32u + 1u) {
-        return RH_FALSE;
-    }
-    rh_u32 value = 0u;
-    rh_u32 inverted = 0u;
+    rh_u32 frame = 0u;
     for (rh_u32 bit = 0; bit < 32u; bit++) {
-        rh_u32 mark = gaps[2u + 2u * bit];
-        rh_u32 gap = gaps[3u + 2u * bit];
+        rh_u32 mark = levels[2u + 2u * bit];
+        rh_u32 space = levels[3u + 2u * bit];
         if (!near(mark, NEC_BIT_MARK_US)) {
             return RH_FALSE;
         }
-        rh_u32 one = 0u;
-        if (near(gap, NEC_ONE_GAP_US)) {
-            one = 1u;
-        } else if (!near(gap, NEC_ZERO_GAP_US)) {
+        if (near(space, NEC_ONE_SPACE_US)) {
+            frame |= 1u << bit;
+        } else if (!near(space, NEC_ZERO_SPACE_US)) {
             return RH_FALSE;
         }
-        if (bit < 16u) {
-            value |= one << bit;
-        } else {
-            inverted |= one << (bit - 16u);
-        }
     }
-    /* The second half is the first half inverted, which is what a correct
-     * remote sends and a false one does not. */
-    rh_u32 complement = (~value) & 0xFFFFu;
-    if (complement != inverted) {
+    if (!near(levels[2u + 2u * 32u], NEC_BIT_MARK_US)) {
+        return RH_FALSE;   /* the closing mark */
+    }
+
+    rh_u32 address_low = frame & 0xFFu;
+    rh_u32 address_high = (frame >> 8) & 0xFFu;
+    rh_u32 command = (frame >> 16) & 0xFFu;
+    rh_u32 command_inverse = (frame >> 24) & 0xFFu;
+    /* The command is checked by its inverse in both forms; a frame that fails
+     * it is noise or a remote misheard. */
+    if ((command ^ command_inverse) != 0xFFu) {
         return RH_FALSE;
     }
-    *code = value;
+    /* The address: 8 bits when the second byte is its inverse (standard NEC),
+     * else 16 bits, low byte first (extended NEC). */
+    rh_u32 address = ((address_low ^ address_high) == 0xFFu)
+                         ? address_low
+                         : (address_low | (address_high << 8));
+    *code = (address << 8) | command;
     return RH_TRUE;
 }
 
@@ -157,14 +182,14 @@ static RoboHubError ir_op_read(RoboHubInfraredReceiver* self, rh_u32* code, rh_b
         return ROBOHUB_ERR_STATE;
     }
 
-    rh_u32 gaps[NEC_MAX_EDGES];
-    rh_size count = ir_capture(ir, gaps, NEC_MAX_EDGES);
+    rh_u32 levels[NEC_MAX_EDGES];
+    rh_size count = ir_capture(ir, levels, NEC_MAX_EDGES);
     ir->have_code = RH_FALSE;
     ir->protocol = ROBOHUB_INFRARED_PROTOCOL_NONE;
     *code = 0u;
 
     rh_u32 decoded = 0u;
-    if (ir_decode(gaps, count, &decoded)) {
+    if (ir_decode(levels, count, &decoded)) {
         ir->code = decoded;
         ir->have_code = RH_TRUE;
         ir->protocol = ROBOHUB_INFRARED_PROTOCOL_NEC;

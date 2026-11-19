@@ -9,7 +9,8 @@
 D="$MODULE_ROOT/drivers"
 
 mkdir -p "$GEN/robohub/drivers/input" "$GEN/robohub/drivers/output" \
-         "$GEN/robohub/drivers/light" "$GEN/robohub/drivers/temperature"
+         "$GEN/robohub/drivers/light" "$GEN/robohub/drivers/temperature" \
+         "$GEN/robohub/drivers/environmental"
 cp "$D/input/button-gpio/inc/button_gpio.h"            "$GEN/robohub/drivers/input/"
 cp "$D/output/tone-pwm/inc/tone_pwm.h"                 "$GEN/robohub/drivers/output/"
 cp "$D/output/rgb-pwm/inc/rgb_pwm.h"                   "$GEN/robohub/drivers/output/"
@@ -21,6 +22,9 @@ cp "$D/input/analog-adc/inc/analog_adc.h"               "$GEN/robohub/drivers/in
 cp "$D/input/encoder-gpio/inc/encoder_gpio.h"           "$GEN/robohub/drivers/input/"
 cp "$D/input/pulse-adc/inc/pulse_adc.h"                 "$GEN/robohub/drivers/input/"
 cp "$D/input/infrared-receiver-gpio/inc/infrared_receiver_gpio.h" "$GEN/robohub/drivers/input/"
+cp "$D/environmental/bmp180/inc/bmp180.h"               "$GEN/robohub/drivers/environmental/"
+cp "$D/environmental/dht11/inc/dht11.h"                 "$GEN/robohub/drivers/environmental/"
+cp "$D/temperature/ds18b20/inc/ds18b20.h"               "$GEN/robohub/drivers/temperature/"
 
 $CC -std=c11 -Wall -Wextra -I"$GEN" \
     -I"$D/input/button-gpio/inc" -I"$D/output/tone-pwm/inc" -I"$D/output/rgb-pwm/inc" \
@@ -42,3 +46,15 @@ $CC -std=c11 -Wall -Wextra -I"$GEN" \
 
 run test_parts "$OUT/test_parts"
 run test_parts2 "$OUT/test_parts2"
+
+$CC -std=c11 -Wall -Wextra -I"$GEN" -I"$D/input/infrared-receiver-gpio/inc" $BASE \
+    "$MODULE_ROOT/tests/test_ir_receiver.c" \
+    "$D/input/infrared-receiver-gpio/src/infrared_receiver_gpio.c" -o "$OUT/test_ir_receiver"
+run test_ir_receiver "$OUT/test_ir_receiver"
+
+$CC -std=c11 -Wall -Wextra -I"$GEN" -I"$D/environmental/bmp180/inc" \
+    -I"$D/environmental/dht11/inc" -I"$D/temperature/ds18b20/inc" $BASE \
+    "$MODULE_ROOT/tests/test_environmental.c" \
+    "$D/environmental/bmp180/src/bmp180.c" "$D/environmental/dht11/src/dht11.c" \
+    "$D/temperature/ds18b20/src/ds18b20.c" -lm -o "$OUT/test_environmental"
+run test_environmental "$OUT/test_environmental"

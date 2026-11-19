@@ -39,6 +39,7 @@ static rh_u8 rgb_op_channels(RoboHubRgb* self)
     return ((RoboHubRgbPwm*)self->context)->count;
 }
 
+// @req DRV-OUT-0003
 static RoboHubError rgb_op_set(RoboHubRgb* self, rh_u8 red, rh_u8 green, rh_u8 blue)
 {
     RoboHubRgbPwm* rgb = (RoboHubRgbPwm*)self->context;

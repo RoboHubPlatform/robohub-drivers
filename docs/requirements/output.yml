@@ -1,0 +1,60 @@
+# The output parts: on/off outputs, tones, colour LEDs and infrared
+# transmitters, in drivers/output/. Proposed until the maintainer approves them.
+level: SUB
+prefix: DRV-OUT
+title: Outputs
+requirements:
+  - id: DRV-OUT-0001
+    title: A switch is off at bring-up and reports its pin
+    statement: >
+      The GPIO switch driver shall write the off level for its wiring when it is
+      brought up, write the level its polarity gives for on or off when set, and
+      report on or off from the level its pin reads.
+    rationale: A relay must not close when a node resets, and the state a page shows comes from the pin.
+    satisfies: [DRV-0004]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [switch, gpio, outputs]
+
+  - id: DRV-OUT-0002
+    title: A tone is its frequency at half duty
+    statement: >
+      The tone driver shall play a tone by setting its PWM channel to the
+      requested frequency at 50 % duty, and stop it by stopping the channel.
+    rationale: A square wave at half duty is the loudest a passive buzzer gives.
+    satisfies: [DRV-0004]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [tone, pwm, outputs]
+
+  - id: DRV-OUT-0003
+    title: A colour is each channel's byte as a duty
+    statement: >
+      The colour LED driver shall drive each bound PWM channel at its colour
+      byte divided by 255, ignore the byte of a channel bound as
+      ROBOHUB_RGB_NO_CHANNEL, and report the number of channels bound.
+    rationale: A two-colour LED and an RGB LED are driven through the same interface.
+    satisfies: [DRV-0004]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [rgb, pwm, outputs]
+
+  - id: DRV-OUT-0004
+    title: An infrared sequence gates a 38 kHz carrier
+    statement: >
+      The infrared transmitter driver shall send a sequence of mark and space
+      durations in microseconds by switching a 38000 Hz carrier on for each mark
+      and off for each space, and leave the carrier off when the sequence ends.
+    rationale: Every consumer remote's receiver demodulates a 38 kHz carrier.
+    satisfies: [DRV-0004]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [infrared, pwm, outputs]

@@ -55,11 +55,15 @@ board:
   driver: robohub-driver-button-gpio
   functions:
     - button
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+    - name: gnd
       signal: ground
+    # The switch's output, read on a GPIO, active low (bsp/ky_017_mercury_switch_module.h).
+    # The header's pin order is not recorded here, so no position is given.
+    - name: s
+      signal: digital_in
 
 package:
   kind: library

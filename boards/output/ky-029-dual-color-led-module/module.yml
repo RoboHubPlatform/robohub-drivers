@@ -55,11 +55,17 @@ board:
   driver: robohub-driver-rgb-pwm
   functions:
     - color
-  connector:
-    - name: VCC
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+    - name: gnd
       signal: ground
+    # The red and green LEDs on two PWM channels (bsp: RED 0, GREEN 1, no blue).
+    # The header's pin order is not recorded here, so no position is given.
+    - name: r
+      signal: pwm_out
+    - name: g
+      signal: pwm_out
 
 package:
   kind: library

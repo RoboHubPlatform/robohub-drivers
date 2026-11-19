@@ -4,7 +4,7 @@ module:
   previous_ids:
     - robohub-drivers.drivers.environmental.bmp180
   type: driver
-  version: 0.1.0
+  version: 0.1.1
   description: >
     Platform-agnostic Bosch BMP180 temperature, pressure and altitude sensor.
     Implements the RoboHubTemperature, RoboHubPressure and RoboHubAltitude

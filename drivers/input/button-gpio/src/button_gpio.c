@@ -31,6 +31,7 @@ static RoboHubError button_op_deinit(RoboHubButton* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-IN-0001
 static RoboHubError button_op_get(RoboHubButton* self, rh_bool* pressed)
 {
     RoboHubButtonGpio* button = (RoboHubButtonGpio*)self->context;

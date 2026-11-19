@@ -21,6 +21,7 @@ static rh_u32 level_for(const RoboHubGpioSwitch* sw, rh_bool on)
     return on ? 0u : 1u;
 }
 
+// @req DRV-0004, DRV-OUT-0001
 static RoboHubError switch_op_init(RoboHubSwitch* self)
 {
     RoboHubGpioSwitch* sw = (RoboHubGpioSwitch*)self->context;
@@ -50,6 +51,7 @@ static RoboHubError switch_op_deinit(RoboHubSwitch* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-OUT-0001
 static RoboHubError switch_op_get(RoboHubSwitch* self, rh_bool* on)
 {
     RoboHubGpioSwitch* sw = (RoboHubGpioSwitch*)self->context;
@@ -68,6 +70,7 @@ static RoboHubError switch_op_get(RoboHubSwitch* self, rh_bool* on)
     return ROBOHUB_OK;
 }
 
+// @req DRV-OUT-0001
 static RoboHubError switch_op_set(RoboHubSwitch* self, rh_bool on)
 {
     RoboHubGpioSwitch* sw = (RoboHubGpioSwitch*)self->context;

@@ -17,16 +17,25 @@ module:
   previous_ids:
     - robohub-drivers
   type: collection
-  version: 0.5.1
+  version: 0.5.2
   license: "MIT"
   description: >
     Device drivers for the RoboHub Platform, and the examples that use them.
+
+# The collection's requirements are numbered DRV-NNNN (and DRV-<FAMILY>-NNNN per
+# driver family) and serve the system requirements robohub holds. They are all
+# kept here, at the root: the nested modules carry none of their own.
+requirements: { prefix: DRV, parent: robohub }
 
 # The functions a driver here may present, one per driver interface
 # robohub-common declares. A driver lists the ones it answers in its own
 # manifest, so a sensor that measures more than one thing — a BMP180 is a
 # thermometer, a barometer and an altimeter at once — is found by any of them.
 # This is the vocabulary; a driver's own `functions:` is its claim.
+#
+# `switch` is an on/off output: robohub-common declares it as `RoboHubSwitch`
+# (robohub/devices/switch.h) and as the device kind `switch`, and the GPIO switch
+# driver and the relay boards built on it present it.
 functions:
   - temperature
   - pressure
@@ -40,6 +49,7 @@ functions:
   - analog
   - encoder
   - pulse
+  - switch
 
 # The contract a board manifest is written to.
 #
@@ -63,15 +73,24 @@ contracts:
         - designation
         - device
         - category
-        - driver
         - connectors
-      capabilities:
-        - sensor
-        - summary
-        - buses
-        - measures
       metadata:
         - tags
+    # Checked for every board by tests/board_manifests_test.py, which reads
+    # `requires` from here.
+    optional:
+      board.driver: >
+        The driver module the board carries, and the one its `depends` names.
+        Mesh compiles and links it into a node and keys the board's readings on
+        it, so a board that depends on a driver names it. A carrier whose
+        support package binds a HAL interface itself (max485-module binds an
+        RS485 from a UART and a GPIO) depends on no driver and names none.
+      capabilities: >
+        sensor, summary, buses, measures. A driver declares these; a board
+        need not repeat them. Mesh reads a board's capabilities.summary when
+        it has one and the first sentence of its description otherwise, and
+        lists a board with capabilities.sensor true among the sensor drivers.
+        When present, sensor is a boolean and a sensor names what it measures.
     bus:
       description: >
         How the board reaches a node. A missing block is a module that makes no
@@ -137,6 +156,6 @@ docs:
   title: RoboHub Drivers
   section: collections
   order: "20"
-  index: docs/index.md
+  index: docs/doc/index.md
   sources:
-    - docs/index.md
+    - docs/doc/index.md

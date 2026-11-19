@@ -75,6 +75,7 @@ static RoboHubError ds18b20_write_byte(RoboHubDS18B20* dev, rh_u8 byte)
 
 /* Reset the bus, then SKIP ROM and a command. Every exchange with the part
  * starts this way, which is why it is one function and not five. */
+// @req DRV-TEMP-0002
 static RoboHubError ds18b20_command(RoboHubDS18B20* dev, rh_u8 command)
 {
     if (dev->bus->reset == NULL) {
@@ -119,6 +120,7 @@ static RoboHubError ds18b20_read_scratchpad(RoboHubDS18B20* dev);
  * thousands of writes, and a copy needs a strong pull-up a parasite-powered
  * part may not get, so a driver that re-initialises after a failed read must
  * not write it each time; doing so kept a struggling probe failing. */
+// @req DRV-TEMP-0003
 static RoboHubError ds18b20_configure(RoboHubDS18B20* dev)
 {
     rh_u8 wanted_config = ds18b20_config_byte(dev->resolution_bits);
@@ -159,6 +161,7 @@ static RoboHubError ds18b20_configure(RoboHubDS18B20* dev)
 /*  Reading                                                                   */
 /* -------------------------------------------------------------------------- */
 
+// @req DRV-TEMP-0002
 static RoboHubError ds18b20_read_scratchpad(RoboHubDS18B20* dev)
 {
     if (dev->bus->read_byte == NULL) {
@@ -205,6 +208,7 @@ static RoboHubError ds18b20_op_deinit(RoboHubTemperature* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-TEMP-0001
 static RoboHubError ds18b20_op_get_celsius(RoboHubTemperature* self, rh_f32* celsius)
 {
     RoboHubDS18B20* dev = (RoboHubDS18B20*)self->context;
@@ -266,6 +270,7 @@ static RoboHubError ds18b20_op_get_fahrenheit(RoboHubTemperature* self, rh_f32* 
 /*  Public API                                                                */
 /* -------------------------------------------------------------------------- */
 
+// @req DRV-TEMP-0001
 RoboHubError robohub_ds18b20_init(RoboHubDS18B20* dev, const RoboHubDS18B20Config* config)
 {
     if (dev == NULL || config == NULL || config->bus == NULL || config->timer == NULL) {

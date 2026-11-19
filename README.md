@@ -241,15 +241,32 @@ step.
 The manifest carries:
 
 - `module`: name, type, version, description;
-- `board`: designation, device, category, driver, connectors and functions;
-- `capabilities`: `sensor`, `summary`, `buses`, `measures`;
-- `board.bus`: how it reaches a node (see below);
+- `board`: designation, device, category and `connectors` — every pin the
+  header brings out, each with a `name` and the `signal` it carries;
+- `board.driver`: the driver the board carries, which is also in its
+  `depends`. Mesh compiles and links it into a node and keys the board's
+  readings on it. A carrier whose support package binds a HAL interface
+  itself — `max485-module` makes an RS485 of a UART and a GPIO — depends on no
+  driver and names none;
 - `metadata.tags`: including `water`, `dirt` or `air` when the board is rated
   for that medium;
 - `exports`: the header and CMake target a node links.
 
-The root `module.yml` states the same contract under `contracts.board`, so a
-new board can be checked against it without reading a consumer.
+It may carry:
+
+- `board.functions`, `board.bus` (how it reaches a node, see below),
+  `board.pins`, `board.peripherals`, `board.defaults`;
+- `signals` and `telemetry`: what a dashboard binds to and how a node reads it;
+  a signal names its id, direction, unit and field;
+- `capabilities` (`sensor`, `summary`, `buses`, `measures`): a driver declares
+  these and a board need not repeat them. Mesh shows a board's
+  `capabilities.summary` when it has one and the first sentence of its
+  description otherwise, and lists a board whose `capabilities.sensor` is true
+  among the sensor drivers (the DS18B20 boards do).
+
+The root `module.yml` states the same contract under `contracts.board`, and
+`tests/board_manifests_test.py` checks every board against it on each
+`rho test .`, so a board that leaves out a required key fails the tests.
 
 ## Bus metadata
 

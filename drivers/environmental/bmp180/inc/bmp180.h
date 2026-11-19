@@ -152,7 +152,11 @@ typedef struct {
  * Reads the factory calibration and checks the chip id. Returns
  * `ROBOHUB_ERR_NOT_FOUND` when the part does not answer, which is the one
  * failure a caller can act on — nothing is wired, or it is wired wrongly — and
- * `ROBOHUB_ERR_PROTOCOL` when it answers with the wrong identity.
+ * `ROBOHUB_ERR_PROTOCOL` when it answers with the wrong identity. Not answering
+ * is the identity read failing at the bus (`ROBOHUB_ERR_IO` or
+ * `ROBOHUB_ERR_TIMEOUT`, how an I2C backend reports a NACK) or reading back
+ * 0x00 or 0xFF (an SPI line nothing drives). Any other bus error is returned as
+ * the bus reported it.
  */
 RoboHubError robohub_bmp180_init(RoboHubBMP180* dev, const RoboHubBMP180Config* config);
 

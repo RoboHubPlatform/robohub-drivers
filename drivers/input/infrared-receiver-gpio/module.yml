@@ -4,7 +4,7 @@ module:
   previous_ids:
     - robohub-drivers.drivers.input.infrared-receiver-gpio
   type: driver
-  version: 0.1.0
+  version: 0.1.1
   description: >
     A input part for the RoboHub Platform, presenting the infrared interface.
   maintainer: "Aurel Miron"

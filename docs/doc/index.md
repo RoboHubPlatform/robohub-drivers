@@ -19,7 +19,7 @@ together (see {ref}`robohub-devices/index`).
 - **analog-adc**: analog input via ADC
 - **encoder-gpio**: rotary encoder via GPIO
 - **pulse-adc**: pulse input via ADC
-- **infrared-receiver-gpio**: infrared receiver via GPIO
+- **infrared-receiver-gpio**: infrared receiver via GPIO, decoding NEC — standard (8-bit address) and extended (16-bit address) — as `(address << 8) | command`
 
 ### Output
 - **tone-pwm**: tone generation via PWM
@@ -95,3 +95,10 @@ ROBOHUB_COMMON_DIR=/path/to/robohub-common \
 ROBOHUB_ORCHESTRATOR_DIR=/path/to/robohub \
   tests/run.sh
 ```
+
+`rho test .` runs the same host tests: `tests/tests.yml` declares them as a ctest
+suite (`tests/CMakeLists.txt`), which finds robohub-common and robohub under
+`ROBOHUB_WORKSPACE`, or beside this repository. They exercise the part drivers
+over fake HAL halves, the infrared receiver against replayed NEC frames, and the
+BMP180, DHT11 and DS18B20 protocols, including a part that does not answer
+(`ROBOHUB_ERR_NOT_FOUND`).

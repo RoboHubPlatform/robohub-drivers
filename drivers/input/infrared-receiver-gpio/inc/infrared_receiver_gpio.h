@@ -8,15 +8,22 @@
  * them.
  *
  * NEC is decoded, because it is what most remotes speak and what these modules
- * are sold for: a header, then thirty-two bits whose length says whether they
- * are a zero or a one, then the same bits inverted, which is how a code is
- * checked. A burst that is not NEC is reported as none, which is different from
- * a code that was.
+ * are sold for: a header, then thirty-two bits whose space says whether they are
+ * a zero or a one — an address byte, a second address byte, a command and the
+ * command inverted. In standard NEC the second address byte is the first
+ * inverted; in extended NEC, which most remotes now send, the two make a 16-bit
+ * address. Both are decoded. The command's inverse is what checks a code, so a
+ * frame whose command does not invert is refused.
+ *
+ * The code read is `(address << 8) | command`: bits 0-7 the command, bits 8-15
+ * the address of a standard frame, bits 8-23 the address of an extended one. A
+ * repeat code (a held button) and a burst that is not NEC are reported as none,
+ * which is different from a code that was.
  *
  * The timing is taken by polling the pin, and the resolution of that poll is
- * what a remote's shortest pulse has to fit in. NEC's shortest mark is about
- * 560 µs and the gap that says a one is about 2250 µs, so a poll of tens of
- * microseconds is enough to tell them apart.
+ * what a remote's shortest pulse has to fit in. NEC's shortest level is about
+ * 560 µs and a one's space is about 1690 µs, so a poll of tens of microseconds
+ * is enough to tell them apart.
  *
  * @project RoboHub Platform
  * @license MIT

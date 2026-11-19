@@ -66,6 +66,7 @@ static RoboHubError encoder_state(RoboHubEncoderGpio* encoder, rh_u8* state)
     return ROBOHUB_OK;
 }
 
+// @req DRV-IN-0003
 static RoboHubError encoder_op_read(RoboHubEncoder* self, rh_i32* steps, rh_bool* clockwise)
 {
     RoboHubEncoderGpio* encoder = (RoboHubEncoderGpio*)self->context;

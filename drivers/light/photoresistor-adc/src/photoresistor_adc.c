@@ -28,6 +28,7 @@ static RoboHubError light_op_deinit(RoboHubLight* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-IN-0002
 static RoboHubError light_op_get(RoboHubLight* self, rh_f32* level)
 {
     RoboHubPhotoresistorAdc* light = (RoboHubPhotoresistorAdc*)self->context;

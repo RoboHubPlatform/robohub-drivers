@@ -1,0 +1,91 @@
+# The environmental sensors: the Bosch BMP180 (temperature, pressure,
+# altitude) and the Aosong DHT11 (temperature, relative humidity), in
+# drivers/environmental/. Proposed until the maintainer approves them.
+level: SUB
+prefix: DRV-ENV
+title: Environmental sensors
+requirements:
+  - id: DRV-ENV-0001
+    title: The BMP180 is brought up only when it is a BMP180
+    statement: >
+      robohub_bmp180_init shall read the chip-id register over the bound
+      RoboHubBus, I2C or SPI, return ROBOHUB_ERR_PROTOCOL when it does not read
+      0x55, and otherwise read the part's eleven factory calibration
+      coefficients once and keep them with the device.
+    rationale: Another part at address 0x77 must not produce pressures; the calibration is needed by every conversion.
+    satisfies: [DRV-0001, DRV-0003]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [bmp180, bus, errors]
+
+  - id: DRV-ENV-0002
+    title: The BMP180 reports Celsius, pascals and metres
+    statement: >
+      The BMP180 driver shall present the temperature, pressure and altitude
+      interfaces of one part, report degrees Celsius, pascals, and metres above
+      a sea-level reference that is 101325 Pa unless configured or set, and
+      refuse an oversampling setting above 3 with ROBOHUB_ERR_INVALID_ARG.
+    rationale: One part answers three interfaces, so a thermometer, a barometer and an altimeter program can each be handed it.
+    satisfies: [DRV-0002, DRV-0003]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [bmp180, measurement, units]
+
+  - id: DRV-ENV-0003
+    title: A BMP180 conversion is waited out, never guessed
+    statement: >
+      The BMP180 driver shall wait out a conversion for the part's conversion
+      time when it was given a timer, and otherwise poll the end-of-conversion
+      bit at most 20000 times and then return ROBOHUB_ERR_TIMEOUT.
+    rationale: Reading the result register before the conversion ends returns the previous value; a part that never finishes must not hang the node.
+    satisfies: [DRV-0003]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [bmp180, bus, errors]
+
+  - id: DRV-ENV-0004
+    title: A DHT11 frame counts only when its checksum matches
+    statement: >
+      The DHT11 driver shall read a five-byte frame from the single-wire bus,
+      return ROBOHUB_ERR_PROTOCOL without writing a value when the fifth byte is
+      not the low byte of the sum of the first four, and otherwise report
+      relative humidity in percent and temperature in degrees Celsius, negative
+      when the temperature's sign bit is set.
+    rationale: The single wire is noisy; a frame with a flipped bit must not become a humidity reading.
+    satisfies: [DRV-0002, DRV-0003]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [dht11, measurement, errors]
+
+  - id: DRV-ENV-0005
+    title: A DHT11 is not sampled faster than it can recover
+    statement: >
+      When given a timer, the DHT11 driver shall leave at least the configured
+      interval (1000 ms by default) between two measurements, and between
+      bring-up and the first measurement.
+    rationale: The part answers garbage, or nothing, when asked again within about a second.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [dht11, bus]
+
+  - id: DRV-ENV-0006
+    title: An absent BMP180 or DHT11 is reported as not found
+    statement: The BMP180 driver shall return ROBOHUB_ERR_NOT_FOUND from bring-up when the identity read fails at the bus with an I/O error or a timeout (an unacknowledged I2C address) or reads back 0x00 or 0xFF (an undriven SPI line), and ROBOHUB_ERR_PROTOCOL for any other wrong identity; the DHT11 driver shall return ROBOHUB_ERR_NOT_FOUND from a read when the bus heard no answer (not found or timeout) or the frame is all zeros.
+    rationale: Nothing wired, or wired wrongly, is the one failure a caller can act on; the headers promised it and the drivers returned a bus error or a 0 C / 0 % reading instead.
+    satisfies: [DRV-0003]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [bmp180, dht11, errors]

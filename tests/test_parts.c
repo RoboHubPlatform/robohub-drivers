@@ -55,6 +55,7 @@ static void timer_dus(RoboHubTimer* s, rh_u32 us) { timer_last_us = us; }
 
 static int near(rh_f32 a, rh_f32 b) { rh_f32 d = a - b; if (d < 0) d = -d; return d < 0.0005f; }
 
+// @verifies DRV-0002, DRV-0004, DRV-IN-0001, DRV-IN-0002, DRV-OUT-0002, DRV-OUT-0003, DRV-OUT-0004
 int main(void)
 {
     RoboHubGPIO gpio = { .name = "gpio0" };

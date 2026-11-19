@@ -49,6 +49,7 @@ static RoboHubError temp_op_deinit(RoboHubTemperature* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-TEMP-0004
 static RoboHubError temp_op_get_celsius(RoboHubTemperature* self, rh_f32* celsius)
 {
     RoboHubThermistorAdc* sensor = (RoboHubThermistorAdc*)self->context;

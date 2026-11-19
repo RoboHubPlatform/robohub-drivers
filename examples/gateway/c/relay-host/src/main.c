@@ -284,6 +284,7 @@ static rh_u32 board_plain_dropped;
 
 /* Every frame a board sends is taken here, before the bus: its HELLO and its
  * sealed frames go up whole inside RELAYED, and nothing else goes anywhere. */
+// @req DRV-0006, DRV-GW-0001
 static int on_board_frame(rh_u16 msg_id, rh_u16 tx_id, const rh_u8* payload, rh_size length, void* user)
 {
     (void)user;
@@ -337,6 +338,7 @@ static void answer_diag(RoboHubTransport* link, rh_u16 tx_id, const rh_u8* paylo
  * dropped whatever did not open under the relay's session, so this is the
  * parent speaking; an unsealed link is nobody in particular, and nothing it
  * says is acted on. `user` is the link. */
+// @req DRV-GW-0002
 static int on_parent_frame(rh_u16 msg_id, rh_u16 tx_id, const rh_u8* payload, rh_size length, void* user)
 {
     RoboHubTransport* link = (RoboHubTransport*)user;

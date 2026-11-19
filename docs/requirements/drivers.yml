@@ -1,0 +1,120 @@
+# What the driver collection does towards the system requirements: the drivers
+# that turn a part on a board into a reading or an output, the board manifests
+# Mesh builds nodes from, and the relay examples that carry boards' frames to a
+# parent gateway. Written in the R5 backfill from the headers, the changelog,
+# the code and the host tests; proposed until the maintainer approves them.
+#
+# Every requirement of the collection lives here, at the root: the drivers,
+# boards and examples nested below are modules of their own but carry none.
+level: NODE
+prefix: DRV
+title: Drivers
+requirements:
+  - id: DRV-0001
+    title: A driver presents robohub-common's interfaces over its HAL
+    statement: >
+      Every driver in drivers/ shall present only driver interfaces that
+      robohub-common declares, reach its part only through robohub-common's HAL
+      (the register bus, GPIO, ADC, PWM, timer and single-wire bus), and hold its
+      state in a value the caller owns, with no allocation and no platform code.
+    rationale: >
+      One object file then runs on an RP2350, an STM32, an ESP32 or a host test
+      with fake HALs, and a program written against a temperature interface is
+      handed a DS18B20, a thermistor or a BMP180 without naming it.
+    satisfies: [SYS-0046]
+    decided_by: [ADR-0001]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [portability, interfaces]
+
+  - id: DRV-0002
+    title: Readings are given in the interface's own unit
+    statement: >
+      A driver shall report temperature in degrees Celsius, pressure in pascals,
+      altitude in metres above its reference, relative humidity in percent, an
+      analog or light level as a fraction from 0 to 1, and a pulse rate in beats
+      per minute, whatever unit or scale its part produces.
+    rationale: A reading that reaches the history must mean the same whichever part produced it.
+    satisfies: [SYS-0047]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [measurement, units]
+
+  - id: DRV-0003
+    title: A part that cannot be read is an error, not a value
+    statement: >
+      A driver shall return a RoboHubError other than ROBOHUB_OK, and leave the
+      caller's output unwritten, when its arguments or configuration are invalid,
+      it has not been brought up, its part answers with the wrong identity, a
+      checksum or CRC does not match, or a conversion does not finish.
+    rationale: A garbled frame or an unwired part must never become a plausible reading in the history.
+    satisfies: [SYS-0047]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [errors, measurement]
+
+  - id: DRV-0004
+    title: An output driver puts its output where it is asked
+    statement: >
+      An output driver shall put its part in the state it is asked for — a
+      switch on or off through the polarity it was wired with, a tone, a colour,
+      an infrared sequence — and a switch shall be off from the moment it is
+      brought up.
+    rationale: Switching a heater from an application ends at this driver; an output that comes up on is a heater left running after a reset.
+    satisfies: [SYS-0025]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [outputs]
+
+  - id: DRV-0005
+    title: The tree is the catalogue of boards
+    statement: >
+      Every board the collection offers shall be one module of type driver-board
+      at boards/<category>/<name>/module.yml, discoverable by walking that
+      pattern with no list kept elsewhere.
+    rationale: Mesh's module picker and bus plan find a board added here without another repository being edited.
+    satisfies: [SYS-0042]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [boards, catalogue]
+
+  - id: DRV-0006
+    title: A relay carries its boards' frames without being able to forge them
+    statement: >
+      The relay examples shall carry each board's hello and sealed frames to the
+      parent gateway unchanged, under the relay's own session, and shall hold no
+      board's key.
+    rationale: >
+      A far mesh reports through a parent, and the parent must be able to trust
+      each board's reading as the board's own (robohub-gateway GW-0007,
+      GW-SEC-0008).
+    satisfies: [SYS-0026, SYS-0020]
+    decided_by: [robohub:ADR-0010]
+    status: proposed
+    verification: demonstration
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [relay, security, topology]
+
+  - id: DRV-0007
+    title: Each module of the collection carries its own version
+    statement: >
+      The collection's manifest and the manifest of every driver, board and
+      example in it shall carry a version of its own.
+    rationale: A board's support package and the driver it carries change at different times.
+    satisfies: [SYS-0040]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [releases]

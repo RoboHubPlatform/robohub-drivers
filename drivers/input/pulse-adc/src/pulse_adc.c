@@ -33,6 +33,7 @@ static RoboHubError pulse_op_deinit(RoboHubPulse* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-IN-0004
 static RoboHubError pulse_op_read(RoboHubPulse* self, rh_u16* beats_per_minute, rh_bool* beat)
 {
     RoboHubPulseAdc* pulse = (RoboHubPulseAdc*)self->context;

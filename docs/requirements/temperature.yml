@@ -1,0 +1,64 @@
+# The temperature sensors: the Maxim DS18B20 on 1-Wire and an NTC thermistor
+# on an ADC, in drivers/temperature/. Proposed until the maintainer approves
+# them.
+level: SUB
+prefix: DRV-TEMP
+title: Temperature sensors
+requirements:
+  - id: DRV-TEMP-0001
+    title: The DS18B20 converts at the resolution it was given
+    statement: >
+      The DS18B20 driver shall accept a resolution of 9 to 12 bits (12 when
+      unset), refuse any other with ROBOHUB_ERR_INVALID_ARG, wait 94, 188, 375 or
+      750 ms for a conversion at 9, 10, 11 or 12 bits, and report degrees Celsius
+      with the bits below the resolution cleared.
+    rationale: A conversion read early is the previous one; the low bits are undefined below the configured resolution.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [ds18b20, measurement, bus]
+
+  - id: DRV-TEMP-0002
+    title: A DS18B20 that is absent or garbled is an error
+    statement: >
+      The DS18B20 driver shall return ROBOHUB_ERR_NOT_FOUND when no part answers
+      the bus reset, and ROBOHUB_ERR_PROTOCOL without writing a value when the
+      scratchpad's CRC-8 does not match.
+    rationale: An unplugged probe or a long cable must be reported, not read as 85 °C or as noise.
+    satisfies: [DRV-0003]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [ds18b20, errors]
+
+  - id: DRV-TEMP-0003
+    title: The DS18B20's EEPROM is written only when its configuration differs
+    statement: >
+      The DS18B20 driver shall read the part's scratchpad at bring-up and copy
+      the resolution and alarm limits to its EEPROM only when they differ from
+      what the part holds.
+    rationale: A node that re-initialises after a failed read must not wear the EEPROM, or keep a parasite-powered probe failing (0.3.2).
+    satisfies: [DRV-0001]
+    status: proposed
+    verification: inspection
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [ds18b20, bus]
+
+  - id: DRV-TEMP-0004
+    title: A thermistor is read through the Beta model, on either side of its divider
+    statement: >
+      The thermistor driver shall convert the ADC level to degrees Celsius with a
+      Beta of 3950 for a part of 10 kΩ at 25 °C in a divider with 10 kΩ, whichever
+      half of the divider the thermistor is, so that half the scale reads
+      25 °C ± 0.05 °C.
+    rationale: The KY-013 and similar boards put the thermistor in either half; the reading must not depend on which.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [thermistor, measurement, units]

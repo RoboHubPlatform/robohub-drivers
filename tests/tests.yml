@@ -1,0 +1,36 @@
+# robohub-drivers' tests, declared, so that `rho test .` — and so CI — runs them.
+#
+# The host tests are registered with CTest in tests/CMakeLists.txt, a test
+# project of its own (the collection is not built by CMake); the board check is
+# a command:
+#
+#   host  tests/run.sh: the part drivers over fake HAL halves — buttons, tone,
+#         RGB, infrared transmitter and receiver (NEC, standard and extended),
+#         photoresistor, GPIO switch, thermistor, analog, encoder, pulse — and the
+#         BMP180, DHT11 and DS18B20 protocols (compensation, checksum, CRC-8,
+#         absent parts) (tests/host-tests.plan), built against the sibling
+#         robohub-common checkout. The ctest kind configures, builds and runs it
+#         on every `rho test`.
+#
+#   boards  tests/board_manifests_test.py: every board manifest carries the keys
+#         the board contract (contracts.board in module.yml) requires —
+#         connectors, the driver it depends on, its exports, its signals' units —
+#         so a board cannot drift from what Mesh reads. Python 3 with PyYAML;
+#         no sibling checkout and no build.
+#
+# The examples are firmware for boards and are built, not run, here:
+#
+#     cd examples/environmental/bmp180/rho && rho build -target pico2w .
+name: robohub-drivers
+suites:
+  # @verifies DRV-0001, DRV-0003
+  - name: host
+    kind: ctest
+    tags: [unit, host]
+    ctest:
+      source: tests
+  # @verifies DRV-BRD-0001, DRV-BRD-0002, DRV-BRD-0003, DRV-BRD-0004
+  - name: boards
+    kind: command
+    tags: [unit, boards]
+    command: [python3, tests/board_manifests_test.py]

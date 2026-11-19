@@ -1,0 +1,58 @@
+# The board manifests under boards/: the support packages Mesh builds a node
+# from and its module picker groups by category. Proposed until the maintainer
+# approves them.
+level: SUB
+prefix: DRV-BRD
+title: Board manifests
+requirements:
+  - id: DRV-BRD-0001
+    title: A board is named and filed by its folder
+    statement: >
+      Each board manifest shall be at boards/<category>/<name>/module.yml with
+      module name <name>, type driver-board, a version, and a board block naming
+      its designation, its device and the category <category>.
+    rationale: The folder is the index; a manifest that disagrees with its folder would be grouped or found wrongly.
+    satisfies: [DRV-0005, DRV-0007]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [boards, catalogue]
+
+  - id: DRV-BRD-0002
+    title: A board exports what a node links it with
+    statement: >
+      Each board manifest shall export its headers and a CMake target with its
+      include directories and the libraries it links.
+    rationale: Mesh links a picked board into a node's build from this block alone.
+    satisfies: [DRV-0005]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [boards, build]
+
+  - id: DRV-BRD-0003
+    title: Every signal a board declares names its direction, unit and field
+    statement: >
+      Each signal in a board manifest's signals block shall name its id, its
+      direction, its unit (empty for a unitless signal) and the telemetry field
+      it is reported in.
+    rationale: An application shows a reading with its unit and finds it by its field without knowing the part.
+    satisfies: [DRV-0002, DRV-0005]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [boards, units, telemetry]
+
+  - id: DRV-BRD-0004
+    title: A board names its connectors and the driver it carries
+    statement: Each board manifest shall list in board.connectors every connector its header brings out, each with a name and the signal it carries, and shall name in board.driver the driver module it depends on, when it depends on one; a board with no driver dependency names none. Every board manifest shall be checked against the required keys of the collection's board contract (contracts.board) on each test run.
+    rationale: Mesh compiles, links and keys a node's readings on the board's driver, and a person wires the board from its connectors; a manifest that leaves either out builds a node without the part or leaves the wiring unsaid.
+    satisfies: [DRV-0005]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [boards, build, wiring]

@@ -53,10 +53,12 @@ board:
   category: {{category}}
   driver: robohub-driver-{{name}}
   functions: [{{functions}}]
-  connector:
-    - name: VCC
+  # Every pin the header brings out, with what it carries. Power and ground
+  # are a start; add the part's own lines (i2c_sda, digital_in, pwm_out, ...).
+  connectors:
+    - name: vcc
       signal: power
-    - name: GND
+    - name: gnd
       signal: ground
   peripherals: {}
 

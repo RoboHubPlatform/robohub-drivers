@@ -1,0 +1,89 @@
+# The input parts: contacts, analog levels, light, rotary encoders, pulses and
+# infrared receivers, in drivers/input/ and drivers/light/. Proposed until the
+# maintainer approves them.
+level: SUB
+prefix: DRV-IN
+title: Inputs
+requirements:
+  - id: DRV-IN-0001
+    title: A contact reads through the polarity it was wired with
+    statement: >
+      The button driver shall report a contact wired active-low as pressed when
+      its pin reads low and released when it reads high, and the reverse for a
+      contact wired active-high.
+    rationale: The KY boards are wired both ways; a program asks whether the contact is closed, not what the pin reads.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [button, gpio]
+
+  - id: DRV-IN-0002
+    title: An analog or light level is a fraction, inverted when the wiring is
+    statement: >
+      The analog and photoresistor drivers shall report the ADC level as a
+      fraction from 0 to 1, and as one minus that fraction when the part is
+      wired as the upper half of its divider, so that more of what is measured
+      reads higher.
+    rationale: A light sensor that reads less in more light is the wiring's fault, and must not leak into a rule.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [analog, light, adc]
+
+  - id: DRV-IN-0003
+    title: An encoder counts steps and their direction
+    statement: >
+      The encoder driver shall turn each valid change of its two pins' quadrature
+      state into one step and report the direction of the last step.
+    rationale: A knob is read as how far and which way, not as two pins.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [encoder, gpio]
+
+  - id: DRV-IN-0004
+    title: A pulse is a threshold crossing, and its rate the interval between two
+    statement: >
+      The pulse driver shall report a beat when the level rises above its
+      threshold and a rate of 60000 divided by the milliseconds between the last
+      two beats, so a beat every 500 ms reads 120 beats per minute.
+    rationale: A heartbeat or a flow meter's pulses are counted the same way.
+    satisfies: [DRV-0002]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [pulse, adc, units]
+
+  - id: DRV-IN-0005
+    title: An infrared receiver reports only bursts timed as NEC
+    statement: >
+      The infrared receiver driver shall report a code only for a burst timed as
+      NEC — a 9000 µs header mark, a 4500 µs space and 32 bits of 560 µs marks with
+      563 µs (zero) or 1688 µs (one) spaces, each within 400 µs, and a closing
+      mark — and report nothing received for any other burst, a repeat code, a
+      line stuck at one level, or silence.
+    rationale: A remote's button is a code; noise on the line must not press one.
+    satisfies: [DRV-0002, DRV-0003]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [infrared, gpio]
+
+  - id: DRV-IN-0006
+    title: An infrared receiver decodes standard and extended NEC, checked by the command's inverse
+    statement: The infrared receiver driver shall decode a NEC frame's four bytes (sent least-significant bit first) as address, second address byte, command and command inverse; it shall refuse a frame whose command and command inverse are not each other's complement, read the address as 8 bits when the second byte is its complement (standard NEC) and as 16 bits, low byte first, when it is not (extended NEC), and report the code (address << 8) | command with the protocol NEC.
+    rationale: Most remotes send extended NEC, whose address has no complement; requiring one rejected them. The command's inverse is still in every frame and is what tells a code from noise.
+    satisfies: [DRV-0002, DRV-0003]
+    status: proposed
+    verification: test
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [infrared, nec]

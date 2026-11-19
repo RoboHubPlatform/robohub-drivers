@@ -124,7 +124,11 @@ typedef struct {
  *
  * Initialises the bus and marks the device ready. Returns `ROBOHUB_ERR_NOT_FOUND`
  * from a read, not from here, when nothing answers — the part answers only once
- * it is asked for a measurement.
+ * it is asked for a measurement. A read reports it when the bus heard no answer
+ * to the start signal (the bus's `ROBOHUB_ERR_NOT_FOUND`, or
+ * `ROBOHUB_ERR_TIMEOUT`) and when the frame is all zeros, which is what a line
+ * nothing drives samples as and which no DHT11 sends. A frame whose checksum
+ * does not match is `ROBOHUB_ERR_PROTOCOL`.
  */
 RoboHubError robohub_dht11_init(RoboHubDHT11* dev, const RoboHubDHT11Config* config);
 

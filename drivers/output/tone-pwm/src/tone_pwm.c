@@ -34,6 +34,7 @@ static RoboHubError tone_op_deinit(RoboHubTone* self)
     return ROBOHUB_OK;
 }
 
+// @req DRV-OUT-0002
 static RoboHubError tone_op_play(RoboHubTone* self, rh_u32 frequency_hz)
 {
     RoboHubTonePwm* tone = (RoboHubTonePwm*)self->context;
@@ -50,6 +51,7 @@ static RoboHubError tone_op_play(RoboHubTone* self, rh_u32 frequency_hz)
     return tone->pwm->set_duty(tone->pwm, tone->channel, 0.5f);
 }
 
+// @req DRV-OUT-0002
 static RoboHubError tone_op_stop(RoboHubTone* self)
 {
     RoboHubTonePwm* tone = (RoboHubTonePwm*)self->context;

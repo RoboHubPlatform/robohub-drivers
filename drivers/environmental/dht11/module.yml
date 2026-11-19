@@ -4,7 +4,7 @@ module:
   previous_ids:
     - robohub-drivers.drivers.environmental.dht11
   type: driver
-  version: 0.1.0
+  version: 0.1.1
   description: >
     Platform-agnostic Aosong DHT11 temperature and humidity sensor. Implements
     the RoboHubTemperature and RoboHubHumidity driver interfaces from

@@ -36,6 +36,7 @@
 /* Wait out the part's recovery time, and remember when a measurement was taken
  * so the next one is paced. Without a timer there is nothing to wait with, and
  * pacing is the caller's. */
+// @req DRV-ENV-0005
 static void dht11_pace(RoboHubDHT11* dev)
 {
     if (dev->timer == NULL || dev->timer->get_millis == NULL) {
@@ -80,6 +81,7 @@ static RoboHubError dht11_bring_up(RoboHubDHT11* dev)
 /*  Reading                                                                   */
 /* -------------------------------------------------------------------------- */
 
+// @req DRV-ENV-0004, DRV-ENV-0006
 static RoboHubError dht11_read_frame(RoboHubDHT11* dev, rh_f32* celsius, rh_f32* percent)
 {
     if (!dev->ready) {
@@ -90,8 +92,20 @@ static RoboHubError dht11_read_frame(RoboHubDHT11* dev, rh_f32* celsius, rh_f32*
 
     rh_u8 frame[ROBOHUB_DHT_FRAME_BYTES];
     RoboHubError err = dev->bus->read(dev->bus, frame, ROBOHUB_DHT_FRAME_BYTES);
+    if (err == ROBOHUB_ERR_TIMEOUT) {
+        /* A bus that waited for the part's answer to the start signal and got
+         * none: the part is not there. Backends that know it say NOT_FOUND. */
+        return ROBOHUB_ERR_NOT_FOUND;
+    }
     if (ROBOHUB_FAILED(err)) {
         return err;
+    }
+
+    /* A line nothing drives samples as all zeros, and an all-zero frame's
+     * checksum (zero) checks. No DHT11 reports 0 % humidity — its range starts
+     * at 20 % — so this is no part, not a reading. */
+    if ((frame[0] | frame[1] | frame[2] | frame[3] | frame[4]) == 0u) {
+        return ROBOHUB_ERR_NOT_FOUND;
     }
 
     rh_u8 sum = (rh_u8)(frame[DHT11_BYTE_HUMIDITY_INT] + frame[DHT11_BYTE_HUMIDITY_DEC] +

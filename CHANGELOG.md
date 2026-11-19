@@ -2,6 +2,60 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.5.2] - 2026-11-19
+
+The infrared receiver decodes real remotes (infrared-receiver-gpio 0.1.1,
+DRV-IN-0005, DRV-IN-0006). It decoded nothing a remote sends: it compared the
+first sixteen bits of a frame with the inverse of the last sixteen, which no NEC
+frame satisfies (the bytes are address, address inverse, command, command
+inverse), so every standard frame was refused, and most remotes now send the
+extended form, whose second byte is the high byte of a 16-bit address with no
+complement at all. Two more faults kept it deaf before the check was reached: the
+capture recorded a "gap" at every poll the line was idle rather than at each
+edge, and it compared a bit's space with the whole bit period (1125/2250 µs)
+instead of the space alone (563/1688 µs). The capture now waits for the first mark
+and times each level until one outlasts 10 ms; the decode checks the header, the
+32 bits and the closing mark, refuses a frame whose command does not invert, and
+reads the address as 8 bits when its second byte inverts it and as 16 bits when
+it does not. The code is `(address << 8) | command`. A repeat code is still no
+new code. `tests/test_ir_receiver.c` replays standard, extended, corrupted, cut-short
+and repeat frames on a fake pin.
+
+The BMP180 and the DHT11 report a part that is not there as
+`ROBOHUB_ERR_NOT_FOUND`, as their headers said (bmp180 0.1.1, dht11 0.1.1,
+DRV-ENV-0006). The BMP180 returned the bus's own error for an unacknowledged
+address and `ROBOHUB_ERR_PROTOCOL` for an SPI line nothing drives; it now returns
+not found when the identity read fails with an I/O error or a timeout, or reads
+0x00 or 0xFF, and keeps the protocol error for a part of another identity. The
+DHT11 passed a bus timeout through and read an all-zero frame — what an undriven
+line samples as, and whose checksum checks — as 0 °C and 0 % humidity; both are
+now not found.
+
+The GPIO switch's function `switch` is in the collection's vocabulary: it is the
+on/off output robohub-common declares as `RoboHubSwitch` and as the device kind
+`switch`, and the relay board built on the driver claims it too.
+
+CI runs this collection's tests: `tests/tests.yml` declares the host tests
+(`tests/run.sh`, through a CTest project in `tests/CMakeLists.txt`) as a ctest
+suite, so `rho test .` runs them. `tests/test_environmental.c` adds host tests for
+the BMP180 (the datasheet's worked example: 15.0 °C, 69964 Pa), the DHT11 (frame,
+checksum, pacing) and the DS18B20 (temperatures, CRC-8 checked against a real
+scratchpad, resolution masking, an empty bus).
+
+The board contract says what the boards carry and what Mesh reads (DRV-BRD-0004).
+`contracts.board` (0.2.3) and the README required `capabilities` and
+`board.driver` of every board; no board but the two DS18B20 ones had
+`capabilities`, and Mesh does not need it of a board — the driver declares it,
+a board's summary falls back to its description, and only a board with
+`capabilities.sensor: true` is listed among the sensor drivers — so it is now
+optional. `board.driver` is required of a board that depends on a driver, which
+Mesh compiles and links; `max485-module` binds its RS485 itself and depends on
+none. Three boards (KY-016, KY-017, KY-029), and the board template, spelled
+the block `connector:`, which nothing reads, with only power and ground: they
+now carry `connectors` with the signal lines their support packages bind.
+`tests/board_manifests_test.py`, a `boards` suite in `tests/tests.yml`, checks
+every board manifest against `contracts.board` on each `rho test .`.
+
 ## [0.3.3] - 2026-11-14
 
 The gateway and DS18B20 examples' protocol schemas are copies of robohub-protocol 1.0.0, written by its tools/sync.py; the generated C is unchanged.

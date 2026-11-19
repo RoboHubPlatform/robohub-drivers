@@ -1,0 +1,52 @@
+# The gateway-side examples: the relay on a Pico 2W (examples/gateway/c/relay),
+# the same relay on a host (relay-host) and the host uplink (uplink-host) —
+# robohub-transport's RELAYED carriage, from the relay's side. The parent's
+# side is robohub-gateway's GW-0007 and GW-SEC-0008. Proposed until the
+# maintainer approves them.
+level: SUB
+prefix: DRV-GW
+title: Relay examples
+requirements:
+  - id: DRV-GW-0001
+    title: A board's frames go up whole inside RELAYED
+    statement: >
+      The relay shall carry each hello and each sealed frame from a board,
+      unchanged, inside a RELAYED message (0x0013) of port, inner message id,
+      inner transaction id and inner payload, sealed under the relay's own
+      session with its parent, and shall drop every plain frame from a board.
+    rationale: The parent opens the inner frame with the board's own key; a plain frame the relay cannot vouch for, and the parent refuses it anyway.
+    satisfies: [DRV-0006]
+    decided_by: [robohub:ADR-0010]
+    status: proposed
+    verification: demonstration
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [relay, security]
+
+  - id: DRV-GW-0002
+    title: What the parent sends a board comes down to the board's port
+    statement: >
+      The relay shall write the inner frame of a RELAYED message from its parent
+      to its board port, unchanged, when the message names that port, and act
+      itself on nothing from its parent but RELAYED and a diagnostic request.
+    rationale: The relay holds no board's key; a board's session and commands are sealed by the parent for the board alone.
+    satisfies: [DRV-0006]
+    status: proposed
+    verification: demonstration
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [relay, security]
+
+  - id: DRV-GW-0003
+    title: A relay announces the area it speaks for
+    statement: >
+      The relay and the host uplink shall announce to the parent, under their
+      own session, the area they speak for in relay mode, and the relay shall
+      announce again under each new session with its parent.
+    rationale: A parent takes an announce only for an area its manifest gives the relay (GW-SEC-0008), and forgets it with the session.
+    satisfies: [DRV-0006]
+    status: proposed
+    verification: demonstration
+    owner: maintainer
+    changed: 2026-11-19
+    tags: [relay, topology]
