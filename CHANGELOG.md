@@ -2,6 +2,10 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.5.3] - 2026-11-20
+
+The examples name robohub-core, robohub-transport, robohub-telemetry and robohub-freertos at their new paths in the robohub-node collection (`core/`, `link/`, `telemetry/`, `kernels/freertos/`; robohub ADR-0020); CI checks out robohub-node instead of the four repositories.
+
 ## [0.5.2] - 2026-11-19
 
 The infrared receiver decodes real remotes (infrared-receiver-gpio 0.1.1,

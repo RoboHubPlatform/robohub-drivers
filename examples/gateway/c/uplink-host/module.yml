@@ -49,9 +49,7 @@ depends:
     branch: main
   - name: robohub-transport
     type: c
-    path: ${ROBOHUB_WORKSPACE}/robohub-transport
-    git: https://github.com/RoboHubPlatform/robohub-transport
-    branch: main
+    path: ${ROBOHUB_WORKSPACE}/robohub-node/link
   - name: robohub-common
     type: c
     path: ${ROBOHUB_WORKSPACE}/robohub-common
@@ -68,9 +66,9 @@ c_connection:
     - ${ROBOHUB_WORKSPACE}/robohub-linux/include
     - ${ROBOHUB_WORKSPACE}/robohub-common/include
     - ${ROBOHUB_WORKSPACE}/robohub-common/include/robohub/hal
-    - ${ROBOHUB_WORKSPACE}/robohub-core/include
-    - ${ROBOHUB_WORKSPACE}/robohub-core/include/robohub/core
-    - ${ROBOHUB_WORKSPACE}/robohub-transport/include
+    - ${ROBOHUB_WORKSPACE}/robohub-node/core/include
+    - ${ROBOHUB_WORKSPACE}/robohub-node/core/include/robohub/core
+    - ${ROBOHUB_WORKSPACE}/robohub-node/link/include
   variants:
     native:
       libraries:
