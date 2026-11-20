@@ -34,3 +34,12 @@ suites:
     kind: command
     tags: [unit, boards]
     command: [python3, tests/board_manifests_test.py]
+
+  # The DS18B20 telemetry example, built for the Pico 2 W as it is and as Mesh
+  # provisions it: the managed layer only in the provisioned image. Needs the Pico
+  # toolchain; skipped (77) without it.
+  # @verifies DRV-TEMP-0005
+  - name: managed-example
+    kind: command
+    tags: [build, pico2w, updates]
+    command: [python3, tests/managed_example_test.py]

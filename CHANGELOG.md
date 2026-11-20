@@ -2,6 +2,10 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.5.7] - 2026-11-20
+
+The DS18B20 telemetry example takes updates over its link (DRV-TEMP-0005): with the mesh's update key in its build (`robohub_update_key.h`) and the managed layer chosen (`CONFIG_RH_NODE_MANAGED`), it hands robohub-node's managed layer its link, its uid and its firmware version; without them it builds as before.
+
 ## [0.5.6] - 2026-11-20
 
 The examples' protocol copies know the update messages (robohub-protocol 1.5.0).

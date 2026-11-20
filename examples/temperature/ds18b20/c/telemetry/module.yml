@@ -76,6 +76,11 @@ depends:
   - name: robohub-telemetry
     type: c
     path: ${ROBOHUB_WORKSPACE}/robohub-node/telemetry
+  # Updates over the link, chosen by CONFIG_RH_NODE_MANAGED when Mesh writes the
+  # mesh's update key into the build (DRV-TEMP-0005).
+  - name: robohub-managed
+    type: c
+    path: ${ROBOHUB_WORKSPACE}/robohub-node/managed
 
 c_connection:
   library: "robohub-pico"
@@ -105,6 +110,7 @@ c_connection:
     - ${ROBOHUB_WORKSPACE}/robohub-node/core/include/robohub/core
     - ${ROBOHUB_WORKSPACE}/robohub-node/link/include
     - ${ROBOHUB_WORKSPACE}/robohub-node/telemetry/include
+    - ${ROBOHUB_WORKSPACE}/robohub-node/managed/include
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"
@@ -113,6 +119,7 @@ c_connection:
         - robohub-core
         - robohub-transport
         - robohub-telemetry
+        - robohub-managed
 
 config:
   dialect: linux

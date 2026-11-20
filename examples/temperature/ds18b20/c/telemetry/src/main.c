@@ -57,6 +57,22 @@
 #include "robohub/net.h"
 #endif
 
+/* The mesh's update public key, written into this build by Mesh beside the
+ * board's key (robohub_update_key.h). With it, and with the managed layer chosen
+ * (CONFIG_RH_NODE_MANAGED), the board takes firmware updates over its link
+ * (DRV-TEMP-0005, robohub ADR-0022/0023); a manifest must name this board's uid,
+ * so an unprovisioned build takes none. */
+#if defined(__has_include)
+#  if __has_include("robohub_update_key.h")
+#    include "robohub_update_key.h"
+#  endif
+#endif
+#if defined(CONFIG_RH_NODE_MANAGED) && CONFIG_RH_NODE_MANAGED && defined(RH_UPDATE_KEY_PROVISIONED) && \
+    defined(RH_SECURE_PROVISIONED)
+#define RH_EXAMPLE_MANAGED 1
+#include "robohub/managed.h"
+#endif
+
 /* The name the Pico's board support package registers its timer under. */
 #define TIMER_NAME "system_timer"
 #define REPORT_PERIOD_MS 500u
@@ -189,11 +205,12 @@ static void secure_link(void)
 static int usb_phy_write(const rh_u8* data, rh_size length, void* context)
 {
     (void)context;
-    /* putchar_raw, not printf: a frame is bytes, and the C library's line
-     * buffering would hold them and then insert its own. */
-    for (rh_size i = 0; i < length; i++) {
-        (void)putchar_raw((int)data[i]);
-    }
+    /* One raw write per frame, not printf (the C library's line buffering would
+     * hold the bytes and insert its own) and not a byte at a time: written one
+     * putchar_raw per byte, frames lost bytes on the USB link once several went
+     * out together — an update's statuses, a health report beside a reading. */
+    (void)stdio_put_string((const char*)data, (int)length, false, false);
+    stdio_flush();
     return 0;
 }
 
@@ -541,6 +558,20 @@ int main(void)
 #endif
 
     (void)robohub_core_app_register(&sensor_app);
+#if defined(RH_EXAMPLE_MANAGED)
+    {
+        /* Updates over this board's link (robohub-node's managed layer). */
+        const RoboHubManagedConfig managed = {
+            .transport = &node_link,
+            .uid = RH_DEVICE_UID,
+            .update_key = RH_UPDATE_PUBLIC_KEY,
+            .firmware_version = RH_FIRMWARE_VERSION,
+        };
+        if (ROBOHUB_SUCCEEDED(robohub_managed_init(&managed))) {
+            emit("updates: taken over the link\n");
+        }
+    }
+#endif
     if (ROBOHUB_FAILED(robohub_core_init(0))) {
         emit("runtime failed to start; is the sensor on the bus?\n");
         for (;;) {

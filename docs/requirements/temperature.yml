@@ -62,3 +62,19 @@ requirements:
     owner: maintainer
     changed: 2026-11-19
     tags: [thermistor, measurement, units]
+
+  - id: DRV-TEMP-0005
+    title: The DS18B20 telemetry example takes updates over its link when Mesh provisions it
+    statement: >
+      The DS18B20 telemetry example shall choose the managed layer when its build
+      carries the mesh's update key (`robohub_update_key.h`, `CONFIG_RH_NODE_MANAGED`),
+      giving it the board's link, its uid and its firmware version, and shall build
+      without it otherwise.
+    rationale: It is the firmware Mesh builds for a Pico sensor board, so it is what an update over the link must reach (robohub ADR-0023).
+    satisfies: [SYS-0072]
+    decided_by: [robohub:ADR-0023]
+    status: approved
+    verification: test
+    owner: maintainer
+    changed: 2026-11-20
+    tags: [updates, ds18b20, example]
