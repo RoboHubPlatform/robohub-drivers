@@ -2,6 +2,10 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.5.5] - 2026-11-20
+
+The DS18B20 telemetry example — the firmware Mesh builds for a sensor board — reports the board's health: its link sends `HEALTH` once per boot and on a `DIAG_REQUEST` (robohub-node link 0.5.0), naming the board's area and node and `CONFIG_RH_FIRMWARE_VERSION` (0 when unset).
+
 ## [0.5.4] - 2026-11-20
 
 The gateway examples' and the DS18B20 telemetry example's protocol copies know `HEALTH` (0x0403) and `ResetReason` (robohub-protocol 1.4.0).

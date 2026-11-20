@@ -134,6 +134,12 @@
 #else
 #define RH_NODE_ID ((rh_u16)1u)
 #endif
+/* What HEALTH says the firmware is; 0 when the build does not say. */
+#if defined(CONFIG_RH_FIRMWARE_VERSION)
+#define RH_FIRMWARE_VERSION ((rh_u16)CONFIG_RH_FIRMWARE_VERSION)
+#else
+#define RH_FIRMWARE_VERSION ((rh_u16)0u)
+#endif
 
 /* Sampling rate is control opcode 1; the control family is general, so a second
  * command is another opcode rather than another message. */
@@ -543,6 +549,11 @@ int main(void)
             }
         }
     }
+
+    /* The board's health, read by the runtime as it came up: the link reports
+     * it once per boot — when its session is up on a sealed link, at once on a
+     * plain one — and again on a DIAG_REQUEST (robohub-node RNODE-HEALTH-0004). */
+    (void)robohub_transport_report_health(&node_link, RH_AREA_ID, RH_NODE_ID, RH_FIRMWARE_VERSION);
 
     /* Subscribe after the runtime is up: bringing it up initialises the event
      * bus, which starts with no subscriptions and would drop this one. */

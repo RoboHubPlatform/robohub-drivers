@@ -17,7 +17,7 @@ module:
   previous_ids:
     - robohub-drivers
   type: collection
-  version: 0.5.4
+  version: 0.5.5
   license: "MIT"
   description: >
     Device drivers for the RoboHub Platform, and the examples that use them.
