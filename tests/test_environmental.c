@@ -63,12 +63,16 @@ static const rh_i16 bmp_calib[11] = {
     408, -72, -14383, (rh_i16)32741, (rh_i16)32757, 23153, 6190, 4, (rh_i16)-32768, -8711, 2868
 };
 
+/* AC4 as the part gives it: the datasheet's example by default, or one above
+ * 32767, as real parts have (a GY-68 read 236 Pa when it was taken as signed). */
+static rh_u16 bmp_ac4 = 32741u;
+
 static void bmp_reset_part(rh_u8 chip_id)
 {
     memset(bmp_regs, 0, sizeof(bmp_regs));
     bmp_regs[0xD0] = chip_id;
     for (int i = 0; i < 11; i++) {
-        rh_u16 v = (rh_u16)bmp_calib[i];
+        rh_u16 v = (i == 3) ? bmp_ac4 : (rh_u16)bmp_calib[i];
         bmp_regs[0xAA + 2 * i] = (rh_u8)(v >> 8);
         bmp_regs[0xAB + 2 * i] = (rh_u8)(v & 0xFFu);
     }
@@ -131,6 +135,30 @@ static void test_bmp180(RoboHubTimer* timer)
     CHECK(near(pascals, 69964.0f, 0.5f), "bmp180: the datasheet's UP is 69964 Pa");
     CHECK(metres > 2900.0f && metres < 3100.0f,
           "bmp180: 69964 Pa is about 3 km above the standard sea level");
+
+    /* AC4 above 32767 is unsigned: the pressure is the datasheet's algorithm
+     * with AC4 = 34000, computed here independently. */
+    {
+        bmp_ac4 = 34000u;
+        bmp_reset_part(ROBOHUB_BMP180_CHIP_ID);
+        CHECK(robohub_bmp180_init(&dev, &config) == ROBOHUB_OK, "bmp180: a part with AC4 above 32767 comes up");
+        CHECK(robohub_bmp180_read(&dev, &celsius, &pascals, &metres) == ROBOHUB_OK, "bmp180: and reads");
+        long ut = 27898, up = 23843, ac1 = 408, ac2 = -72, ac3 = -14383, b1 = 6190, b2 = 4, mc = -8711, md = 2868;
+        unsigned long ac4 = 34000ul, ac5 = 32757ul, ac6 = 23153ul;
+        long x1 = ((ut - (long)ac6) * (long)ac5) >> 15, x2 = (mc * 2048) / (x1 + md), b5 = x1 + x2;
+        long b6 = b5 - 4000;
+        x1 = (b2 * ((b6 * b6) >> 12)) >> 11; x2 = (ac2 * b6) >> 11;
+        long x3 = x1 + x2, b3 = ((ac1 * 4 + x3) + 2) / 4;
+        x1 = (ac3 * b6) >> 13; x2 = (b1 * ((b6 * b6) >> 12)) >> 16; x3 = ((x1 + x2) + 2) >> 2;
+        unsigned long b4 = (ac4 * (unsigned long)(x3 + 32768)) >> 15;
+        unsigned long b7 = ((unsigned long)up - (unsigned long)b3) * 50000ul;
+        long p = (b7 < 0x80000000ul) ? (long)((b7 * 2) / b4) : (long)((b7 / b4) * 2);
+        x1 = (p >> 8) * (p >> 8); x1 = (x1 * 3038) >> 16; x2 = (-7357 * p) >> 16;
+        p = p + ((x1 + x2 + 3791) >> 4);
+        CHECK(near(pascals, (rh_f32)p, 0.5f), "bmp180: AC4 above 32767 is read unsigned, as the datasheet gives");
+        CHECK(pascals > 60000.0f, "bmp180: and the pressure is a pressure, not two orders of magnitude low");
+        bmp_ac4 = 32741u;
+    }
 
     /* Absent: the bus is not acknowledged (an I2C NACK, or a timeout). */
     bmp_reset_part(ROBOHUB_BMP180_CHIP_ID);

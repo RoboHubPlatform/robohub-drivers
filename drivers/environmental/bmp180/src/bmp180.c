@@ -99,6 +99,15 @@ static rh_i16 bmp180_i16(const rh_u8* p)
     return (rh_i16)(((rh_u16)p[0] << 8) | (rh_u16)p[1]);
 }
 
+/* AC4, AC5 and AC6 are unsigned (datasheet, table "calibration coefficients"):
+ * read as signed, a part whose AC4 is above 32767 computed a pressure two
+ * orders of magnitude low (236 Pa on a GY-68), and AC5/AC6 the same for the
+ * temperature on a part that has them there. */
+static rh_u16 bmp180_u16(const rh_u8* p)
+{
+    return (rh_u16)(((rh_u16)p[0] << 8) | (rh_u16)p[1]);
+}
+
 /* Start a conversion and wait for it: write the command, then wait the part's
  * conversion time. Both readings start this way, which is why it is one
  * function and not two. */
@@ -187,9 +196,9 @@ static RoboHubError bmp180_bring_up(RoboHubBMP180* dev)
     dev->ac1 = bmp180_i16(&calib[0]);
     dev->ac2 = bmp180_i16(&calib[2]);
     dev->ac3 = bmp180_i16(&calib[4]);
-    dev->ac4 = bmp180_i16(&calib[6]);
-    dev->ac5 = bmp180_i16(&calib[8]);
-    dev->ac6 = bmp180_i16(&calib[10]);
+    dev->ac4 = bmp180_u16(&calib[6]);
+    dev->ac5 = bmp180_u16(&calib[8]);
+    dev->ac6 = bmp180_u16(&calib[10]);
     dev->b1  = bmp180_i16(&calib[12]);
     dev->b2  = bmp180_i16(&calib[14]);
     dev->mb  = bmp180_i16(&calib[16]);

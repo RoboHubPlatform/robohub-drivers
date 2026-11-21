@@ -2,6 +2,9 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.7.1] - 2026-11-21
+
+The BMP180's calibration words AC4, AC5 and AC6 are read unsigned, as the datasheet gives them. Read as signed, a part whose AC4 is above 32767 computed a pressure two orders of magnitude low: a GY-68 on a Pico 2 W reported 236 Pa, and an altitude of 30 km. The host test only used the datasheet's example coefficients, all below 32768. It now also checks a part with AC4 = 34000 against the datasheet's algorithm computed independently. On the board, the same GY-68 reads 97 428 Pa.
 ## [0.7.0] - 2026-11-21
 
 An SHT4x driver and module board, for the settlement's node (DRV-ENV-0007…0009, DRV-BRD-0005, robohub ADR-0026).

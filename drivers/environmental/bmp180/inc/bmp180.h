@@ -130,9 +130,9 @@ typedef struct {
     rh_i16 ac1;
     rh_i16 ac2;
     rh_i16 ac3;
-    rh_i16 ac4;
-    rh_i16 ac5;
-    rh_i16 ac6;
+    rh_u16 ac4;   /* unsigned, as the datasheet gives AC4, AC5 and AC6 */
+    rh_u16 ac5;
+    rh_u16 ac6;
     rh_i16 b1;
     rh_i16 b2;
     rh_i16 mb;
