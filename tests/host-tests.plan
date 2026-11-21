@@ -24,6 +24,7 @@ cp "$D/input/pulse-adc/inc/pulse_adc.h"                 "$GEN/robohub/drivers/in
 cp "$D/input/infrared-receiver-gpio/inc/infrared_receiver_gpio.h" "$GEN/robohub/drivers/input/"
 cp "$D/environmental/bmp180/inc/bmp180.h"               "$GEN/robohub/drivers/environmental/"
 cp "$D/environmental/dht11/inc/dht11.h"                 "$GEN/robohub/drivers/environmental/"
+cp "$D/environmental/sht4x/inc/sht4x.h"                 "$GEN/robohub/drivers/environmental/"
 cp "$D/temperature/ds18b20/inc/ds18b20.h"               "$GEN/robohub/drivers/temperature/"
 
 $CC -std=c11 -Wall -Wextra -I"$GEN" \
@@ -58,3 +59,8 @@ $CC -std=c11 -Wall -Wextra -I"$GEN" -I"$D/environmental/bmp180/inc" \
     "$D/environmental/bmp180/src/bmp180.c" "$D/environmental/dht11/src/dht11.c" \
     "$D/temperature/ds18b20/src/ds18b20.c" -lm -o "$OUT/test_environmental"
 run test_environmental "$OUT/test_environmental"
+
+$CC -std=c11 -Wall -Wextra -I"$GEN" -I"$D/environmental/sht4x/inc" $BASE \
+    "$MODULE_ROOT/tests/test_sht4x.c" \
+    "$D/environmental/sht4x/src/sht4x.c" -lm -o "$OUT/test_sht4x"
+run test_sht4x "$OUT/test_sht4x"

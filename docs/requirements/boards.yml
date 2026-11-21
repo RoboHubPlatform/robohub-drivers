@@ -56,3 +56,21 @@ requirements:
     owner: maintainer
     changed: 2026-11-19
     tags: [boards, build, wiring]
+
+  - id: DRV-BRD-0005
+    title: An SHT4x module board gives the part's address, each board's I2C pins and its telemetry fields
+    statement: >
+      The SHT4x module board shall name the SHT4x driver, give the part's I2C
+      address (0x44), bring out SDA, SCL, power and ground as connectors, give
+      the I2C bus and pins it uses on each board it supports (the Pico 2 W and
+      the LOLIN32 Lite), and declare temperature (°C) and humidity (%) as
+      telemetry fields, so Mesh fits it to a node built from robohub-node's
+      template like any other module.
+    rationale: The settlement node is the template with this module fitted (robohub ADR-0026, 2); nothing in Mesh or the template is to be particular to it.
+    satisfies: [DRV-0005]
+    decided_by: [robohub:ADR-0026]
+    status: approved
+    verification: test
+    owner: maintainer
+    changed: 2026-11-21
+    tags: [boards, sht4x, i2c]

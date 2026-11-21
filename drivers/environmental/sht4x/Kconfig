@@ -1,0 +1,14 @@
+menu "RoboHub SHT4x driver"
+
+config RH_DRV_SHT4X
+    bool "SHT4x temperature and humidity sensor"
+    select RH_HAL_I2C
+    select RH_HAL_TIMER
+    default n
+    help
+      Sensirion's SHT40, SHT41 and SHT45 temperature and humidity sensors,
+      reached through the I2C HAL and a timer the selected platform implements
+      (robohub ADR-0026). An application that sets this gets the driver compiled
+      in; one that does not pays for none of it.
+
+endmenu

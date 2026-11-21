@@ -2,6 +2,14 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.7.0] - 2026-11-21
+
+An SHT4x driver and module board, for the settlement's node (DRV-ENV-0007…0009, DRV-BRD-0005, robohub ADR-0026).
+
+- `drivers/environmental/sht4x`: Sensirion's SHT40, SHT41 and SHT45 over the I2C HAL, as robohub-common's temperature and humidity interfaces. A measurement is the high-precision command (0xFD). Each word of the answer is checked by its CRC-8 (0x31, init 0xFF) before it becomes a value, and converted as the datasheet gives. A part that stops answering is an I/O error and is soft-reset (0x94) before the next try. Bring-up resets the part and reads its serial number, so a missing part is said, not read as zero.
+- `boards/environmental/sht4x-module`: the module board, at address 0x44 on "i2c0". It gives the wiring on a Pico 2 W (GP8/GP9) and a LOLIN32 Lite (GPIO23/GPIO19), and the read path Mesh generates `sensors.c` from.
+- `tests/test_sht4x.c` tests the driver against an I2C double, including the datasheet's CRC example. The board manifest test checks the module board's particulars.
+
 ## [0.6.0] - 2026-11-21
 
 The DS18B20 telemetry example is a driver example again (robohub ADR-0025). Mesh builds every node from robohub-node's template, so the example no longer carries the managed layer. DRV-TEMP-0005 is retired, and its test moved to the template (robohub-node `tests/template_test.py`).

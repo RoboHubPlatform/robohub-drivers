@@ -23,13 +23,15 @@
 #     cd examples/environmental/bmp180/rho && rho build -target pico2w .
 name: robohub-drivers
 suites:
-  # @verifies DRV-0001, DRV-0003
+  # The SHT4x against an I2C double (test_sht4x.c): CRC, conversion, a part
+  # that stops answering and comes back, no part at bring-up.
+  # @verifies DRV-0001, DRV-0003, DRV-ENV-0007, DRV-ENV-0008, DRV-ENV-0009
   - name: host
     kind: ctest
     tags: [unit, host]
     ctest:
       source: tests
-  # @verifies DRV-BRD-0001, DRV-BRD-0002, DRV-BRD-0003, DRV-BRD-0004
+  # @verifies DRV-BRD-0001, DRV-BRD-0002, DRV-BRD-0003, DRV-BRD-0004, DRV-BRD-0005
   - name: boards
     kind: command
     tags: [unit, boards]

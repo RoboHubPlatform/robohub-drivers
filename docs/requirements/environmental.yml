@@ -89,3 +89,54 @@ requirements:
     owner: maintainer
     changed: 2026-11-19
     tags: [bmp180, dht11, errors]
+
+  - id: DRV-ENV-0007
+    title: The SHT4x is read over the I2C HAL as temperature and humidity
+    statement: >
+      The SHT4x driver shall implement robohub-common's RoboHubTemperature and
+      RoboHubHumidity interfaces over the RoboHubI2C HAL, at the address its board
+      gives (0x44 by default), measuring with the high-precision command (0xFD)
+      and waiting at least the datasheet's 8.3 ms before reading its six bytes,
+      so it is written for no one board.
+    rationale: The settlement's node needs temperature and humidity to ±0.2 °C and ±1.8 %RH, which no driver had (robohub ADR-0026, 1).
+    satisfies: [DRV-0002, DRV-0003]
+    decided_by: [robohub:ADR-0026]
+    status: approved
+    verification: test
+    owner: maintainer
+    changed: 2026-11-21
+    tags: [sht4x, i2c, measurement]
+
+  - id: DRV-ENV-0008
+    title: An SHT4x reading counts only when both of its words pass their CRC
+    statement: >
+      The SHT4x driver shall check each 16-bit word of a measurement against the
+      CRC-8 that follows it (polynomial 0x31, initial value 0xFF), return
+      ROBOHUB_ERR_PROTOCOL without writing a value when either fails, and
+      otherwise convert as the datasheet gives — temperature −45 + 175·S/65535
+      °C, relative humidity −6 + 125·S/65535 %, the humidity clamped to 0…100.
+    rationale: An I2C bus outdoors picks up noise; a word with a flipped bit must not become a reading.
+    satisfies: [DRV-0002, DRV-0003]
+    decided_by: [robohub:ADR-0026]
+    status: approved
+    verification: test
+    owner: maintainer
+    changed: 2026-11-21
+    tags: [sht4x, measurement, errors]
+
+  - id: DRV-ENV-0009
+    title: An SHT4x that does not answer is an error, and is reset before it is tried again
+    statement: >
+      When the part does not acknowledge its address or a read fails, the SHT4x
+      driver shall return ROBOHUB_ERR_IO without writing a value and send a soft
+      reset (0x94) before the next measurement; at initialisation it shall
+      reset the part and read its serial number (0x89), checked by CRC, and fail
+      initialisation when it cannot.
+    rationale: A part that was unplugged, or browned out, must come back without a reboot of the node, and a missing part must be said, not read as zero.
+    satisfies: [DRV-0003]
+    decided_by: [robohub:ADR-0026]
+    status: approved
+    verification: test
+    owner: maintainer
+    changed: 2026-11-21
+    tags: [sht4x, errors, recovery]

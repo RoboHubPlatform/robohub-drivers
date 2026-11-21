@@ -1,0 +1,150 @@
+#
+# sht4x-module — an SHT40, SHT41 or SHT45 breakout on I2C (DRV-BRD-0005,
+# robohub ADR-0026).
+#
+# Which driver it carries, the four wires it brings out, the bus it is on and
+# the part's address, and the read path Mesh generates a node's sensors.c from.
+# The bus's pins are each board's: a Pico 2 W registers "i2c0" on GP8 (SDA) and
+# GP9 (SCL), a LOLIN32 Lite on GPIO23 and GPIO19.
+#
+# @project RoboHub Platform
+# @license MIT
+#
+
+module:
+  name: sht4x-module
+  id: robohub.board.sht4x-module
+  type: driver-board
+  version: 0.1.0
+  description: >
+    Support package for an SHT4x temperature and humidity breakout on I2C:
+    which driver it carries, the signals its connector exposes, the bus and
+    address it is reached at, and each board's pins.
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-11-21"
+
+functions:
+  - temperature
+  - humidity
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - bsp/
+  sources:
+    - bsp/bsp.c
+
+depends:
+  - name: robohub-driver-sht4x
+    type: c
+    path: ${ROBOHUB_WORKSPACE}/robohub-drivers/drivers/environmental/sht4x
+  - name: robohub-common
+    type: c
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  headers:
+    - bsp/sht4x_module.h
+  cmake:
+    target: "rho::robohub-board-sht4x-module"
+    include_dirs:
+      - bsp
+    link_libraries:
+      - rho::robohub-driver-sht4x
+      - rho::robohub-common
+
+board:
+  designation: SHT4X_MODULE
+  device: SHT4x
+  category: environmental
+  bus:
+    type: i2c
+    instance: i2c0
+    address: "0x44"
+  driver: robohub-driver-sht4x
+  functions:
+    - temperature
+    - humidity
+  connectors:
+    - name: vcc
+      signal: power
+      position: 1
+    - name: gnd
+      signal: ground
+      position: 2
+    - name: sda
+      signal: i2c_sda
+      position: 3
+    - name: scl
+      signal: i2c_scl
+      position: 4
+  pins:
+    vcc:
+      signal: power
+    gnd:
+      signal: ground
+    sda:
+      signal: i2c_sda
+    scl:
+      signal: i2c_scl
+  # Where SDA and SCL go on each board this module is fitted to: the bus each
+  # platform registers as "i2c0" (DRV-BRD-0005).
+  wiring:
+    pico2w:
+      sda: "GP8"
+      scl: "GP9"
+    lolin32-lite:
+      sda: "GPIO23"
+      scl: "GPIO19"
+  peripherals:
+    - name: i2c0
+      type: i2c
+  defaults:
+    address: "0x44"
+    speed_hz: 100000
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - board
+    - temperature
+    - humidity
+    - environmental
+    - sht4x
+    - i2c
+    - air
+  stability: experimental
+  visibility: public
+
+telemetry:
+  header: "sht4x_module.h"
+  init: "robohub_sht4x_module_init"
+  config: "NULL"
+
+signals:
+  - id: temperature
+    label: Temperature
+    direction: input
+    unit: "°C"
+    field: temperature_c
+    kinds: "numeric chart table"
+    summary: The temperature the module reports.
+  - id: humidity
+    label: Humidity
+    direction: input
+    unit: "%"
+    field: humidity
+    kinds: "numeric chart table"
+    summary: The relative humidity the module reports.

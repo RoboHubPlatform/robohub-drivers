@@ -1,0 +1,12 @@
+menu "RoboHub SHT4x module"
+
+config RH_BOARD_SHT4X_MODULE
+    bool "SHT4x temperature and humidity sensor breakout"
+    select RH_DRV_SHT4X
+    default n
+    help
+      An SHT40, SHT41 or SHT45 breakout on I2C (robohub ADR-0026). Selecting it
+      brings in the driver and the I2C bus and timer it needs; an application
+      that does not fit the module pays for none of it.
+
+endmenu

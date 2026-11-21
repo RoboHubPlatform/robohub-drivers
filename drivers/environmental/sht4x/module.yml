@@ -1,0 +1,88 @@
+module:
+  name: robohub-driver-sht4x
+  id: robohub.driver.sht4x
+  type: driver
+  version: 0.1.0
+  description: >
+    Platform-agnostic Sensirion SHT40/SHT41/SHT45 temperature and humidity
+    sensor. Implements the RoboHubTemperature and RoboHubHumidity driver
+    interfaces from robohub-common and reaches the part through the RoboHubI2C
+    HAL, with every word of an answer checked by its CRC-8 (robohub ADR-0026).
+  maintainer: "Aurel Miron"
+  license: "MIT"
+  created: "2026-11-21"
+
+# The driver interfaces this part presents. The SHT4x measures temperature and
+# relative humidity in one frame, so a search for either finds it.
+functions:
+  - temperature
+  - humidity
+
+# What this module is, in the vocabulary a deployment planner reads.
+capabilities:
+  sensor: true
+  summary: "SHT4x temperature and humidity sensor for ambient air, indoors or out (SHT45 with a filter cap)."
+  buses: "i2c"
+  measures: "temperature,humidity"
+
+# How a deployment uses it: the example the keeper copies and the symbols it
+# needs. An SHT4x can be the primary module of a node.
+deployment:
+  boards: "pico2w lolin32-lite"
+  kconfig: "CONFIG_RH_HAL_I2C=y CONFIG_RH_HAL_TIMER=y CONFIG_RH_BOARD_SHT4X_MODULE=y"
+
+build:
+  language: c
+  standard: c11
+  include_dirs:
+    - inc
+  sources:
+    - src/sht4x.c
+
+depends:
+  - name: robohub-common
+    type: c
+    path: ${ROBOHUB_WORKSPACE}/robohub-common
+    git: https://github.com/RoboHubPlatform/robohub-common
+    branch: main
+
+config:
+  dialect: linux
+  kconfig_fragments:
+    - Kconfig
+
+exports:
+  # The name a consumer includes is the module's place in the ecosystem, not the
+  # file's place in this directory. The header stays flat in inc/sht4x.h; the
+  # namespaced path is generated into the build tree and put on the path through
+  # the CMake target below, and installed under this name.
+  headers:
+    - robohub/drivers/environmental/sht4x.h
+  cmake:
+    target: "rho::robohub-driver-sht4x"
+    include_dirs:
+      - inc
+    link_libraries:
+      - rho::robohub-common
+
+package:
+  kind: library
+  binary: false
+
+metadata:
+  tags:
+    - driver
+    - temperature
+    - humidity
+    - environmental
+    - i2c
+    - sht4x
+    - air
+  stability: experimental
+  visibility: public
+
+telemetry:
+  device: RoboHubSHT4x
+telemetry_fields:
+  - "temperature|temperature_c|°C|f32|temperature|get_celsius|0"
+  - "humidity|humidity|%|f32|humidity|get_humidity|0"

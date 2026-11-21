@@ -141,6 +141,38 @@ def check_board(path, root, required, drivers):
     return errors
 
 
+def check_sht4x(root):
+    """The SHT4x module board's particulars (DRV-BRD-0005): the driver, the bus
+    and address, the wiring on each board it supports, the read path Mesh
+    generates from, and its two signals."""
+    rel = "boards/environmental/sht4x-module/module.yml"
+    path = os.path.join(root, rel)
+    if not os.path.exists(path):
+        return ["%s: missing" % rel]
+    m = load(path)
+    errors = []
+    expect = {
+        "board.driver": "robohub-driver-sht4x",
+        "board.bus.type": "i2c",
+        "board.bus.instance": "i2c0",
+        "board.bus.address": "0x44",
+        "board.wiring.pico2w.sda": "GP8",
+        "board.wiring.pico2w.scl": "GP9",
+        "board.wiring.lolin32-lite.sda": "GPIO23",
+        "board.wiring.lolin32-lite.scl": "GPIO19",
+        "telemetry.header": "sht4x_module.h",
+        "telemetry.init": "robohub_sht4x_module_init",
+    }
+    for key, want in expect.items():
+        got = lookup(m, key)
+        if str(got) != want:
+            errors.append("%s: %s is %r, not %r" % (rel, key, got, want))
+    signals = {s.get("id"): s for s in (m.get("signals") or []) if isinstance(s, dict)}
+    if signals.get("temperature", {}).get("field") != "temperature_c" or signals.get("humidity", {}).get("field") != "humidity":
+        errors.append("%s: the temperature and humidity signals are not declared with their fields" % rel)
+    return errors
+
+
 def main(argv):
     root = os.path.abspath(argv[1] if len(argv) > 1 else os.path.join(os.path.dirname(__file__), ".."))
     contract = lookup(load(os.path.join(root, "module.yml")), "contracts.board")
@@ -157,6 +189,7 @@ def main(argv):
     errors = []
     for path in boards:
         errors.extend(check_board(path, root, required, drivers))
+    errors.extend(check_sht4x(root))
     for e in errors:
         print("FAIL " + e)
     print("%d board manifests, %d failures (required: %s)" % (len(boards), len(errors), ", ".join(required)))
