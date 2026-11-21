@@ -2,6 +2,10 @@
 
 All notable changes to this module are recorded here, one section per release.
 
+## [0.6.0] - 2026-11-21
+
+The DS18B20 telemetry example is a driver example again (robohub ADR-0025). Mesh builds every node from robohub-node's template, so the example no longer carries the managed layer. DRV-TEMP-0005 is retired, and its test moved to the template (robohub-node `tests/template_test.py`).
+
 ## [0.5.7] - 2026-11-20
 
 The DS18B20 telemetry example takes updates over its link (DRV-TEMP-0005): with the mesh's update key in its build (`robohub_update_key.h`) and the managed layer chosen (`CONFIG_RH_NODE_MANAGED`), it hands robohub-node's managed layer its link, its uid and its firmware version; without them it builds as before.

@@ -57,22 +57,6 @@
 #include "robohub/net.h"
 #endif
 
-/* The mesh's update public key, written into this build by Mesh beside the
- * board's key (robohub_update_key.h). With it, and with the managed layer chosen
- * (CONFIG_RH_NODE_MANAGED), the board takes firmware updates over its link
- * (DRV-TEMP-0005, robohub ADR-0022/0023); a manifest must name this board's uid,
- * so an unprovisioned build takes none. */
-#if defined(__has_include)
-#  if __has_include("robohub_update_key.h")
-#    include "robohub_update_key.h"
-#  endif
-#endif
-#if defined(CONFIG_RH_NODE_MANAGED) && CONFIG_RH_NODE_MANAGED && defined(RH_UPDATE_KEY_PROVISIONED) && \
-    defined(RH_SECURE_PROVISIONED)
-#define RH_EXAMPLE_MANAGED 1
-#include "robohub/managed.h"
-#endif
-
 /* The name the Pico's board support package registers its timer under. */
 #define TIMER_NAME "system_timer"
 #define REPORT_PERIOD_MS 500u
@@ -558,20 +542,6 @@ int main(void)
 #endif
 
     (void)robohub_core_app_register(&sensor_app);
-#if defined(RH_EXAMPLE_MANAGED)
-    {
-        /* Updates over this board's link (robohub-node's managed layer). */
-        const RoboHubManagedConfig managed = {
-            .transport = &node_link,
-            .uid = RH_DEVICE_UID,
-            .update_key = RH_UPDATE_PUBLIC_KEY,
-            .firmware_version = RH_FIRMWARE_VERSION,
-        };
-        if (ROBOHUB_SUCCEEDED(robohub_managed_init(&managed))) {
-            emit("updates: taken over the link\n");
-        }
-    }
-#endif
     if (ROBOHUB_FAILED(robohub_core_init(0))) {
         emit("runtime failed to start; is the sensor on the bus?\n");
         for (;;) {

@@ -1,9 +1,10 @@
 #
 # telemetry node — the whole stack: sensors -> core bus -> telemetry -> link.
 #
-# This is the node template Mesh copies. Its default sensors.c fits one DS18B20;
-# Mesh replaces that file with the modules the plan selected, so the same
-# program carries a DHT11, a BMP180, a relay or any other read path.
+# A DS18B20 on a Pico 2 W, streaming its readings. Mesh built every node from
+# this example until robohub ADR-0025; it now builds them from robohub-node's
+# template, and this is a driver example again. Its sensors.c still has the
+# generated shape (sensors_init/poll), so the template's and this one read alike.
 #
 # The sensor application publishes a reading and knows nothing else. Telemetry
 # has subscribed to that event and writes each frame to a transport whose bytes
@@ -76,11 +77,6 @@ depends:
   - name: robohub-telemetry
     type: c
     path: ${ROBOHUB_WORKSPACE}/robohub-node/telemetry
-  # Updates over the link, chosen by CONFIG_RH_NODE_MANAGED when Mesh writes the
-  # mesh's update key into the build (DRV-TEMP-0005).
-  - name: robohub-managed
-    type: c
-    path: ${ROBOHUB_WORKSPACE}/robohub-node/managed
 
 c_connection:
   library: "robohub-pico"
@@ -110,7 +106,6 @@ c_connection:
     - ${ROBOHUB_WORKSPACE}/robohub-node/core/include/robohub/core
     - ${ROBOHUB_WORKSPACE}/robohub-node/link/include
     - ${ROBOHUB_WORKSPACE}/robohub-node/telemetry/include
-    - ${ROBOHUB_WORKSPACE}/robohub-node/managed/include
   variants:
     pico2w:
       target: "robohub-board-ds18b20-temperature-module"
@@ -119,7 +114,6 @@ c_connection:
         - robohub-core
         - robohub-transport
         - robohub-telemetry
-        - robohub-managed
 
 config:
   dialect: linux

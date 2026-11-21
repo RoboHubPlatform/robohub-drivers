@@ -73,8 +73,11 @@ requirements:
     rationale: It is the firmware Mesh builds for a Pico sensor board, so it is what an update over the link must reach (robohub ADR-0023).
     satisfies: [SYS-0072]
     decided_by: [robohub:ADR-0023]
-    status: approved
+    # Retired by robohub ADR-0025 (3) on 2026-11-21: Mesh builds every node from
+    # robohub-node's template (RNODE-TPL-0003), and this example is a driver
+    # example again.
+    status: retired
     verification: test
     owner: maintainer
-    changed: 2026-11-20
+    changed: 2026-11-21
     tags: [updates, ds18b20, example]
